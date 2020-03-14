@@ -15,6 +15,8 @@ function ContractPolice(contractsDirectory, config) {
 }
 
 ContractPolice.prototype.testContracts = function() {
+    const endpoint = this.config.endpoint;
+
     let contractParser = new ContractParser();
     return contractParser
         .findContractFiles(this.contractsDirectory)
@@ -35,7 +37,7 @@ ContractPolice.prototype.testContracts = function() {
             // Compose test runs
             let tests = [];
             contracts.forEach(function(contract) {
-                let runner = new TestRunner(contract.name, contract.data);
+                let runner = new TestRunner(contract.name, contract.data, endpoint);
                 tests.push(runner);
             });
             return tests;

@@ -15,7 +15,8 @@ TestRunner.prototype.runTest = function() {
 
     return needle(method.toLowerCase(), url, options)
         .then(function(response) {
-            console.log(response);
+            console.log(response.body);
+            // TODO: Check for contract violations
         })
         .catch(function(err) {
             console.error(err);
