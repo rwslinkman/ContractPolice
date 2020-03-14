@@ -20,32 +20,7 @@ function ContractParser() {
 
 }
 
-// ContractParser.prototype.walk = function(dir) {
-//     return new Promise(function(done, fail) {
-//         let results = [];
-//         fs.readdir(dir, function(err, list) {
-//             if (err) return fail(err);
-//             let pending = list.length;
-//             if (!pending) return done(results);
-//             list.forEach(function(file) {
-//                 file = path.resolve(dir, file);
-//                 fs.stat(file, function(err, stat) {
-//                     if (stat && stat.isDirectory()) {
-//                         this.walk(file).then(function(res) {
-//                             results = results.concat(res);
-//                             if (!--pending) done(results);
-//                         });
-//                     } else {
-//                         results.push(file);
-//                         if (!--pending) done(results);
-//                     }
-//                 });
-//             });
-//         });
-//     });
-// };
-
-ContractParser.prototype.findContractFiles = async function(directory) {
+ContractParser.prototype.findContractFiles = function(directory) {
     return getFiles(directory)
         .then(function(files) {
             let contractFiles = [];
@@ -56,6 +31,11 @@ ContractParser.prototype.findContractFiles = async function(directory) {
             });
             return contractFiles;
         });
+};
+
+ContractParser.prototype.parseContract = function(contractFile) {
+    let fileContents = fs.readFileSync(contractFile, 'utf8');
+    return yaml.safeLoad(fileContents);
 };
 
 module.exports = ContractParser;
