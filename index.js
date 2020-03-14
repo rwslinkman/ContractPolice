@@ -1,4 +1,5 @@
-let ContractParser = require("./src/contractparser.js");
+const ContractParser = require("./src/contractparser.js");
+const TestRunner = require("./src/testrunner.js");
 
 const defaultConfig = {
     endpoint: "http://127.0.0.1:8080",
@@ -9,29 +10,45 @@ function ContractPolice(contractsDirectory, config) {
     this.contractsDirectory = contractsDirectory;
     this.config = {};
     this.config['endpoint'] = config.endpoint || defaultConfig.endpoint;
+
+    console.log("Endpoint: " + this.config.endpoint);
 }
 
-ContractPolice.prototype.verifyContracts = function() {
-        console.log("Endpoint: " + this.config.endpoint);
-        console.log("Excluding files: " + this.config.excludes);
-
-        let contractParser = new ContractParser();
-        return contractParser
-            .findContractFiles(this.contractsDirectory)
-            .then(function(filesArray){
-                let contracts = [];
-                filesArray.forEach(function(contractFile) {
-                    let contract = contractParser.parseContract(contractFile);
-                    contracts.push(contract);
+ContractPolice.prototype.testContracts = function() {
+    let contractParser = new ContractParser();
+    return contractParser
+        .findContractFiles(this.contractsDirectory)
+        .then(function(filesArray){
+            // Collect all contracts from YAML files
+            let contracts = [];
+            filesArray.forEach(function(contractFile) {
+                let contract = contractParser.parseContract(contractFile);
+                let contractName = contractParser.extractContractName(contractFile);
+                contracts.push({
+                    name: contractName,
+                    data: contract
                 });
-                return contracts
-            })
-            .then(function (contracts) {
-                console.log("Contracts:");
-                contracts.forEach(function(contract) {
-                    console.log(contract);
-                })
             });
+            return contracts;
+        })
+        .then(function (contracts) {
+            // Compose test runs
+            let tests = [];
+            contracts.forEach(function(contract) {
+                let runner = new TestRunner(contract.name, contract.data);
+                tests.push(runner);
+            });
+            return tests;
+        })
+        .then(function(testRunners) {
+            // Run all tests
+            let testRuns = testRunners.map(it => it.runTest());
+            return Promise.all(testRuns);
+        })
+        .then(function(testResults) {
+            // Process test results
+            console.log(testResults);
+        });
 };
 
 module.exports = ContractPolice;

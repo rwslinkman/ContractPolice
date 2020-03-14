@@ -15,6 +15,7 @@
   "author": "Rick Slinkman",
   "license": "Apache-2.0",
   "dependencies": {
-    "js-yaml": "^3.13.1"
+    "js-yaml": "^3.13.1",
+    "needle": "^2.3.3"
   }
 }
