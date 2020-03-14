@@ -1,0 +1,22 @@
+contract:
+  request:
+    path: /orders
+    method: POST
+    body:
+      customer: Rick
+      items:
+        - product: Hamburger
+          quantity: 2
+          price: 20
+        - product: Fries
+          quantity: 1
+          price: 5
+        - product: Aircraftcarrier
+          quantity: 1
+          procie: 9999999
+    headers:
+      - Content-Type: application/json
+  response:
+    statuscode: 400
+    body:
+      error: <anyString>
