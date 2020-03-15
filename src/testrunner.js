@@ -1,4 +1,5 @@
 const needle = require("needle");
+const TestOutcome = require("./testoutcome.js");
 
 function TestRunner(name, contractRequest, endpoint, validator) {
     this.testName = name;
@@ -32,15 +33,13 @@ TestRunner.prototype.runTest = function() {
                 .then(function(violationReport) {
                     // Convert violationReport to testResult
                     let testResult = violationReport.hasViolations() ? "FAIL" : "PASS";
-                    return {
-                        testName: testNameLocal,
-                        report: violationReport.getViolationTexts(),
-                        result: testResult
-                    };
+                    return new TestOutcome(testNameLocal, violationReport.getViolationTexts(), testResult);
                 })
         })
-        .catch(function(err) {
-            console.error(err);
+        .catch(function() {
+            // HTTP request error
+            let violationText = `ContractPolice contacted ${url} but was unable to reach it`;
+            return new TestOutcome(testNameLocal, [violationText], "FAIL");
         });
 };
 

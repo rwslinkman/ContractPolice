@@ -4,24 +4,23 @@ const ContractValidator = require("./src/validation/validator.js");
 const TestReporter = require("./src/reporting/reporter.js");
 
 const defaultConfig = {
-    endpoint: "http://127.0.0.1:8080",
     excludes: [],
     customValidationRules: [],
     failOnError: true,
     reportOutputDir: "build"
 };
 
-function ContractPolice(contractsDirectory, config) {
+function ContractPolice(contractsDirectory, endpoint, config) {
     this.contractsDirectory = contractsDirectory;
+    this.endpoint = endpoint;
     this.config = {};
-    this.config['endpoint']                 = config.endpoint || defaultConfig.endpoint;
     this.config['customValidationRules']    = config.customValidationRules || defaultConfig.customValidationRules;
     this.config['failOnError']              = config.failOnError || defaultConfig.failOnError;
     this.config['reportOutputDir']          = config.reportOutputDir || defaultConfig.reportOutputDir;
 }
 
 ContractPolice.prototype.testContracts = function() {
-    const endpoint = this.config.endpoint;
+    const endpoint = this.endpoint;
     const validationRules = this.config.customValidationRules;
     const failOnError = this.config.failOnError;
     const reportOutputDir = this.config.reportOutputDir;

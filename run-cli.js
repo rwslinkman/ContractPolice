@@ -1,10 +1,9 @@
 let ContractPolice = require("./index.js");
 
 let config = {
-    endpoint: "http://localhost:3000",
     reportOutputDir: "report"
 };
-let contractPolice = new ContractPolice("contracts", config);
+let contractPolice = new ContractPolice("contracts", "http://localhost:3000", config);
 
 console.log("Start contract test(s) with ContractPolice");
 contractPolice.testContracts()
