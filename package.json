@@ -1,18 +1,26 @@
 {
   "name": "contractpolice",
-  "version": "0.0.3",
   "description": "ContractPolice helps you find contract violations fast and easily!",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [
     "contract testing",
     "test",
     "api",
     "rest"
   ],
-  "author": "Rick Slinkman",
+  "version": "0.0.3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+
+  "author": "Rick Slinkman <rw.slinkman@gmail.com> (http://rwslinkman.nl)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rwslinkman/contractpolice.git"
+  },
+  "bugs": {
+    "url": "http://github.com/request/request/issues"
+  },
   "license": "Apache-2.0",
   "dependencies": {
     "js-yaml": "^3.13.1",
