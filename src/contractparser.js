@@ -39,6 +39,7 @@ ContractParser.prototype.findContractFiles = function (directory) {
 };
 
 ContractParser.prototype.extractContractName = function (contractFile, stripExtension = true) {
+    // TODO: Improve to keep directory structure for versioning
     let fileNameSplit = contractFile.split("/");
     let fileName = fileNameSplit[fileNameSplit.length - 1];
     if(stripExtension) {

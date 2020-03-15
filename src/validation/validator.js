@@ -30,20 +30,20 @@ function validateMatchingBodyType(expectedResponse, actualResponse) {
     let expectedBodyType = typeof expectedResponse.body;
     let actualBodyType = typeof actualResponse.body;
     if(expectedBodyType !== actualBodyType) {
-        return [new Violation("bodyType", expectedBodyType, actualBodyType)];
+        return [new Violation("type of 'body'", expectedBodyType, actualBodyType)];
     }
     return [];
 }
 
 function ContractValidator(contractResponse, validationRules = []) {
-    this.expectedResponse = contractResponse;
-    this.validationRules = [
+    let defaultRules = [
         // TODO: Create more violation checks
         validateStatusCode,
         validateMatchingBodyType,
         validateAllKeysExist
     ];
-    this.validationRules.concat(validationRules);
+    this.expectedResponse = contractResponse;
+    this.validationRules = defaultRules.concat(validationRules);
 }
 
 ContractValidator.prototype.validate = async function(serverResponse) {

@@ -1,6 +1,6 @@
 contract:
   request:
-    path: /orders
+    path: /v1/orders
     method: POST
     body:
       customer: Rick

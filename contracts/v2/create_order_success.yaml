@@ -1,6 +1,6 @@
 contract:
   request:
-    path: /orders
+    path: /v2/orders
     method: POST
     body:
       customer: Rick
@@ -23,8 +23,9 @@ contract:
   response:
     body:
       orderId: <anyString>
-      transactionId: <anyUUID>
-      customer: Rick
+      customer:
+        name: Rick
+        email: username@provider.com
       items:
         - product: Hamburger
           quantity: 2
