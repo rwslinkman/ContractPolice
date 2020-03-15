@@ -21,19 +21,4 @@ contract:
       - Content-Type: application/json
   response:
     statuscode: 200
-    body:
-      orderId: <anyString>
-      customer: Rick
-      items:
-        - product: Hamburger
-          quantity: 2
-          price: 20
-        - product: Fries
-          quantity: 1
-          price: 5
-        - product: Chicken nuggets
-          quantity: 1
-          price: 5
-        - product: Milkshake
-          quantity: 2
-          procie: 10
+    body: OK

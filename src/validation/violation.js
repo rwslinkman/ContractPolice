@@ -5,8 +5,7 @@ function Violation(key, expected, actual) {
 }
 
 Violation.prototype.getViolationText = function() {
-    // TODO: Improve printed message
-    return "Expected " + this.key + " but it had something else"
+    return "Expected " + this.key + " to be " + this.expected + " but it was " + this.actual;
 };
 
 module.exports = Violation;
