@@ -1,21 +1,23 @@
 const ContractParser = require("./src/contractparser.js");
 const TestRunner = require("./src/testrunner.js");
+const ContractValidator = require("./src/validation/validator.js");
 
 const defaultConfig = {
     endpoint: "http://127.0.0.1:8080",
-    excludes: []
+    excludes: [],
+    customValidationRules: []
 };
 
 function ContractPolice(contractsDirectory, config) {
     this.contractsDirectory = contractsDirectory;
     this.config = {};
     this.config['endpoint'] = config.endpoint || defaultConfig.endpoint;
-
-    console.log("Endpoint: " + this.config.endpoint);
+    this.config['customValidationRules'] = config.customValidationRules || defaultConfig.customValidationRules;
 }
 
 ContractPolice.prototype.testContracts = function() {
     const endpoint = this.config.endpoint;
+    const validationRules = this.config.customValidationRules;
 
     let contractParser = new ContractParser();
     return contractParser
@@ -36,8 +38,10 @@ ContractPolice.prototype.testContracts = function() {
         .then(function (contracts) {
             // Compose test runs
             let tests = [];
-            contracts.forEach(function(contract) {
-                let runner = new TestRunner(contract.name, contract.data, endpoint);
+            contracts.forEach(function(contractMeta) {
+                let contract = contractMeta.data;
+                let validator = new ContractValidator(contract.response, validationRules);
+                let runner = new TestRunner(contractMeta.name, contract.request, endpoint, validator);
                 tests.push(runner);
             });
             return tests;
@@ -49,7 +53,12 @@ ContractPolice.prototype.testContracts = function() {
         })
         .then(function(testResults) {
             // Process test results
-            console.log(testResults);
+            testResults.forEach(function (result) {
+                // TODO: check result state (pass or fail)
+                // TODO: pass results to test report generator
+                // TODO: finish appropriately (OK or throw)
+                console.log(result);
+            });
         });
 };
 
