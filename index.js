@@ -1,7 +1,7 @@
 const ContractParser = require("./src/contractparser.js");
 const TestRunner = require("./src/testrunner.js");
 const ContractValidator = require("./src/validation/validator.js");
-const TestReporter = require("./src/report/reporter.js");
+const TestReporter = require("./src/reporting/reporter.js");
 
 const defaultConfig = {
     endpoint: "http://127.0.0.1:8080",
