@@ -1,23 +1,30 @@
 const ContractParser = require("./src/contractparser.js");
 const TestRunner = require("./src/testrunner.js");
 const ContractValidator = require("./src/validation/validator.js");
+const TestReporter = require("./src/report/reporter.js");
 
 const defaultConfig = {
     endpoint: "http://127.0.0.1:8080",
     excludes: [],
-    customValidationRules: []
+    customValidationRules: [],
+    failOnError: true,
+    reportOutputDir: "build"
 };
 
 function ContractPolice(contractsDirectory, config) {
     this.contractsDirectory = contractsDirectory;
     this.config = {};
-    this.config['endpoint'] = config.endpoint || defaultConfig.endpoint;
-    this.config['customValidationRules'] = config.customValidationRules || defaultConfig.customValidationRules;
+    this.config['endpoint']                 = config.endpoint || defaultConfig.endpoint;
+    this.config['customValidationRules']    = config.customValidationRules || defaultConfig.customValidationRules;
+    this.config['failOnError']              = config.failOnError || defaultConfig.failOnError;
+    this.config['reportOutputDir']          = config.reportOutputDir || defaultConfig.reportOutputDir;
 }
 
 ContractPolice.prototype.testContracts = function() {
     const endpoint = this.config.endpoint;
     const validationRules = this.config.customValidationRules;
+    const failOnError = this.config.failOnError;
+    const reportOutputDir = this.config.reportOutputDir;
 
     let contractParser = new ContractParser();
     return contractParser
@@ -53,14 +60,16 @@ ContractPolice.prototype.testContracts = function() {
         })
         .then(function(testResults) {
             // Process test results
-            testResults.forEach(function (result) {
-                // TODO: check result state (pass or fail)
-                // TODO: pass results to test report generator
-                // TODO: finish appropriately (OK or throw)
-                if(result.result === "FAIL") {
-                    console.log(result);
-                }
-            });
+            let reporter = new TestReporter(process.cwd(), reportOutputDir);
+            return reporter
+                .writeTestReport(testResults)
+                .then(function() {
+                    // Finish execution
+                    let testOutcomes = testResults.map(it => it.result);
+                    if(testOutcomes.includes("FAIL") && failOnError) {
+                        throw "ContractPolice contract test execution has completed with violations!"
+                    }
+                });
         });
 };
 
