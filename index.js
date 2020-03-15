@@ -27,7 +27,7 @@ ContractPolice.prototype.testContracts = function() {
             let contracts = [];
             filesArray.forEach(function(contractFile) {
                 let contract = contractParser.parseContract(contractFile);
-                let contractName = contractParser.extractContractName(contractFile);
+                let contractName = contractParser.extractContractName(contractFile, false);
                 contracts.push({
                     name: contractName,
                     data: contract
@@ -57,7 +57,9 @@ ContractPolice.prototype.testContracts = function() {
                 // TODO: check result state (pass or fail)
                 // TODO: pass results to test report generator
                 // TODO: finish appropriately (OK or throw)
-                console.log(result);
+                if(result.result === "FAIL") {
+                    console.log(result);
+                }
             });
         });
 };

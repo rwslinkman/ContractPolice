@@ -20,5 +20,5 @@ contract:
     headers:
       - Content-Type: application/json
   response:
-    statuscode: 200
+    statuscode: 201
     body: OK

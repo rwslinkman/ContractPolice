@@ -6,31 +6,47 @@ function deepCompare(expected, actual) {
     // console.log();
     let violations = [];
 
-    for (let property in expected) {
-        if (expected.hasOwnProperty(property)) {
-            // TODO Compare property names
-            console.log("PropertyName " + property);
-            let propertyValue = expected[property];
-            let valueType = typeof propertyValue;
+    for (let propertyName in expected) {
+        if (expected.hasOwnProperty(propertyName)) {
+            // TODO Compare propertyName names
+            let expectedPropertyValue = expected[propertyName];
+            let expectedPropertyValueType = typeof expectedPropertyValue;
 
-            if (valueType === "object") {
-                if (Array.isArray(propertyValue)) {
-                    for (let p = 0; p < propertyValue.length; p++) {
-                        // TODO: Collect all violations of item compare
-                        // TODO: Add found violations to existing ones
-                        let expectedItem = propertyValue[p];
-                        let actualItem = actual[property][p];
-                        // TODO: Check if actualItem exists, if not: expectation is not met => Violation
+            if (expectedPropertyValueType === "object") {
+                if (Array.isArray(expectedPropertyValue)) {
+                    for (let p = 0; p < expectedPropertyValue.length; p++) {
+                        let expectedItem = expectedPropertyValue[p];
+                        let actualItem = actual[propertyName][p];
 
-                        console.log(expectedItem);
-                        console.log(actualItem);
-                        console.log();
+                        let itemViolations = deepCompare(expectedItem, actualItem);
+                        violations.concat(itemViolations);
+
+                        // console.log(expectedItem);
+                        // console.log(actualItem);
+                        // console.log();
                         // deepCompare(expectedItem, actualItem);
                     }
                 } else {
+                    let itemViolations = deepCompare(expectedItem, actualItem);
+                    violations.concat(itemViolations);
                     // TODO: Compare objects
                     // TODO: Add found violations to existing ones
-                    // deepCompare(expected[property], actual[property]);
+                    // deepCompare(expected[propertyName], actual[propertyName]);
+                }
+            } else {
+                // Does it exist in actual
+                if(actual.hasOwnProperty(propertyName)) {
+                    let actualPropertyValue = actual[propertyName];
+                    let actualPropertyValueType = typeof actualPropertyValue;
+
+                    console.log("Expect Property " + propertyName + " = " + expectedPropertyValue + " [" + expectedPropertyValueType + "]");
+                    console.log("Actual Property " + propertyName + " = " + actualPropertyValue + " [" + actualPropertyValueType + "]");
+                    // TODO Compare items
+                } else {
+                    // console.log(expected);
+                    // console.log(actual);
+                    console.log("Property " + propertyName + " is missing in actual!!");
+                    // TODO Add violation
                 }
             }
         }

@@ -25,7 +25,7 @@ contract:
       orderId: <anyString>
       customer: Rick
       items:
-        - product: Hamburger
+        - product: Hamborger
           quantity: 2
           price: 20
         - product: Fries

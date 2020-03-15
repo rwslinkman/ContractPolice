@@ -38,10 +38,13 @@ ContractParser.prototype.findContractFiles = function (directory) {
         });
 };
 
-ContractParser.prototype.extractContractName = function (contractFile) {
+ContractParser.prototype.extractContractName = function (contractFile, stripExtension = true) {
     let fileNameSplit = contractFile.split("/");
     let fileName = fileNameSplit[fileNameSplit.length - 1];
-    return fileName.replace(".yaml", "").replace(".yml", "");
+    if(stripExtension) {
+        return fileName.replace(".yaml", "").replace(".yml", "");
+    }
+    return fileName
 };
 
 ContractParser.prototype.parseContract = function (contractFile) {
@@ -68,7 +71,6 @@ ContractParser.prototype.parseContract = function (contractFile) {
     if (!isExist(() => contractYaml.contract.response.statuscode)) {
         throw `${contractName} does not contain a "contract.response.statuscode"`;
     }
-
     return contractYaml.contract;
 };
 

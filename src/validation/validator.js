@@ -4,28 +4,35 @@ const deepCompare = require("./deepcompare.js");
 
 function validateStatusCode(expectedResponse, actualResponse) {
     if(expectedResponse.statuscode !== actualResponse.statusCode) {
-        return new Violation("statusCode", expectedResponse.statuscode, actualResponse.statusCode);
+        return [new Violation("statusCode", expectedResponse.statuscode, actualResponse.statusCode)];
     }
-    return null;
+    return [];
 }
 
 function validateAllKeysExist(expectedResponse, actualResponse) {
-    if(validateMatchingBodyType(expectedResponse.body, actualResponse.body) == null) {
-        let result = deepCompare(expectedResponse.body, actualResponse.body);
-        // TODO: Add to violations list
+    let bodyTypeViolations = validateMatchingBodyType(expectedResponse, actualResponse);
+    if(bodyTypeViolations.length === 0) {
+        // Validation is only needed when types are the same
+        return deepCompare(expectedResponse.body, actualResponse.body);
     }
+    return [];
 }
 
 function validateMatchingBodyType(expectedResponse, actualResponse) {
     if(expectedResponse == null || actualResponse == null) {
-        return new Violation("Response", "response", null)
+        return [new Violation("Response", "response", null)];
     }
+    if(!expectedResponse.hasOwnProperty("body")) {
+        // No body expectations
+        return [];
+    }
+
     let expectedBodyType = typeof expectedResponse.body;
     let actualBodyType = typeof actualResponse.body;
     if(expectedBodyType !== actualBodyType) {
-        return new Violation("bodyType", expectedBodyType, actualBodyType);
+        return [new Violation("bodyType", expectedBodyType, actualBodyType)];
     }
-    return null;
+    return [];
 }
 
 function ContractValidator(contractResponse, validationRules = []) {
@@ -33,8 +40,8 @@ function ContractValidator(contractResponse, validationRules = []) {
     this.validationRules = [
         // TODO: Create more violation checks
         validateStatusCode,
-        validateAllKeysExist,
-        validateMatchingBodyType
+        validateMatchingBodyType,
+        validateAllKeysExist
     ];
     this.validationRules.concat(validationRules);
 }
@@ -42,14 +49,13 @@ function ContractValidator(contractResponse, validationRules = []) {
 ContractValidator.prototype.validate = async function(serverResponse) {
     const expected = this.expectedResponse;
 
-    let violations = [];
-    this.validationRules.forEach(function(rule) {
-        let violation = rule(expected, serverResponse);
-        if(violation != null) {
-            violations.push(violation);
-        }
-    });
-    return new ViolationReport(violations);
+    let violationsTotal = [];
+    for(let r = 0; r < this.validationRules.length; r++) {
+        let rule = this.validationRules[r];
+        let violations = rule(expected, serverResponse);
+        violationsTotal = violationsTotal.concat(violations);
+    }
+    return new ViolationReport(violationsTotal);
 };
 
 module.exports = ContractValidator;
