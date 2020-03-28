@@ -36,8 +36,7 @@ TestRunner.prototype.runTest = function() {
                     return new TestOutcome(testNameLocal, violationReport.getViolationTexts(), testResult);
                 })
         })
-        .catch(function(err) {
-            // console.log(err);
+        .catch(function(ignored) {
             // HTTP request error
             let violationText = `ContractPolice contacted ${url} but was unable to reach it`;
             return new TestOutcome(testNameLocal, [violationText], "FAIL");

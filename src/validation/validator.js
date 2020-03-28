@@ -37,19 +37,18 @@ function validateMatchingBodyType(expectedResponse, actualResponse) {
 
 function validateHeaders(expectedResponse, actualResponse) {
     let expectedHeaders = expectedResponse.headers;
-    if(expectedHeaders === null) {
+    if(expectedHeaders === null || expectedHeaders === undefined) {
         // No expectation = no violation
         return [];
     }
     let actualHeaders = actualResponse.headers;
 
-    // foreach expectedheader
-
-    console.log(expectedHeaders);
-    for(const [key, value] of Object.entries(expectedHeaders)) {
-        // console.log("Expecting header '%s' with value '%s'", key, value);
-    }
-    // console.log(actualHeaders);
+    let violations = [];
+    expectedHeaders.forEach(function(expectedHeader) {
+        let headerViolations = deepCompare(expectedHeader, actualHeaders, false);
+        violations = violations.concat(headerViolations);
+    });
+    return violations;
 }
 
 function ContractValidator(contractResponse, validationRules = []) {
