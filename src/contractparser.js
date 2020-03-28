@@ -72,6 +72,33 @@ ContractParser.prototype.parseContract = function (contractFile) {
     if (!isExist(() => contractYaml.contract.response.statuscode)) {
         throw `${contractName} does not contain a "contract.response.statuscode"`;
     }
+
+    let expectedRequest = contractYaml.contract.request;
+    if(expectedRequest.hasOwnProperty("headers")) {
+        let expectedHeaders = contractYaml.contract.request.headers;
+        if(typeof expectedHeaders !== "object") {
+            throw `Expected header definition in ${contractName} should be of type 'object' or 'array'`;
+        }
+
+        // Formatting headers into desired format; supporting both Object an Array notation
+        if(!Array.isArray(expectedHeaders)) {
+            expectedHeaders = Object.entries(expectedHeaders);
+        }
+        expectedHeaders = expectedHeaders.map(function(header) {
+            let key, value;
+            if(Array.isArray(header)) {
+                key = header[0];
+                value = header[1];
+                let obj = {};
+                obj[key] = value;
+                return obj;
+            }
+            return header;
+
+        });
+        contractYaml.contract.request.headers = expectedHeaders;
+    }
+
     return contractYaml.contract;
 };
 

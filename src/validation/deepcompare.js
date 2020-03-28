@@ -61,7 +61,7 @@ function deepCompare(expected, actual) {
                                 violations.push(specialCaseViolation);
                             }
                         } else if (expectedPropertyValue !== actualPropertyValue) {
-                            violations.push(new Violation(propertyName, expectedPropertyValue, expectedPropertyValue));
+                            violations.push(new Violation(propertyName, expectedPropertyValue, actualPropertyValue));
                         }
                     }
                 } else {

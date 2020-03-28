@@ -18,9 +18,12 @@ contract:
           quantity: 2
           procie: 10
     headers:
-      - Content-Type: application/json
+      Content-Type: application/json
+      Accept: application/json
   response:
     statuscode: 200
+    headers:
+      - Content-Type: application/json
     body:
       orderId: <anyNumber>
       customer: Rick
