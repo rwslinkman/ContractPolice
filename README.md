@@ -43,6 +43,7 @@ TODO: Table here
 ## Contract Definitions
 ContractPolice uses YAML files that define the contracts you have with a web service.   
 
+#### Basics
 A basic definition, only using the required attributes, looks like this:
 ```yaml
 contract:
@@ -59,6 +60,15 @@ This creates the URL that will be subjected to the contract test.
 After the request is executed, the ContractPolice takes the `contract.response` object to verify the service's response.   
 A `contract.response.body` and `contract.response.statuscode` can be defined, of which the latter is required.   
 
+#### Response body validation
+TODO:
+
+#### Response header validation
+TODO:
+
+#### Wildcards
+TODO:
+
 ## Full example
 Example contract definition.
 ```yaml
@@ -66,6 +76,8 @@ contract:
   request:
     path: /v1/orders
     method: POST
+    headers:
+      Content-Type: application/json
     body:
       customer: John Doe
       items:
@@ -77,6 +89,8 @@ contract:
           price: 10
   response:
     statuscode: 200
+    headers:
+      Content-Type: <anyString>
     body:
       orderId: <anyNumber>
       customer: John Doe

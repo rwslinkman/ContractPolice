@@ -23,7 +23,7 @@ contract:
   response:
     statuscode: 200
     headers:
-      - Content-Type: application/json; charset=utf-8
+      - Content-Type: <anyString>
     body:
       orderId: <anyNumber>
       customer: Rick
