@@ -4,6 +4,7 @@ const {promisify} = require('util');
 const {resolve} = require('path');
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
+const helper = require("./helper-functions.js");
 
 async function getFiles(dir) {
     const subdirs = await readdir(dir);
@@ -54,6 +55,7 @@ ContractParser.prototype.parseContract = function (contractFile) {
     let contractYaml = yaml.safeLoad(fileContents);
 
     // TODO: simplify YAML content validation
+    // Verify that all required attributes are there
     if (contractYaml === null) {
         throw `${contractName} is not a valid contract`
     }
@@ -73,30 +75,30 @@ ContractParser.prototype.parseContract = function (contractFile) {
         throw `${contractName} does not contain a "contract.response.statuscode"`;
     }
 
+    // Verify within request
     let expectedRequest = contractYaml.contract.request;
     if(expectedRequest.hasOwnProperty("headers")) {
-        let expectedHeaders = contractYaml.contract.request.headers;
-        if(typeof expectedHeaders !== "object") {
-            throw `Expected header definition in ${contractName} should be of type 'object' or 'array'`;
+        let requestHeaders = contractYaml.contract.request.headers;
+        if(typeof requestHeaders !== "object") {
+            throw `Request header definition in ${contractName} should be of type 'object' or 'array'`;
         }
 
         // Formatting headers into desired format; supporting both Object an Array notation
-        if(!Array.isArray(expectedHeaders)) {
-            expectedHeaders = Object.entries(expectedHeaders);
-        }
-        expectedHeaders = expectedHeaders.map(function(header) {
-            let key, value;
-            if(Array.isArray(header)) {
-                key = header[0];
-                value = header[1];
-                let obj = {};
-                obj[key] = value;
-                return obj;
-            }
-            return header;
+        requestHeaders = helper.normalizeHeaders(requestHeaders);
+        contractYaml.contract.request.headers = requestHeaders;
+    }
 
-        });
-        contractYaml.contract.request.headers = expectedHeaders;
+    // Verify within response
+    let expectedResponse = contractYaml.contract.response;
+    if(expectedResponse.hasOwnProperty("headers")) {
+        let responseHeaders = contractYaml.contract.response.headers;
+        if(typeof responseHeaders !== "object") {
+            throw `Response header definition in ${contractName} should be of type 'object' or 'array'`;
+        }
+
+        // Formatting headers into desired format; supporting both Object an Array notation
+        responseHeaders = helper.normalizeHeaders(responseHeaders);
+        contractYaml.contract.response.headers = responseHeaders;
     }
 
     return contractYaml.contract;

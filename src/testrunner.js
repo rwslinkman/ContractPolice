@@ -1,5 +1,6 @@
 const needle = require("needle");
 const TestOutcome = require("./testoutcome.js");
+const helper = require("./helper-functions.js");
 
 function TestRunner(name, contractRequest, endpoint, validator) {
     this.testName = name;
@@ -18,6 +19,11 @@ TestRunner.prototype.runTest = function() {
         json: true
     };
     const data = contractRequest.body || {};
+    let contractHeaders = contractRequest.headers || [];
+    contractHeaders = helper.normalizeHeaders(contractHeaders);
+    if(contractHeaders.length > 0) {
+        options["headers"] = contractHeaders;
+    }
 
     let request;
     if(method.toUpperCase() === "GET") {
