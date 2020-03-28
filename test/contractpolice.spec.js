@@ -9,11 +9,11 @@ describe("ContractPolice", () => {
 
     it("should throw an exception when directory parameter is null", () => {
         const contractPolice = new ContractPolice(null, "http://someserver.com");
-        expect(contractPolice).to.throw;
+        expect(contractPolice).to.throw();
     });
 
     it("should throw an exception when webserver parameter is null", () => {
         const contractPolice = new ContractPolice("some/directory");
-        expect(contractPolice).to.not.throw;
+        expect(contractPolice).to.throw();
     })
 });

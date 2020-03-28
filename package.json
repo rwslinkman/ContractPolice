@@ -10,7 +10,7 @@
   "version": "0.3.0",
   "main": "index.js",
   "scripts": {
-    "test": "nyc mocha test/**/*.spec.js"
+    "test": "nyc mocha --recursive"
   },
   "author": "Rick Slinkman <rw.slinkman@gmail.com> (http://rwslinkman.nl)",
   "repository": {

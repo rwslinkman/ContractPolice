@@ -11,6 +11,10 @@ const defaultConfig = {
 };
 
 function ContractPolice(contractsDirectory, endpoint, config = {}) {
+    if(contractsDirectory === null) {
+        throw Error(`Please pass the directory where contracts are stored`);
+    }
+
     this.contractsDirectory = contractsDirectory;
     this.endpoint = endpoint;
     this.config = {};
