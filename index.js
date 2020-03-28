@@ -10,7 +10,7 @@ const defaultConfig = {
     reportOutputDir: "build"
 };
 
-function ContractPolice(contractsDirectory, endpoint, config) {
+function ContractPolice(contractsDirectory, endpoint, config = {}) {
     this.contractsDirectory = contractsDirectory;
     this.endpoint = endpoint;
     this.config = {};
