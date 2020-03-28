@@ -35,12 +35,29 @@ function validateMatchingBodyType(expectedResponse, actualResponse) {
     return [];
 }
 
+function validateHeaders(expectedResponse, actualResponse) {
+    let expectedHeaders = expectedResponse.headers;
+    if(expectedHeaders === null || expectedHeaders === undefined) {
+        // No expectation = no violation
+        return [];
+    }
+    let actualHeaders = actualResponse.headers;
+
+    let violations = [];
+    expectedHeaders.forEach(function(expectedHeader) {
+        let headerViolations = deepCompare(expectedHeader, actualHeaders, false);
+        violations = violations.concat(headerViolations);
+    });
+    return violations;
+}
+
 function ContractValidator(contractResponse, validationRules = []) {
     let defaultRules = [
         // TODO: Create more violation checks
         validateStatusCode,
         validateMatchingBodyType,
-        validateAllKeysExist
+        validateAllKeysExist,
+        validateHeaders
     ];
     this.expectedResponse = contractResponse;
     this.validationRules = defaultRules.concat(validationRules);

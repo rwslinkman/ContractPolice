@@ -18,11 +18,13 @@ function compareSpecialCase(key, expectedValue, actualValue) {
 }
 
 // TODO: Add prefix property to print deeper children more correctly
-function deepCompare(expected, actual) {
+function deepCompare(expected, actual, caseSensitive = true) {
     let violations = [];
 
     for (let propertyName in expected) {
         if (expected.hasOwnProperty(propertyName)) {
+            let propName = caseSensitive ? propertyName : propertyName.toLowerCase();
+
             let expectedPropertyValue = expected[propertyName];
             let expectedPropertyValueType = typeof expectedPropertyValue;
 
@@ -48,20 +50,22 @@ function deepCompare(expected, actual) {
                 }
             } else {
                 // Does it exist in actual
-                if (actual.hasOwnProperty(propertyName)) {
-                    let actualPropertyValue = actual[propertyName];
+                if (actual.hasOwnProperty(propName)) {
+                    let actualPropertyValue = actual[propName];
                     let actualPropertyValueType = typeof actualPropertyValue;
 
                     if (expectedPropertyValueType !== actualPropertyValueType && !expectedPropertyValue.startsWith("<any")) {
                         violations.push(new Violation(`type of '${propertyName}'`, expectedPropertyValueType, actualPropertyValueType));
                     } else {
+                        // Check for special cases
                         if (typeof expectedPropertyValue === "string" && expectedPropertyValue.startsWith("<any") && expectedPropertyValue.endsWith(">")) {
                             let specialCaseViolation = compareSpecialCase(propertyName, expectedPropertyValue, actualPropertyValue);
                             if(specialCaseViolation !== null) {
                                 violations.push(specialCaseViolation);
                             }
                         } else if (expectedPropertyValue !== actualPropertyValue) {
-                            violations.push(new Violation(propertyName, expectedPropertyValue, expectedPropertyValue));
+                            // Variable type comparison
+                            violations.push(new Violation(propertyName, expectedPropertyValue, actualPropertyValue));
                         }
                     }
                 } else {

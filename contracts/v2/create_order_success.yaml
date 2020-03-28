@@ -20,6 +20,7 @@ contract:
           procie: 10
     headers:
       - Content-Type: application/json
+      - Accept: application/json
   response:
     body:
       orderId: <anyString>

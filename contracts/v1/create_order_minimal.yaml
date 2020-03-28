@@ -1,0 +1,6 @@
+contract:
+  request:
+    path: /v1/orders
+    method: POST
+  response:
+    statuscode: 200

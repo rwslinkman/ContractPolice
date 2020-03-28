@@ -43,6 +43,7 @@ TODO: Table here
 ## Contract Definitions
 ContractPolice uses YAML files that define the contracts you have with a web service.   
 
+#### Basics
 A basic definition, only using the required attributes, looks like this:
 ```yaml
 contract:
@@ -57,7 +58,60 @@ The path is appended to the endpoint given to the ContractPolice.
 This creates the URL that will be subjected to the contract test.   
 
 After the request is executed, the ContractPolice takes the `contract.response` object to verify the service's response.   
-A `contract.response.body` and `contract.response.statuscode` can be defined, of which the latter is required.   
+This object as only one required property, which is  `contract.response.statuscode`.   
+
+#### Response body validation
+The HTTP response body can be verified using the `contract.response.body` property.   
+This expects an Object or Array value containing the expected properties with their respective values.   
+   
+An example of a contract with response body validation looks like this:   
+```yaml
+contract:
+  request:
+    path: /v1/orders/my-order-id
+  response:
+    statuscode: 200
+    body:
+      orderId: my-order-id
+      customer: John Doe
+      items:
+        - product: Hamburger
+          quantity: 2
+          price: 20
+        - product: Fries
+          quantity: 1
+          price: 10
+```  
+
+The response body coming back from the API will be deeply examined to verify its correctness.   
+During verification the name of the property is verified, as well as its value and value type.    
+
+#### Response header validation
+The headers in the API's response can also be validated.   
+For this, they need to be specified in the contract YAML file.   
+This is similar to the body definition.   
+
+An example of a contract with response header validation looks like this:   
+```yaml
+contract:
+  request:
+    path: /v1/orders/my-order-id
+  response:
+    statuscode: 200
+    headers:
+      Content-Type: application/json
+```
+
+#### Wildcards
+Wildcards can be used if the exact value of the outcome does not matter.   
+Using these wildcards, you can verify the type of the variable, ignoring its exact value.   
+
+Within the `contract.response` object it is possible to use the following wildcards:   
+
+| Wildcard      | Explanation                                        |
+|---------------|----------------------------------------------------|
+| `<anyString>` | Verifies that the value is a string of any length  |
+| `<anyNumber>` | Verifies that the value is any number              |   
 
 ## Full example
 Example contract definition.
@@ -66,6 +120,8 @@ contract:
   request:
     path: /v1/orders
     method: POST
+    headers:
+      Content-Type: application/json
     body:
       customer: John Doe
       items:
@@ -77,6 +133,8 @@ contract:
           price: 10
   response:
     statuscode: 200
+    headers:
+      Content-Type: <anyString>
     body:
       orderId: <anyNumber>
       customer: John Doe
