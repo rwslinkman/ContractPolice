@@ -117,12 +117,218 @@ describe("ContractParser", () => {
             expect(result).to.equal(yamlContent.contract);
         });
 
-        it("should throw an error when file does not contain a contract", () => {
+        it("should throw an error when file does not contain a contract at all", () => {
             mockYamlLoading(null);
 
             const parser = new ContractParser();
 
             expect(() => parser.parseContract("some/my-file.yaml")).to.throw("my-file is not a valid contract");
+        });
+
+        it("should throw an error when file does not contain a contract object", () => {
+            const yamlContent = {};
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser();
+
+            expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract"`);
+        });
+
+        it("should throw an error when contract does not contain a request object", () => {
+            const yamlContent = {
+                contract: {}
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser();
+
+            expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.request"`);
+        });
+
+        it("should throw an error when contract.request does not contain a path object", () => {
+            const yamlContent = {
+                contract: {
+                    request: {}
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser();
+
+            expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.request.path"`);
+        });
+
+        it("should throw an error when contract does not contain a response object", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/v1/orders"
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser();
+
+            expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.response"`);
+        });
+
+        it("should throw an error when contract.response does not contain a statuscode object", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/v1/orders"
+                    },
+                    response: {}
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser();
+
+            expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.response.statuscode"`);
+        });
+
+        it("should normalize request headers to array when headers are specified as object", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
+                        }
+                    },
+                    response: {
+                        statuscode: 200
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser();
+            let result = parser.parseContract("some/file.yaml");
+
+            expect(result.request.headers).to.deep.equal([
+                { "Content-Type": "application/json" },
+                { "Accept": "application/json" }
+            ]);
+        });
+
+        it("should normalize request headers to array when headers are specified as array", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path",
+                        headers: [
+                            { "Content-Type": "application/json" },
+                            { "Accept": "application/json" }
+                        ]
+                    },
+                    response: {
+                        statuscode: 200
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser();
+            let result = parser.parseContract("some/file.yaml");
+
+            expect(result.request.headers).to.deep.equal([
+                { "Content-Type": "application/json" },
+                { "Accept": "application/json" }
+            ]);
+        });
+
+        it("should throw an error when request headers are specified as non-object type", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path",
+                        headers: "ContentType"
+                    },
+                    response: {
+                        statuscode: 200
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser();
+
+            expect(() => parser.parseContract("some/file.yaml")).to.throw("Request header definition in file should be of type 'object' or 'array'");
+        });
+
+        it("should normalize response headers to array when headers are specified as object", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path"
+                    },
+                    response: {
+                        statuscode: 200,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
+                        }
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser();
+            let result = parser.parseContract("some/file.yaml");
+
+            expect(result.response.headers).to.deep.equal([
+                { "Content-Type": "application/json" },
+                { "Accept": "application/json" }
+            ]);
+        });
+
+        it("should normalize response headers to array when headers are specified as array", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path"
+                    },
+                    response: {
+                        statuscode: 200,
+                        headers: [
+                            { "Content-Type": "application/json" },
+                            { "Accept": "application/json" }
+                        ]
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser();
+            let result = parser.parseContract("some/file.yaml");
+
+            expect(result.response.headers).to.deep.equal([
+                { "Content-Type": "application/json" },
+                { "Accept": "application/json" }
+            ]);
+        });
+
+        it("should throw an error when response headers are specified as non-object type", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path"
+                    },
+                    response: {
+                        statuscode: 200,
+                        headers: "ContentType"
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser();
+
+            expect(() => parser.parseContract("some/file.yaml")).to.throw("Response header definition in file should be of type 'object' or 'array'");
         });
     })
 });
