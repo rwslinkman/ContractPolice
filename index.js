@@ -41,10 +41,11 @@ ContractPolice.prototype.testContracts = function() {
             filesArray.forEach(function(contractFile) {
                 let contract = contractParser.parseContract(contractFile);
                 let contractName = contractParser.extractContractName(contractFile, false);
-                contracts.push({
+                let contractMeta = {
                     name: contractName,
                     data: contract
-                });
+                };
+                contracts.push(contractMeta);
             });
             return contracts;
         })
