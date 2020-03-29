@@ -31,8 +31,6 @@ function deepCompare(expected, actual, caseSensitive = true) {
 
     for (let propertyName in expected) {
         if (expected.hasOwnProperty(propertyName)) {
-            // let propName = caseSensitive ? propertyName : propertyName.toLowerCase();
-
             let expectedPropertyValue = expected[propertyName];
             let expectedPropertyValueType = typeof expectedPropertyValue;
 
@@ -43,8 +41,16 @@ function deepCompare(expected, actual, caseSensitive = true) {
                         let expectedItem = expectedPropertyValue[p];
                         let actualItem = actual[propertyName][p];
 
-                        let itemViolations = deepCompare(expectedItem, actualItem);
-                        violations = violations.concat(itemViolations);
+                        if(typeof expectedItem === "object") {
+                            let itemViolations = deepCompare(expectedItem, actualItem);
+                            violations = violations.concat(itemViolations);
+                        } else {
+                            let actualArray = actual[propertyName];
+                            if(!actualArray.includes(expectedItem)) {
+                                let arrayViolation = new Violation(propertyName, expectedItem, "missing");
+                                violations.push(arrayViolation);
+                            }
+                        }
                     }
                 } else {
                     if (actual.hasOwnProperty(propertyName)) {
