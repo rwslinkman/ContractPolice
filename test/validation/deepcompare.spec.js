@@ -459,6 +459,7 @@ describe("deepCompare", () => {
 
         // TODO: Check violation
         expect(result).to.not.be.empty;
+        expect(result).to.have.lengthOf(1);
     });
 
     it("should return a violation list when two equal objects with equal case-sensitive values are passed", () => {
