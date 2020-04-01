@@ -2,3 +2,7 @@ contracts
 run-cli.js
 .idea
 report
+coverage
+.nyc_output
+.github
+test
