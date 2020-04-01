@@ -17,6 +17,6 @@ contract:
     headers:
       - Content-Type: application/json
   response:
-    statuscode: 400
+    statusCode: 400
     body:
       error: <anyString>

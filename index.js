@@ -10,7 +10,14 @@ const defaultConfig = {
     reportOutputDir: "build"
 };
 
-function ContractPolice(contractsDirectory, endpoint, config) {
+function ContractPolice(contractsDirectory, endpoint, config = {}) {
+    if(contractsDirectory === null || contractsDirectory === undefined) {
+        throw Error(`Please provide the directory where contracts are stored`);
+    }
+    if(endpoint === null || endpoint === undefined) {
+        throw Error(`Please provide the endpoint that will be placed under test`);
+    }
+
     this.contractsDirectory = contractsDirectory;
     this.endpoint = endpoint;
     this.config = {};
@@ -34,10 +41,11 @@ ContractPolice.prototype.testContracts = function() {
             filesArray.forEach(function(contractFile) {
                 let contract = contractParser.parseContract(contractFile);
                 let contractName = contractParser.extractContractName(contractFile, false);
-                contracts.push({
+                let contractMeta = {
                     name: contractName,
                     data: contract
-                });
+                };
+                contracts.push(contractMeta);
             });
             return contracts;
         })

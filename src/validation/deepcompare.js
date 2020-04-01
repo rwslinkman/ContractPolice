@@ -1,5 +1,13 @@
 const Violation = require("./violation.js");
 
+function hasOwnPropertyCaseInsensitive(obj, property) {
+    let props = [];
+    for (let i in obj) if (obj.hasOwnProperty(i)) props.push(i);
+    let prop;
+    while (prop = props.pop()) if (prop.toLowerCase() === property.toLowerCase()) return prop;
+    return null;
+}
+
 function compareSpecialCase(key, expectedValue, actualValue) {
     let actualType = typeof actualValue;
     if(expectedValue === "<anyString>") {
@@ -23,8 +31,6 @@ function deepCompare(expected, actual, caseSensitive = true) {
 
     for (let propertyName in expected) {
         if (expected.hasOwnProperty(propertyName)) {
-            let propName = caseSensitive ? propertyName : propertyName.toLowerCase();
-
             let expectedPropertyValue = expected[propertyName];
             let expectedPropertyValueType = typeof expectedPropertyValue;
 
@@ -35,8 +41,16 @@ function deepCompare(expected, actual, caseSensitive = true) {
                         let expectedItem = expectedPropertyValue[p];
                         let actualItem = actual[propertyName][p];
 
-                        let itemViolations = deepCompare(expectedItem, actualItem);
-                        violations = violations.concat(itemViolations);
+                        if(typeof expectedItem === "object") {
+                            let itemViolations = deepCompare(expectedItem, actualItem);
+                            violations = violations.concat(itemViolations);
+                        } else {
+                            let actualArray = actual[propertyName];
+                            if(!actualArray.includes(expectedItem)) {
+                                let arrayViolation = new Violation(propertyName, expectedItem, "missing");
+                                violations.push(arrayViolation);
+                            }
+                        }
                     }
                 } else {
                     if (actual.hasOwnProperty(propertyName)) {
@@ -50,8 +64,26 @@ function deepCompare(expected, actual, caseSensitive = true) {
                 }
             } else {
                 // Does it exist in actual
-                if (actual.hasOwnProperty(propName)) {
-                    let actualPropertyValue = actual[propName];
+                let propName = null;
+                let actualPropertyValue = null;
+                if(caseSensitive) {
+                    if(actual.hasOwnProperty(propertyName)) {
+                        propName = propertyName;
+                        actualPropertyValue = actual[propertyName];
+                    }
+                } else {
+                    let propertyNameCaseInsensitive = hasOwnPropertyCaseInsensitive(actual, propertyName);
+                    if(propertyNameCaseInsensitive !== null && propertyNameCaseInsensitive !== undefined) {
+                        propName = propertyNameCaseInsensitive;
+                        actualPropertyValue = actual[propertyNameCaseInsensitive];
+                    }
+                }
+
+                if(propName === null) {
+                    // Property does not exist (even case-insensitive)
+                    violations.push(new Violation(propertyName, "present", "missing"));
+                }
+                else {
                     let actualPropertyValueType = typeof actualPropertyValue;
 
                     if (expectedPropertyValueType !== actualPropertyValueType && !expectedPropertyValue.startsWith("<any")) {
@@ -64,12 +96,10 @@ function deepCompare(expected, actual, caseSensitive = true) {
                                 violations.push(specialCaseViolation);
                             }
                         } else if (expectedPropertyValue !== actualPropertyValue) {
-                            // Variable type comparison
+                            // variable type comparison
                             violations.push(new Violation(propertyName, expectedPropertyValue, actualPropertyValue));
                         }
                     }
-                } else {
-                    violations.push(new Violation(propertyName, "present", "missing"));
                 }
             }
         }

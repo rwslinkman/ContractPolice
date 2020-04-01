@@ -21,7 +21,7 @@ contract:
       Content-Type: application/json
       Accept: application/json
   response:
-    statuscode: 200
+    statusCode: 200
     headers:
       - Content-Type: <anyString>
     body:

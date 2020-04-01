@@ -3,8 +3,8 @@ const Violation = require("./violation.js");
 const deepCompare = require("./deepcompare.js");
 
 function validateStatusCode(expectedResponse, actualResponse) {
-    if(expectedResponse.statuscode !== actualResponse.statusCode) {
-        return [new Violation("statusCode", expectedResponse.statuscode, actualResponse.statusCode)];
+    if(expectedResponse.statusCode !== actualResponse.statusCode) {
+        return [new Violation("statusCode", expectedResponse.statusCode, actualResponse.statusCode)];
     }
     return [];
 }
@@ -19,9 +19,6 @@ function validateAllKeysExist(expectedResponse, actualResponse) {
 }
 
 function validateMatchingBodyType(expectedResponse, actualResponse) {
-    if(expectedResponse == null || actualResponse == null) {
-        return [new Violation("Response", "response", null)];
-    }
     if(!expectedResponse.hasOwnProperty("body")) {
         // No body expectations
         return [];

@@ -50,7 +50,7 @@ contract:
   request:
     path: /hello-world
   response:
-    statuscode: 200
+    statusCode: 200
 ```
 
 Within the `contract.request` object, the path is defined.   
@@ -58,7 +58,7 @@ The path is appended to the endpoint given to the ContractPolice.
 This creates the URL that will be subjected to the contract test.   
 
 After the request is executed, the ContractPolice takes the `contract.response` object to verify the service's response.   
-This object as only one required property, which is  `contract.response.statuscode`.   
+This object as only one required property, which is  `contract.response.statusCode`.   
 
 #### Response body validation
 The HTTP response body can be verified using the `contract.response.body` property.   
@@ -70,7 +70,7 @@ contract:
   request:
     path: /v1/orders/my-order-id
   response:
-    statuscode: 200
+    statusCode: 200
     body:
       orderId: my-order-id
       customer: John Doe
@@ -97,7 +97,7 @@ contract:
   request:
     path: /v1/orders/my-order-id
   response:
-    statuscode: 200
+    statusCode: 200
     headers:
       Content-Type: application/json
 ```
@@ -132,7 +132,7 @@ contract:
           quantity: 1
           price: 10
   response:
-    statuscode: 200
+    statusCode: 200
     headers:
       Content-Type: <anyString>
     body:
