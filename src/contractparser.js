@@ -71,8 +71,8 @@ ContractParser.prototype.parseContract = function (contractFile) {
     if (!isExist(() => contractYaml.contract.response)) {
         throw `${contractName} does not contain a "contract.response"`;
     }
-    if (!isExist(() => contractYaml.contract.response.statuscode)) {
-        throw `${contractName} does not contain a "contract.response.statuscode"`;
+    if (!isExist(() => contractYaml.contract.response.statusCode)) {
+        throw `${contractName} does not contain a "contract.response.statusCode"`;
     }
 
     // Verify within request

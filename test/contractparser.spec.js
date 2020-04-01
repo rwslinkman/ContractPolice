@@ -105,7 +105,7 @@ describe("ContractParser", () => {
                         path: "/some/path"
                     },
                     response: {
-                        statuscode: 200
+                        statusCode: 200
                     }
                 }
             };
@@ -173,7 +173,7 @@ describe("ContractParser", () => {
             expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.response"`);
         });
 
-        it("should throw an error when contract.response does not contain a statuscode object", () => {
+        it("should throw an error when contract.response does not contain a statusCode object", () => {
             const yamlContent = {
                 contract: {
                     request: {
@@ -186,7 +186,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser();
 
-            expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.response.statuscode"`);
+            expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.response.statusCode"`);
         });
 
         it("should normalize request headers to array when headers are specified as object", () => {
@@ -200,7 +200,7 @@ describe("ContractParser", () => {
                         }
                     },
                     response: {
-                        statuscode: 200
+                        statusCode: 200
                     }
                 }
             };
@@ -226,7 +226,7 @@ describe("ContractParser", () => {
                         ]
                     },
                     response: {
-                        statuscode: 200
+                        statusCode: 200
                     }
                 }
             };
@@ -249,7 +249,7 @@ describe("ContractParser", () => {
                         headers: "ContentType"
                     },
                     response: {
-                        statuscode: 200
+                        statusCode: 200
                     }
                 }
             };
@@ -267,7 +267,7 @@ describe("ContractParser", () => {
                         path: "/some/path"
                     },
                     response: {
-                        statuscode: 200,
+                        statusCode: 200,
                         headers: {
                             "Content-Type": "application/json",
                             "Accept": "application/json"
@@ -293,7 +293,7 @@ describe("ContractParser", () => {
                         path: "/some/path"
                     },
                     response: {
-                        statuscode: 200,
+                        statusCode: 200,
                         headers: [
                             { "Content-Type": "application/json" },
                             { "Accept": "application/json" }
@@ -319,7 +319,7 @@ describe("ContractParser", () => {
                         path: "/some/path"
                     },
                     response: {
-                        statuscode: 200,
+                        statusCode: 200,
                         headers: "ContentType"
                     }
                 }

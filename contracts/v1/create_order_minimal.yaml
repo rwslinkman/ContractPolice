@@ -3,4 +3,4 @@ contract:
     path: /v1/orders
     method: POST
   response:
-    statuscode: 200
+    statusCode: 200

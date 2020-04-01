@@ -38,4 +38,4 @@ contract:
 #        - product: Milkshake
 #          quantity: 2
 #          price: 10
-    statuscode: 200
+    statusCode: 200
