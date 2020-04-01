@@ -19,9 +19,6 @@ function validateAllKeysExist(expectedResponse, actualResponse) {
 }
 
 function validateMatchingBodyType(expectedResponse, actualResponse) {
-    if(expectedResponse == null || actualResponse == null) {
-        return [new Violation("Response", "response", null)];
-    }
     if(!expectedResponse.hasOwnProperty("body")) {
         // No body expectations
         return [];
