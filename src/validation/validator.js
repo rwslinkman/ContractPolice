@@ -4,7 +4,7 @@ const deepCompare = require("./deepcompare.js");
 
 function validateStatusCode(expectedResponse, actualResponse) {
     if(expectedResponse.statusCode !== actualResponse.statusCode) {
-        return [new Violation("statusCode", expectedResponse.statuscode, actualResponse.statusCode)];
+        return [new Violation("statusCode", expectedResponse.statusCode, actualResponse.statusCode)];
     }
     return [];
 }
@@ -65,7 +65,7 @@ function ContractValidator(contractResponse, validationRules = []) {
 
 ContractValidator.prototype.validate = async function(serverResponse) {
     const expected = this.expectedResponse;
-    
+
     let violationsTotal = [];
     for(let r = 0; r < this.validationRules.length; r++) {
         let rule = this.validationRules[r];

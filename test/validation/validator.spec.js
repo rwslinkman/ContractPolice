@@ -22,9 +22,33 @@ describe("ContractValidator", () => {
         // console.log(result);
         expect(result).to.eventually.be.fulfilled;
         return result.then(function(violationReport) {
-            console.log(violationReport);
             expect(violationReport.hasViolations()).to.equal(false);
             expect(violationReport.violations).to.be.empty;
+        })
+    });
+
+    it("should return a violation report when server responded with different statsucode", () => {
+        const contractResponse = {
+            statusCode: 200
+        };
+        const serverResponse = {
+            statusCode: 404
+        };
+        const validator = new ContractValidator(contractResponse);
+
+        const result = validator.validate(serverResponse);
+
+        // console.log(result);
+        expect(result).to.eventually.be.fulfilled;
+        return result.then(function(violationReport) {
+            expect(violationReport.hasViolations()).to.equal(true);
+            expect(violationReport.violations).to.have.length(1);
+
+            const violation = violationReport.violations[0];
+            expect(violation).to.not.be.null;
+            expect(violation.key).to.equal("statusCode");
+            expect(violation.expected).to.equal(200);
+            expect(violation.actual).to.equal(404);
         })
     });
 });
