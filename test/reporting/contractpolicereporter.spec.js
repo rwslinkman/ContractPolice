@@ -8,7 +8,7 @@ let expect = chai.expect;
 const TestReporter = rewire("../../src/reporting/contractpolicereporter.js");
 const TestOutcome = require("../../src/testoutcome");
 
-describe("TestReporter", () => {
+describe("ContractPoliceReporter", () => {
     function mockFileSystem(outputDirExists, writeFileError) {
         const fsMock = {
             existsSync: function (dir) {

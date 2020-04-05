@@ -1,12 +1,11 @@
 const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
-const chaiSpies = require('chai-spies');
 const rewire = require("rewire");
+const sinon = require("sinon");
 
 chai.use(chaiAsPromised);
-chai.use(chaiSpies);
 const expect = chai.expect;
-const spy = chai.spy;
+const stub = sinon.stub;
 
 const TestOutcome = require("../src/testoutcome.js");
 const ContractPoliceReporter = require("../src/reporting/contractpolicereporter.js");
@@ -15,13 +14,6 @@ const JUnitReporter = require("../src/reporting/junitreporter.js");
 const ContractPolice = rewire("../index.js");
 
 describe("ContractPolice", () => {
-    function reporterMock() { // constructor returns object with functions
-        return {
-            writeTestReport: function() {
-                return Promise.resolve();
-            }
-        }
-    }
 
     it("should accept a directory parameter and a endpoint parameter", () => {
         const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
@@ -105,8 +97,18 @@ describe("ContractPolice", () => {
                 }
             }
         };
-        let cpReporter = spy(reporterMock);
-        let junitReporter = spy(reporterMock);
+        const cprStub = stub().returns(Promise.resolve());
+        const cpReporter = function() {
+            return {
+                writeTestReport: cprStub
+            }
+        };
+        const junitStub = stub().returns(Promise.resolve());
+        const junitReporter = function() {
+            return {
+                writeTestReport: junitStub
+            }
+        };
         // Injection
         ContractPolice.__set__({
             "ContractParser": parserMock,
@@ -120,10 +122,8 @@ describe("ContractPolice", () => {
         return expect(contractPolice.testContracts())
             .to.eventually.be.fulfilled
             .then(function () {
-                expect(cpReporter).to.be.spy;
-                expect(cpReporter).to.have.been.called();
-                expect(junitReporter).to.be.spy;
-                expect(junitReporter).to.not.have.been.called();
+                expect(cprStub.called).to.equal(true);
+                expect(junitStub.called).to.equal(false);
             });
     });
 
@@ -156,8 +156,19 @@ describe("ContractPolice", () => {
                 }
             }
         };
-        let cpReporter = spy(reporterMock);
-        let junitReporter = spy(reporterMock);
+        const cprStub = stub().returns(Promise.resolve());
+        const cpReporter = function() {
+            return {
+                writeTestReport: cprStub
+            }
+        };
+        const junitStub = stub().returns(Promise.resolve());
+        const junitReporter = function() {
+            return {
+                writeTestReport: junitStub
+            }
+        };
+
         // Injection
         ContractPolice.__set__({
             "ContractParser": parserMock,
@@ -174,10 +185,8 @@ describe("ContractPolice", () => {
         return expect(contractPolice.testContracts())
             .to.eventually.be.fulfilled
             .then(function () {
-                expect(cpReporter).to.be.spy;
-                expect(cpReporter).to.not.have.been.called();
-                expect(junitReporter).to.be.spy;
-                expect(junitReporter).to.have.been.called();
+                expect(cprStub.called).to.equal(false);
+                expect(junitStub.called).to.equal(true);
         });
     });
 
@@ -210,8 +219,18 @@ describe("ContractPolice", () => {
                 }
             }
         };
-        let cpReporter = spy(reporterMock);
-        let junitReporter = spy(reporterMock);
+        const cprStub = stub().returns(Promise.resolve());
+        const cpReporter = function() {
+            return {
+                writeTestReport: cprStub
+            }
+        };
+        const junitStub = stub().returns(Promise.resolve());
+        const junitReporter = function() {
+            return {
+                writeTestReport: junitStub
+            }
+        };
         // Injection
         ContractPolice.__set__({
             "ContractParser": parserMock,
@@ -226,10 +245,8 @@ describe("ContractPolice", () => {
         return expect(contractPolice.testContracts())
             .to.eventually.be.rejectedWith("ContractPolice contract test execution has completed with violations!")
             .then(function () {
-                expect(cpReporter).to.be.spy;
-                expect(cpReporter).to.have.been.called();
-                expect(junitReporter).to.be.spy;
-                expect(junitReporter).to.not.have.been.called();
+                expect(cprStub.called).to.equal(true);
+                expect(junitStub.called).to.equal(false);
             });
     });
 });

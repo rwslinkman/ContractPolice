@@ -38,6 +38,7 @@ ContractPolice.prototype.testContracts = function() {
     const validationRules = this.config.customValidationRules;
     const failOnError = this.config.failOnError;
     const reportOutputDir = this.config.reportOutputDir;
+    const reporterType = this.config.reporter;
 
     let contractParser = new ContractParser();
     return contractParser
@@ -74,7 +75,11 @@ ContractPolice.prototype.testContracts = function() {
         })
         .then(function(testResults) {
             // Process test results
-            let reporter = new ContractPoliceReporter(process.cwd(), reportOutputDir);
+            const baseDir = process.cwd();
+            let reporter = new ContractPoliceReporter(baseDir, reportOutputDir);
+            if(reporterType === "junit") {
+                reporter = new JUnitReporter(baseDir, reportOutputDir);
+            }
             return reporter
                 .writeTestReport(testResults)
                 .then(function() {
