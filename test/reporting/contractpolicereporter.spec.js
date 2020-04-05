@@ -5,7 +5,7 @@ const rewire = require("rewire");
 chai.use(chaiAsPromised);
 let expect = chai.expect;
 
-const TestReporter = rewire("../../src/reporting/reporter.js");
+const TestReporter = rewire("../../src/reporting/contractpolicereporter.js");
 const TestOutcome = require("../../src/testoutcome");
 
 describe("TestReporter", () => {

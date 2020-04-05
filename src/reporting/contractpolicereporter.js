@@ -20,12 +20,12 @@ function writeTxtFile(outputDirectory, timestamp, testResults) {
     });
 }
 
-function TestReporter(baseDir, outputDir) {
+function ContractPoliceReporter(baseDir, outputDir) {
     this.baseDir = baseDir;
     this.outputDir = outputDir;
 }
 
-TestReporter.prototype.writeTestReport = function(testResults) {
+ContractPoliceReporter.prototype.writeTestReport = function(testResults) {
     const timestamp = new Date().getTime();
     const outputDir = this.baseDir + "/" + this.outputDir;
 
@@ -36,4 +36,4 @@ TestReporter.prototype.writeTestReport = function(testResults) {
     return writeTxtFile(outputDir, timestamp, testResults);
 };
 
-module.exports = TestReporter;
+module.exports = ContractPoliceReporter;

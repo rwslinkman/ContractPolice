@@ -1,13 +1,15 @@
 const ContractParser = require("./src/contractparser.js");
 const TestRunner = require("./src/testrunner.js");
 const ContractValidator = require("./src/validation/validator.js");
-const TestReporter = require("./src/reporting/reporter.js");
+const ContractPoliceReporter = require("./src/reporting/contractpolicereporter.js");
+const JUnitReporter = require("./src/reporting/junitreporter.js");
 
 const defaultConfig = {
     excludes: [],
     customValidationRules: [],
     failOnError: true,
-    reportOutputDir: "build"
+    reportOutputDir: "build",
+    reporter: "default"
 };
 
 function ContractPolice(contractsDirectory, endpoint, config = {}) {
@@ -23,7 +25,12 @@ function ContractPolice(contractsDirectory, endpoint, config = {}) {
     this.config = {};
     this.config['customValidationRules']    = config.customValidationRules || defaultConfig.customValidationRules;
     this.config['failOnError']              = config.failOnError || defaultConfig.failOnError;
+    this.config['reporter']                 = config.reporter || defaultConfig.reporter;
     this.config['reportOutputDir']          = config.reportOutputDir || defaultConfig.reportOutputDir;
+
+    if(!["default", "junit"].includes(this.config.reporter)) {
+        this.config.reporter = "default"
+    }
 }
 
 ContractPolice.prototype.testContracts = function() {
@@ -67,7 +74,7 @@ ContractPolice.prototype.testContracts = function() {
         })
         .then(function(testResults) {
             // Process test results
-            let reporter = new TestReporter(process.cwd(), reportOutputDir);
+            let reporter = new ContractPoliceReporter(process.cwd(), reportOutputDir);
             return reporter
                 .writeTestReport(testResults)
                 .then(function() {
