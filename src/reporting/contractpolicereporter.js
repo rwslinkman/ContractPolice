@@ -32,7 +32,6 @@ ContractPoliceReporter.prototype.writeTestReport = function(testResults) {
     if(!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir);
     }
-    // TODO: Improve with more output options
     return writeTxtFile(outputDir, timestamp, testResults);
 };
 
