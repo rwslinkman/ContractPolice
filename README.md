@@ -37,8 +37,30 @@ contractPolice
     });
 ```
 
+### Reporting
+ContractPolice is a tool that keeps CI pipelines close to the heart.   
+By default, it generates a `*.txt` file that reports on the APIs contract state.   
+
+For CI systems that understand JUnit (or xUnit) reporting, these reports can also be created.   
+In order to generate JUnit based reports instead of ContractPolice's default, add it to the configuration.   
+Additionally, the path can be set for the output file to be placed.   
+This will help in relocating the file for result analysis by your CI system.   
+
+```javascript
+const contractPoliceConfig = {
+    reporter: "junit",
+    reportOutputDir: "relative/path/to/outputdir"
+}
+```
+
 ### Configuration
-TODO: Table here
+ContractPolice allows for a (minimal) set of properties to be configured to your desire.   
+
+| Option            | Explanation                                                                             | Default value |
+|-------------------|-----------------------------------------------------------------------------------------|---------------|
+| `failOnError`     | Determines the signal given to the CLI after ContractPolice detects contract violations | `true`        |
+| `reporter`        | Defines which reporter should be used by ContractPolice.                                | `default`     |
+| `reportOutputDir` | Allows to set a location for the reports to be placed                                   | `build`       |
 
 ## Contract Definitions
 ContractPolice uses YAML files that define the contracts you have with a web service.   
@@ -152,7 +174,8 @@ Implementation example for using ContractPolice can be found below:
 let ContractPolice = require("contractpolice");
 
 let config = {
-    reportOutputDir: "relative/path/to/outputdir"
+    reportOutputDir: "relative/path/to/outputdir",
+    reporter: "junit"
 };
 let contractPolice = new ContractPolice("relative/path/to/contracts", "http://localhost:3000", config);
 
