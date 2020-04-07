@@ -22,17 +22,22 @@ describe("JUnitReporter", () => {
         };
     }
 
-    it('should write a JUnit report to file when given a test report with two items and output directory exists', () => {
-        const writeStub = sinon.stub();
-        const fsMock = mockFileSystem(true);
-
+    function injectMocks(writeStub, fsMock) {
         JUnitReporter.__set__({
             "junitBuilder": {
                 writeTo: writeStub,
-                testSuite: function() { return junit._factory.newTestSuite() }
+                testSuite: function () {
+                    return junit._factory.newTestSuite()
+                }
             },
             "fs": fsMock
         });
+    }
+
+    it('should write a JUnit report to file when given a test report with two items and output directory exists', () => {
+        const writeStub = sinon.stub();
+        const fsMock = mockFileSystem(true);
+        injectMocks(writeStub, fsMock);
 
         const reporter = new JUnitReporter("/some/baseDir", "outputDir");
         let testResults = [
@@ -47,15 +52,62 @@ describe("JUnitReporter", () => {
         });
     });
 
-    // it('should write a JUnit report to file when given a test report with zero items and output directory exists', () => {
-    //     // TODO
-    // });
-    //
-    // it('should write a JUnit report to file when given no test reports and output directory exists', () => {
-    //     // TODO
-    // });
-    //
-    // it('should write a JUnit report to file when given no reports and output directory does not exist', () => {
-    //     // TODO
-    // });
+    it('should write a JUnit report to file when given a test report with zero items and output directory exists', () => {
+        const writeStub = sinon.stub();
+        const fsMock = mockFileSystem(true);
+        injectMocks(writeStub, fsMock);
+
+        const reporter = new JUnitReporter("/some/baseDir", "outputDir");
+        let testResults = [
+            new TestOutcome("test1", [], "PASS")
+        ];
+
+        return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled.then(function() {
+            expect(writeStub.called).to.equal(true);
+        });
+    });
+
+    it('should write a JUnit report to file when given no test reports and output directory exists', () => {
+        const writeStub = sinon.stub();
+        const fsMock = mockFileSystem(true);
+        injectMocks(writeStub, fsMock);
+
+        const reporter = new JUnitReporter("/some/baseDir", "outputDir");
+        let testResults = [];
+
+        return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled.then(function() {
+            expect(writeStub.called).to.equal(true);
+        });
+    });
+
+    it('should write a JUnit report to file when given no reports and output directory does not exist', () => {
+        const writeStub = sinon.stub();
+        const fsMock = mockFileSystem(false);
+        injectMocks(writeStub, fsMock);
+
+        const reporter = new JUnitReporter("/some/baseDir", "outputDir");
+        let testResults = [];
+
+        return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled.then(function() {
+            expect(writeStub.called).to.equal(true);
+        });
+    });
+
+    it('should write a JUnit report to file when given failing test reports and output directory does not exist', () => {
+        const writeStub = sinon.stub();
+        const fsMock = mockFileSystem(true);
+        injectMocks(writeStub, fsMock);
+
+        const reporter = new JUnitReporter("/some/baseDir", "outputDir");
+        let testResults = [
+            new TestOutcome("test1", [
+                "Test one passed",
+                "Test two passed",
+            ], "FAIL")
+        ];
+
+        return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled.then(function() {
+            expect(writeStub.called).to.equal(true);
+        });
+    });
 });
