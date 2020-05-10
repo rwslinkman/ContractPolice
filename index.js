@@ -3,12 +3,13 @@ const TestRunner = require("./src/testrunner.js");
 const ContractValidator = require("./src/validation/validator.js");
 const ContractPoliceReporter = require("./src/reporting/contractpolicereporter.js");
 const JUnitReporter = require("./src/reporting/junitreporter.js");
+const fs = require('fs');
 
 const defaultConfig = {
     excludes: [],
     customValidationRules: [],
     failOnError: true,
-    reportOutputDir: "build",
+    reportOutputDir: "/contractpolice/build",
     reporter: "default"
 };
 
@@ -75,13 +76,17 @@ ContractPolice.prototype.testContracts = function() {
         })
         .then(function(testResults) {
             // Process test results
-            const baseDir = process.cwd();
-            let reporter = new ContractPoliceReporter(baseDir, reportOutputDir);
+            const timestamp = new Date().getTime();
+            let reporter = new ContractPoliceReporter(reportOutputDir);
             if(reporterType === "junit") {
-                reporter = new JUnitReporter(baseDir, reportOutputDir);
+                reporter = new JUnitReporter(reportOutputDir);
+            }
+            // Ensure output dir exists
+            if(!fs.existsSync(reportOutputDir)) {
+                fs.mkdirSync(reportOutputDir);
             }
             return reporter
-                .writeTestReport(testResults)
+                .writeTestReport(testResults, timestamp)
                 .then(function() {
                     // Finish execution
                     let testOutcomes = testResults.map(it => it.result);

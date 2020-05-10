@@ -1,4 +1,5 @@
 contracts
+run-ci.js
 run-cli.js
 .idea
 report

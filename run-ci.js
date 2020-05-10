@@ -3,12 +3,14 @@ let ContractPolice = require("./index.js");
 // Define used variables used by ContractPolice, injected by Docker
 const targetUrl = process.env.CP_TARGET;
 const contractsDirectory = "/contractpolice/ci-contracts";
-const configFailOnError = (process.env.CP_FAIL_ON_ERROR !== 'false');
+const outputsDirectory = "/contractpolice/outputs";
+const configFailOnError = (process.env.CP_FAIL_ON_ERROR !== "false");
 const configReporter = (process.env.CP_REPORTER === "junit") ? "junit" : "default";
+const configAppLogs = (process.env.CP_REPORT_LOGS_ENABLED === "true") // TODO Report logs of ContractPolice
 
 // Gather injected config into single object
 let config = {
-    reportOutputDir: "outputs", // TODO: This should be absolute like the other parameters
+    reportOutputDir: outputsDirectory,
     failOnError: configFailOnError,
     reporter: configReporter
 };

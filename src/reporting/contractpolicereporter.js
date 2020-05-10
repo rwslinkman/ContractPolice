@@ -20,19 +20,12 @@ function writeTxtFile(outputDirectory, timestamp, testResults) {
     });
 }
 
-function ContractPoliceReporter(baseDir, outputDir) {
-    this.baseDir = baseDir;
+function ContractPoliceReporter(outputDir) {
     this.outputDir = outputDir;
 }
 
-ContractPoliceReporter.prototype.writeTestReport = function(testResults) {
-    const timestamp = new Date().getTime();
-    const outputDir = this.baseDir + "/" + this.outputDir;
-
-    if(!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir);
-    }
-    return writeTxtFile(outputDir, timestamp, testResults);
+ContractPoliceReporter.prototype.writeTestReport = function(testResults, timestamp) {
+    return writeTxtFile(this.outputDir, timestamp, testResults);
 };
 
 module.exports = ContractPoliceReporter;
