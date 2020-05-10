@@ -9,9 +9,9 @@ console.log("Start contract test(s) with ContractPolice");
 contractPolice.testContracts()
     .then(function() {
         console.log("ContractPolice successfully finished executing contract tests");
+        process.exitCode = 0; // success
     })
     .catch(function(err) {
-        // TODO: Verify if this is the correct way to crash (if yes, move to ContractPolice)
         console.error(err);
-        return process.exit(1);
+        process.exitCode = 1; // failure
     });

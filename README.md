@@ -16,7 +16,33 @@ When running ContractPolice on a regular basis, you can make sure to work with v
 ContractPolice takes a `Contract` defined in YAML and tests a given endpoint.   
 For more details on the defining a contract, see `Contract Definitions`
 
+### Docker 
+An easy to use Docker image is available on [Docker Hub](https://hub.docker.com/r/rwslinkman/contractpolice).   
+The container takes several parameters to execute contract tests from your Docker image.   
+It will automatically stop after the contract tests have been executed.        
+
+```shell script
+docker run \
+  -e CP_TARGET=http://testing-target.com/api \
+  -e CP_REPORTER=junit \
+  -v $(pwd)/contracts:/contractpolice/ci-contracts \
+  -v $(pwd)/build:/contractpolice/outputs \
+  rwslinkman/contractpolice:0.5.0
+```
+
+Define a place to store your contract YAML files and map it to `/contractpolice/ci-contracts`.   
+The ContractPolice container will use it to load `Contract Definitions` from.   
+Another volume can be defined to allow ContractPolice to store the results in.   
+Please map this to the `/contractpolice/outputs` directory, where the test reports are stored internally.   
+
+To integrate this in your CI system, you can observe the exit code of the container.   
+Most CI systems will automatically do this when you execute the `docker` command there.      
+ContractPolice will set the exit status to `0` for success; `1` means a test has failed or an error occurred.   
+This can be overriden using the `CP_FAIL_ON_ERROR` environment variable.   
+Pass `-e CP_FAIL_ON_ERROR=false` in the `docker` command to do so.
+
 ### Installation
+You could also integrate ContractPolice manually to fit the needs of your project.   
 Create a basic NodeJS project and include ContractPolice to the dependency list.   
 ```bash
 npm install contractpolice --save
@@ -184,9 +210,10 @@ contractPolice
     .testContracts()
     .then(function() {
         console.log("ContractPolice successfully finished executing contract tests");
+        process.exitCode = 0; // success
     })
     .catch(function(err) {
         console.error(err);
-        return process.exit(1);
+        process.exitCode = 1; // failure
     });
 ```

@@ -1,0 +1,11 @@
+build/
+contracts/
+docker/
+node_modules/
+report/
+test/
+LICENSE
+buildimage.sh
+envfile.list
+run-cli.js
+runcontainer.sh

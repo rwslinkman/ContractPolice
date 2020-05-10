@@ -104,3 +104,7 @@ dist
 .tern-port
 .idea
 report
+build
+buildimage.sh
+envfile.list
+runcontainer.sh
