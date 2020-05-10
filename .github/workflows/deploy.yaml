@@ -23,18 +23,18 @@ jobs:
         env: # More info about the environment variables in the README
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this as is, it's automatically generated
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }} # You need to set this in your repo settings
-    # Deploy to
-    dockerhub-deploy:
-      name: Deploy to Docker Hub
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-          name: Checkout
-        - name: Docker Build & Push to Docker Hub
-          uses: mr-smithers-excellent/docker-build-push@v3.1
-          with:
-            image: rwslinkman/contractpolice
-            registry: docker.io
-            dockerfile: docker/Dockerfile
-            username: ${{ secrets.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_PASSWORD }}
+  # Deploy to
+  dockerhub-deploy:
+    name: Deploy to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout
+      - name: Docker Build & Push to Docker Hub
+        uses: mr-smithers-excellent/docker-build-push@v3.1
+        with:
+          image: rwslinkman/contractpolice
+          registry: docker.io
+          dockerfile: docker/Dockerfile
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
