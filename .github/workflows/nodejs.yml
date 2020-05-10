@@ -4,7 +4,7 @@ name: ContactPolice build pipeline
 on:
   push:
     branches:
-      - *
+      - '*'
   pull_request:
     branches: [ master ]
 jobs:
