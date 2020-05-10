@@ -6,7 +6,7 @@ on:
 jobs:
   # Publish to NPM Package registry
   publish-npm:
-    needs: build
+    name: Deploy node package to NPM
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -20,7 +20,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
   # Deploy to Docker Hub
   dockerhub-deploy:
-    name: Deploy to Docker Hub
+    name: Deploy image to Docker Hub
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
