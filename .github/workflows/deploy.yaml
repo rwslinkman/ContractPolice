@@ -1,6 +1,8 @@
 name: ContractPolice public deployment
 on:
   push:
+    branches:
+      - master
     tags:
       - v*
 jobs:
