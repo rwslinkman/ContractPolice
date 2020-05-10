@@ -27,7 +27,7 @@ docker run \
   -e CP_REPORTER=junit \
   -v $(pwd)/contracts:/contractpolice/ci-contracts \
   -v $(pwd)/build:/contractpolice/outputs \
-  rwslinkman/contractpolice:v0.5.5
+  rwslinkman/contractpolice:v0.5.10
 ```
 
 Define a place to store your contract YAML files and map it to `/contractpolice/ci-contracts`.   
