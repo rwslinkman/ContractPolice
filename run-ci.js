@@ -1,9 +1,14 @@
 let ContractPolice = require("./index.js");
 
+const env = process.env;
+console.log(env);
+// TODO: Get config from ENV
+const contractsDirectory = "/contractpolice/ci-contracts";
+const targetUrl = process.env.CP_TARGET;
 let config = {
-    reportOutputDir: "report"
+    reportOutputDir: "outputs"
 };
-let contractPolice = new ContractPolice("contracts", "http://localhost:3000", config);
+let contractPolice = new ContractPolice(contractsDirectory, targetUrl, config);
 
 console.log("Start contract test(s) with ContractPolice");
 contractPolice.testContracts()
