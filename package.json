@@ -7,7 +7,7 @@
     "api",
     "rest"
   ],
-  "version": "0.5.0",
+  "version": "0.5.1",
   "main": "index.js",
   "scripts": {
     "test": "nyc --reporter=html --reporter=text mocha --recursive"
