@@ -1,0 +1,20 @@
+name: ContractPolice Docker Hub push
+on:
+  push:
+    tags:
+      - v*
+jobs:
+  dockerhub-deploy:
+    name: Deploy to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout
+      - name: Docker Build & Push to Docker Hub
+        uses: mr-smithers-excellent/docker-build-push@v3.1
+        with:
+          image: rwslinkman/contractpolice
+          registry: docker.io
+          dockerfile: docker/Dockerfile
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
