@@ -23,7 +23,8 @@ function isExist(arg) {
     }
 }
 
-function ContractParser() {
+function ContractParser(logger) {
+    this.logger = logger;
 }
 
 ContractParser.prototype.findContractFiles = function (directory) {

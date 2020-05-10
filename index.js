@@ -4,13 +4,16 @@ const ContractValidator = require("./src/validation/validator.js");
 const ContractPoliceReporter = require("./src/reporting/contractpolicereporter.js");
 const JUnitReporter = require("./src/reporting/junitreporter.js");
 const fs = require('fs');
+const Logging = require("./src/logging/logging.js");
 
+const LOG_TAG = "ContractPolice"
 const defaultConfig = {
     excludes: [],
     customValidationRules: [],
     failOnError: true,
     reportOutputDir: "/contractpolice/build",
-    reporter: "default"
+    reporter: "default",
+    enableAppLogs: false
 };
 
 function ContractPolice(contractsDirectory, endpoint, config = {}) {
@@ -28,6 +31,7 @@ function ContractPolice(contractsDirectory, endpoint, config = {}) {
     this.config['failOnError']              = config.failOnError || defaultConfig.failOnError;
     this.config['reporter']                 = config.reporter || defaultConfig.reporter;
     this.config['reportOutputDir']          = config.reportOutputDir || defaultConfig.reportOutputDir;
+    this.config['enableAppLogs']            = config.enableAppLogs || defaultConfig.enableAppLogs;
 
     if(!["default", "junit"].includes(this.config.reporter)) {
         this.config.reporter = "default"
@@ -40,8 +44,9 @@ ContractPolice.prototype.testContracts = function() {
     const failOnError = this.config.failOnError;
     const reportOutputDir = this.config.reportOutputDir;
     const reporterType = this.config.reporter;
+    const logger = new Logging(this.config.enableAppLogs);
 
-    let contractParser = new ContractParser();
+    let contractParser = new ContractParser(logger);
     return contractParser
         .findContractFiles(this.contractsDirectory)
         .then(function(filesArray){
@@ -63,8 +68,8 @@ ContractPolice.prototype.testContracts = function() {
             let tests = [];
             contracts.forEach(function(contractMeta) {
                 let contract = contractMeta.data;
-                let validator = new ContractValidator(contract.response, validationRules);
-                let runner = new TestRunner(contractMeta.name, contract.request, endpoint, validator);
+                let validator = new ContractValidator(logger, contract.response, validationRules);
+                let runner = new TestRunner(logger, contractMeta.name, contract.request, endpoint, validator);
                 tests.push(runner);
             });
             return tests;
@@ -75,8 +80,7 @@ ContractPolice.prototype.testContracts = function() {
             return Promise.all(testRuns);
         })
         .then(function(testResults) {
-            // Process test results
-            const timestamp = new Date().getTime();
+            // Prepare reporter
             let reporter = new ContractPoliceReporter(reportOutputDir);
             if(reporterType === "junit") {
                 reporter = new JUnitReporter(reportOutputDir);
@@ -85,15 +89,32 @@ ContractPolice.prototype.testContracts = function() {
             if(!fs.existsSync(reportOutputDir)) {
                 fs.mkdirSync(reportOutputDir);
             }
-            return reporter
-                .writeTestReport(testResults, timestamp)
+            // Collect execution report and pass on
+            return {
+                testReporter: reporter,
+                timestamp: new Date().getTime(),
+                results: testResults,
+                runSuccess: !(testResults.map(it => it.result).includes("FAIL"))
+            }
+        })
+        .then(function(executionReport) {
+            // Write test report & application logs
+            return executionReport.testReporter
+                .writeTestReport(executionReport.results, executionReport.timestamp)
                 .then(function() {
-                    // Finish execution
-                    let testOutcomes = testResults.map(it => it.result);
-                    if(testOutcomes.includes("FAIL") && failOnError) {
-                        throw "ContractPolice contract test execution has completed with violations!"
-                    }
-                });
+                    logger.log(LOG_TAG, "INFO", "Contract test written to file")
+                    return executionReport;
+                })
+        })
+        .then(function(executionReport) {
+            // Finish execution
+            const logEnd = executionReport.runSuccess ? "successfully!" : "with violations and/or errors!"
+            logger.log(LOG_TAG, "INFO", "ContractPolice finished contract testing " + logEnd)
+            logger.writeLogs(reportOutputDir)
+            // Throw error on failure to influence process exit code
+            if(!executionReport.runSuccess && failOnError) {
+                throw "ContractPolice contract test execution has completed with violations!"
+            }
         });
 };
 

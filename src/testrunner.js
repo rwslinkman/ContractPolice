@@ -2,7 +2,8 @@ const needle = require("needle");
 const TestOutcome = require("./testoutcome.js");
 const helper = require("./helper-functions.js");
 
-function TestRunner(name, contractRequest, endpoint, validator) {
+function TestRunner(logger, name, contractRequest, endpoint, validator) {
+    this.logger = logger;
     this.testName = name;
     this.contractRequest = contractRequest;
     this.endpoint = endpoint;

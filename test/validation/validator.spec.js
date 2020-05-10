@@ -1,6 +1,7 @@
 const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
 const rewire = require("rewire");
+const Logging = require("../../src/logging/logging.js");
 
 chai.use(chaiAsPromised);
 let expect = chai.expect;
@@ -8,6 +9,8 @@ let expect = chai.expect;
 const ContractValidator = require("../../src/validation/validator.js");
 
 describe("ContractValidator", () => {
+    const testLogger = new Logging(false);
+
     it("should return an empty violation report when given two equal minimal responses", () => {
         const contractResponse = {
             statusCode: 200
@@ -15,7 +18,7 @@ describe("ContractValidator", () => {
         const serverResponse = {
             statusCode: 200
         };
-        const validator = new ContractValidator(contractResponse);
+        const validator = new ContractValidator(testLogger, contractResponse);
 
         const result = validator.validate(serverResponse);
 
@@ -40,7 +43,7 @@ describe("ContractValidator", () => {
                 someKey: "someValue"
             }
         };
-        const validator = new ContractValidator(contractResponse);
+        const validator = new ContractValidator(testLogger, contractResponse);
 
         const result = validator.validate(serverResponse);
 
@@ -73,7 +76,7 @@ describe("ContractValidator", () => {
                 "Accept": "application/json"
             }
         };
-        const validator = new ContractValidator(contractResponse);
+        const validator = new ContractValidator(testLogger, contractResponse);
 
         const result = validator.validate(serverResponse);
 
@@ -92,7 +95,7 @@ describe("ContractValidator", () => {
         const serverResponse = {
             statusCode: 404
         };
-        const validator = new ContractValidator(contractResponse);
+        const validator = new ContractValidator(testLogger, contractResponse);
 
         const result = validator.validate(serverResponse);
 
@@ -121,7 +124,7 @@ describe("ContractValidator", () => {
             statusCode: 200,
             body: "stringBodyType"
         };
-        const validator = new ContractValidator(contractResponse);
+        const validator = new ContractValidator(testLogger, contractResponse);
 
         const result = validator.validate(serverResponse);
 

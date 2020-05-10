@@ -6,13 +6,14 @@ const contractsDirectory = "/contractpolice/ci-contracts";
 const outputsDirectory = "/contractpolice/outputs";
 const configFailOnError = (process.env.CP_FAIL_ON_ERROR !== "false");
 const configReporter = (process.env.CP_REPORTER === "junit") ? "junit" : "default";
-const configAppLogs = (process.env.CP_REPORT_LOGS_ENABLED === "true") // TODO Report logs of ContractPolice
+const configAppLogs = (process.env.CP_REPORT_LOGS_ENABLED === "true");
 
 // Gather injected config into single object
 let config = {
     reportOutputDir: outputsDirectory,
     failOnError: configFailOnError,
-    reporter: configReporter
+    reporter: configReporter,
+    enableAppLogs: configAppLogs
 };
 
 let contractPolice = new ContractPolice(contractsDirectory, targetUrl, config);

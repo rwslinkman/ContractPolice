@@ -48,7 +48,7 @@ function validateHeaders(expectedResponse, actualResponse) {
     return violations;
 }
 
-function ContractValidator(contractResponse, validationRules = []) {
+function ContractValidator(logger, contractResponse, validationRules = []) {
     let defaultRules = [
         // TODO: Create more violation checks
         validateStatusCode,
@@ -58,6 +58,7 @@ function ContractValidator(contractResponse, validationRules = []) {
     ];
     this.expectedResponse = contractResponse;
     this.validationRules = defaultRules.concat(validationRules);
+    this.logger = logger;
 }
 
 ContractValidator.prototype.validate = async function(serverResponse) {

@@ -2,7 +2,8 @@ let ContractPolice = require("./index.js");
 
 let config = {
     reportOutputDir: "report",
-    reporter: "junit"
+    // reporter: "junit",
+    enableAppLogs: true
 };
 let contractPolice = new ContractPolice("contracts", "http://localhost:3000", config);
 

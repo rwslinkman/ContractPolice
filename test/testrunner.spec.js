@@ -1,6 +1,7 @@
 const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
 const rewire = require("rewire");
+const Logging = require("../src/logging/logging.js");
 
 chai.use(chaiAsPromised);
 let expect = chai.expect;
@@ -11,6 +12,7 @@ const needle = rewire("needle");
 const TestRunner = rewire("../src/testrunner.js");
 
 describe("TestRunner", () => {
+    const testLogger = new Logging(false);
     function mockValidator(violations = []) {
         return {
             validate: function () {
@@ -38,7 +40,7 @@ describe("TestRunner", () => {
         const httpSuccess = true;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
@@ -55,7 +57,7 @@ describe("TestRunner", () => {
         const httpSuccess = true;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
@@ -72,7 +74,7 @@ describe("TestRunner", () => {
         const httpSuccess = true;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
@@ -89,7 +91,7 @@ describe("TestRunner", () => {
         const httpSuccess = true;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
@@ -106,7 +108,7 @@ describe("TestRunner", () => {
         const httpSuccess = true;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
@@ -125,7 +127,7 @@ describe("TestRunner", () => {
         const httpSuccess = true;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
@@ -141,7 +143,7 @@ describe("TestRunner", () => {
         const httpSuccess = false;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
@@ -162,7 +164,7 @@ describe("TestRunner", () => {
         const httpSuccess = true;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
