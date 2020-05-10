@@ -11,35 +11,22 @@ const JUnitReporter = rewire("../../src/reporting/junitreporter.js");
 const TestOutcome = require("../../src/testoutcome");
 
 describe("JUnitReporter", () => {
-    function mockFileSystem(outputDirExists) {
-        return {
-            existsSync: function (dir) {
-                return outputDirExists;
-            },
-            mkdirSync: function(dir) {
-                // nop
-            }
-        };
-    }
-
-    function injectMocks(writeStub, fsMock) {
+    function injectMocks(writeStub) {
         JUnitReporter.__set__({
             "junitBuilder": {
                 writeTo: writeStub,
                 testSuite: function () {
                     return junit._factory.newTestSuite()
                 }
-            },
-            "fs": fsMock
+            }
         });
     }
 
-    it('should write a JUnit report to file when given a test report with two items and output directory exists', () => {
+    it('should write a JUnit report to file when given a test report with two items', () => {
         const writeStub = sinon.stub();
-        const fsMock = mockFileSystem(true);
-        injectMocks(writeStub, fsMock);
+        injectMocks(writeStub);
 
-        const reporter = new JUnitReporter("/some/baseDir", "outputDir");
+        const reporter = new JUnitReporter("/some/outputDir");
         let testResults = [
             new TestOutcome("test1", [
                 "Test one passed",
@@ -52,12 +39,11 @@ describe("JUnitReporter", () => {
         });
     });
 
-    it('should write a JUnit report to file when given a test report with zero items and output directory exists', () => {
+    it('should write a JUnit report to file when given a test report with zero items', () => {
         const writeStub = sinon.stub();
-        const fsMock = mockFileSystem(true);
-        injectMocks(writeStub, fsMock);
+        injectMocks(writeStub);
 
-        const reporter = new JUnitReporter("/some/baseDir", "outputDir");
+        const reporter = new JUnitReporter("/some/outputDir");
         let testResults = [
             new TestOutcome("test1", [], "PASS")
         ];
@@ -67,12 +53,11 @@ describe("JUnitReporter", () => {
         });
     });
 
-    it('should write a JUnit report to file when given no test reports and output directory exists', () => {
+    it('should write a JUnit report to file when given no test reports', () => {
         const writeStub = sinon.stub();
-        const fsMock = mockFileSystem(true);
-        injectMocks(writeStub, fsMock);
+        injectMocks(writeStub);
 
-        const reporter = new JUnitReporter("/some/baseDir", "outputDir");
+        const reporter = new JUnitReporter("/some/outputDir");
         let testResults = [];
 
         return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled.then(function() {
@@ -80,12 +65,11 @@ describe("JUnitReporter", () => {
         });
     });
 
-    it('should write a JUnit report to file when given no reports and output directory does not exist', () => {
+    it('should write a JUnit report to file when given no reports', () => {
         const writeStub = sinon.stub();
-        const fsMock = mockFileSystem(false);
-        injectMocks(writeStub, fsMock);
+        injectMocks(writeStub);
 
-        const reporter = new JUnitReporter("/some/baseDir", "outputDir");
+        const reporter = new JUnitReporter("/some/outputDir");
         let testResults = [];
 
         return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled.then(function() {
@@ -93,10 +77,9 @@ describe("JUnitReporter", () => {
         });
     });
 
-    it('should write a JUnit report to file when given failing test reports and output directory does not exist', () => {
+    it('should write a JUnit report to file when given failing test reports', () => {
         const writeStub = sinon.stub();
-        const fsMock = mockFileSystem(true);
-        injectMocks(writeStub, fsMock);
+        injectMocks(writeStub);
 
         const reporter = new JUnitReporter("/some/baseDir", "outputDir");
         let testResults = [
