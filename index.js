@@ -8,34 +8,59 @@ const Logging = require("./src/logging/logging.js");
 
 const LOG_TAG = "ContractPolice"
 const defaultConfig = {
-    excludes: [],
     customValidationRules: [],
     failOnError: true,
     reportOutputDir: "/contractpolice/build",
     reporter: "default",
-    enableAppLogs: false
+    enableAppLogsConsole: false,
+    enableAppLogsFile: false,
+    loglevel: "warn"
 };
 
-function ContractPolice(contractsDirectory, endpoint, config = {}) {
+initializeConfig = function (logger, targetConfig, inputConfig) {
+    targetConfig['customValidationRules']    = inputConfig.customValidationRules || defaultConfig.customValidationRules;
+    targetConfig['failOnError']              = inputConfig.failOnError || defaultConfig.failOnError;
+    targetConfig['reporter']                 = inputConfig.reporter || defaultConfig.reporter;
+    targetConfig['reportOutputDir']          = inputConfig.reportOutputDir || defaultConfig.reportOutputDir;
+    targetConfig['enableAppLogsConsole']     = inputConfig.enableAppLogsConsole || defaultConfig.enableAppLogsConsole;
+    targetConfig['enableAppLogsFile']        = inputConfig.enableAppLogsFile || defaultConfig.enableAppLogsFile;
+    targetConfig['loglevel']                 = inputConfig.loglevel || defaultConfig.loglevel;
+
+    if(!['error', 'warn', 'info', 'debug'].includes(inputConfig.loglevel)) {
+        targetConfig.loglevel = defaultConfig.loglevel;
+        logger.log(LOG_TAG, "warn", `Loglevel '${inputConfig.loglevel}' is not supported. Defaulting to '${defaultConfig.loglevel}' loglevel.`);
+    }
+
+    if(!["default", "junit"].includes(targetConfig.reporter)) {
+        targetConfig.reporter = defaultConfig.reporter;
+        logger.log(LOG_TAG, "warn", `Reporter '${inputConfig.reporter}' is not supported. Defaulting to '${defaultConfig.reporter}' reporter.`);
+    }
+}
+
+function ContractPolice(contractsDirectory, endpoint, userConfig = {}) {
+    let loglevel = userConfig.loglevel || defaultConfig.loglevel;
+    if(!['error', 'warn', 'info', 'debug'].includes(loglevel)) {
+        loglevel = defaultConfig.loglevel;
+    }
+    this.logger = new Logging(
+        loglevel,
+        userConfig.enableAppLogsConsole || defaultConfig.enableAppLogsConsole,
+        userConfig.enableAppLogsFile || defaultConfig.enableAppLogsFile
+    );
+
     if(contractsDirectory === null || contractsDirectory === undefined) {
-        throw Error(`Please provide the directory where contracts are stored`);
+        this.logger.log(LOG_TAG, "error", "Required parameter 'contractsDirectory' not found. Please provide the directory where contracts are stored.");
+        throw Error("Required parameter 'contractsDirectory' not found.");
     }
     if(endpoint === null || endpoint === undefined) {
-        throw Error(`Please provide the endpoint that will be placed under test`);
+        this.logger.log(LOG_TAG, "error", "Required parameter 'endpoint' not found. Please provide the endpoint that will be placed under test.");
+        throw Error(`Required parameter 'endpoint' not found.`);
     }
-
     this.contractsDirectory = contractsDirectory;
     this.endpoint = endpoint;
-    this.config = {};
-    this.config['customValidationRules']    = config.customValidationRules || defaultConfig.customValidationRules;
-    this.config['failOnError']              = config.failOnError || defaultConfig.failOnError;
-    this.config['reporter']                 = config.reporter || defaultConfig.reporter;
-    this.config['reportOutputDir']          = config.reportOutputDir || defaultConfig.reportOutputDir;
-    this.config['enableAppLogs']            = config.enableAppLogs || defaultConfig.enableAppLogs;
 
-    if(!["default", "junit"].includes(this.config.reporter)) {
-        this.config.reporter = "default"
-    }
+    this.config = {};
+    initializeConfig(this.logger, this.config, userConfig);
 }
 
 ContractPolice.prototype.testContracts = function() {
@@ -44,7 +69,9 @@ ContractPolice.prototype.testContracts = function() {
     const failOnError = this.config.failOnError;
     const reportOutputDir = this.config.reportOutputDir;
     const reporterType = this.config.reporter;
-    const logger = new Logging(this.config.enableAppLogs);
+    const logger = this.logger;
+
+    logger.log(LOG_TAG, "info", "Start contract test(s) with ContractPolice");
 
     let contractParser = new ContractParser(logger);
     return contractParser
@@ -102,18 +129,19 @@ ContractPolice.prototype.testContracts = function() {
             return executionReport.testReporter
                 .writeTestReport(executionReport.results, executionReport.timestamp)
                 .then(function() {
-                    logger.log(LOG_TAG, "INFO", "Contract test written to file")
+                    logger.log(LOG_TAG, "info", "Contract test report written to file")
                     return executionReport;
                 })
         })
         .then(function(executionReport) {
             // Finish execution
             const logEnd = executionReport.runSuccess ? "successfully!" : "with violations and/or errors!"
-            logger.log(LOG_TAG, "INFO", "ContractPolice finished contract testing " + logEnd)
+            const message = "ContractPolice finished contract testing " + logEnd;
+            logger.log(LOG_TAG, "info", message)
             logger.writeLogs(reportOutputDir)
             // Throw error on failure to influence process exit code
             if(!executionReport.runSuccess && failOnError) {
-                throw "ContractPolice contract test execution has completed with violations!"
+                throw Error(message)
             }
         });
 };

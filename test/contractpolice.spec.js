@@ -25,6 +25,7 @@ describe("ContractPolice", () => {
         };
     }
 
+    //region Tests to setup and config of ContractPolice
     it("should accept a directory parameter and a endpoint parameter", () => {
         const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
         expect(contractPolice).to.not.be.null;
@@ -35,11 +36,35 @@ describe("ContractPolice", () => {
     });
 
     it("should throw an exception when directory parameter is null", () => {
-        expect(() =>  new ContractPolice(null, "http://someserver.com")).to.throw("Please provide the directory where contracts are stored");
+        expect(() =>  new ContractPolice(null, "http://someserver.com")).to.throw("Required parameter 'contractsDirectory' not found.");
     });
 
     it("should throw an exception when endpoint parameter is null", () => {
-        expect(() => new ContractPolice("some/directory")).to.throw("Please provide the endpoint that will be placed under test");
+        expect(() => new ContractPolice("some/directory")).to.throw("Required parameter 'endpoint' not found.");
+    });
+
+    it("should fallback to defaults when config is not provided", () => {
+        const defaultConfig = {
+            customValidationRules: [],
+            failOnError: true,
+            reportOutputDir: "/contractpolice/build",
+            reporter: "default",
+            enableAppLogsConsole: false,
+            enableAppLogsFile: false,
+            loglevel: "warn"
+        };
+
+        const contractPolice = new ContractPolice("some/directory", "http://someserver.com", {});
+        expect(contractPolice).to.not.be.null;
+        expect(contractPolice.contractsDirectory).to.equal("some/directory");
+        expect(contractPolice.endpoint).to.equal("http://someserver.com");
+        expect(contractPolice.config.customValidationRules).to.deep.equal(defaultConfig.customValidationRules);
+        expect(contractPolice.config.failOnError).to.equal(defaultConfig.failOnError);
+        expect(contractPolice.config.reportOutputDir).to.equal(defaultConfig.reportOutputDir);
+        expect(contractPolice.config.reporter).to.equal(defaultConfig.reporter);
+        expect(contractPolice.config.enableAppLogsConsole).to.equal(false, defaultConfig.enableAppLogsConsole);
+        expect(contractPolice.config.enableAppLogsFile).to.equal(defaultConfig.enableAppLogsFile);
+        expect(contractPolice.config.loglevel).to.equal(defaultConfig.loglevel);
     });
 
     it("should accept the parameters when config.reporter is 'default'", () => {
@@ -78,7 +103,50 @@ describe("ContractPolice", () => {
         expect(contractPolice.config.reportOutputDir).to.equal("/contractpolice/build");
     });
 
+    it("should fallback to default when config.reporter is not supported", () => {
+        const options = {
+            reporter: "somethingElse"
+        };
+        const contractPolice = new ContractPolice("some/directory", "http://someserver.com", options);
+        expect(contractPolice).to.not.be.null;
+        expect(contractPolice.contractsDirectory).to.equal("some/directory");
+        expect(contractPolice.endpoint).to.equal("http://someserver.com");
+        expect(contractPolice.config.reporter).to.equal("default");
+        expect(contractPolice.config.reportOutputDir).to.equal("/contractpolice/build");
+    });
+
+    it("should accept the parameters when config.loglevel is 'error', 'warn', 'info', 'debug'", () => {
+        ['error', 'warn', 'info', 'debug'].forEach(function(supportedLogLevel) {
+            const options = {
+                loglevel: supportedLogLevel
+            };
+            const contractPolice = new ContractPolice("some/directory", "http://someserver.com", options);
+            expect(contractPolice).to.not.be.null;
+            expect(contractPolice.contractsDirectory).to.equal("some/directory");
+            expect(contractPolice.endpoint).to.equal("http://someserver.com");
+            expect(contractPolice.config.reporter).to.equal("default");
+            expect(contractPolice.config.reportOutputDir).to.equal("/contractpolice/build");
+            expect(contractPolice.config.loglevel).to.equal(supportedLogLevel);
+        });
+    });
+
+    it("should fallback to default when config.loglevel is not supported", () => {
+        const options = {
+            loglevel: "appelflap"
+        };
+        const contractPolice = new ContractPolice("some/directory", "http://someserver.com", options);
+        expect(contractPolice).to.not.be.null;
+        expect(contractPolice.contractsDirectory).to.equal("some/directory");
+        expect(contractPolice.endpoint).to.equal("http://someserver.com");
+        expect(contractPolice.config.reporter).to.equal("default");
+        expect(contractPolice.config.reportOutputDir).to.equal("/contractpolice/build");
+        expect(contractPolice.config.loglevel).to.equal("warn");
+    });
+    //endregion
+
+    //region Tests to verify behaviour of ContractPolice
     it('should resolve a successful promise when given valid input, outputDir exists and tests are passing', () => {
+        //region mocks
         let parserMock = function() { // constructor returns object with functions
             return {
                 findContractFiles: function (directory) {
@@ -127,6 +195,7 @@ describe("ContractPolice", () => {
             "JUnitReporter": junitReporter,
             "fs": mockFileSystem(true)
         });
+        //endregion mocks
 
         const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
 
@@ -135,10 +204,11 @@ describe("ContractPolice", () => {
             .then(function () {
                 expect(cprStub.called).to.equal(true);
                 expect(junitStub.called).to.equal(false);
-            });
+            })
     });
 
     it('should resolve a successful promise when given valid input, outputDir does not exist and tests are passing', () => {
+        //region mocks
         let parserMock = function() { // constructor returns object with functions
             return {
                 findContractFiles: function (directory) {
@@ -327,6 +397,7 @@ describe("ContractPolice", () => {
     });
 
     it('should resolve a successful promise when given valid input, outputDir exists and tests are failing', () => {
+        //region mocks
         let parserMock = function() { // constructor returns object with functions
             return {
                 findContractFiles: function (directory) {
@@ -375,11 +446,12 @@ describe("ContractPolice", () => {
             "JUnitReporter": junitReporter,
             "fs": mockFileSystem(true)
         });
+        //endregion mocks
 
         const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
 
         return expect(contractPolice.testContracts())
-            .to.eventually.be.rejectedWith("ContractPolice contract test execution has completed with violations!")
+            .to.eventually.be.rejectedWith("ContractPolice finished contract testing with violations and/or errors!")
             .then(function () {
                 expect(cprStub.called).to.equal(true);
                 expect(junitStub.called).to.equal(false);
@@ -387,6 +459,7 @@ describe("ContractPolice", () => {
     });
 
     it('should resolve a successful promise when given valid input, outputDir does not exist and tests are failing', () => {
+        //region mocks
         let parserMock = function() { // constructor returns object with functions
             return {
                 findContractFiles: function (directory) {
@@ -435,15 +508,16 @@ describe("ContractPolice", () => {
             "JUnitReporter": junitReporter,
             "fs": mockFileSystem(false)
         });
+        //endregion mocks
 
         const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
 
-
         return expect(contractPolice.testContracts())
-            .to.eventually.be.rejectedWith("ContractPolice contract test execution has completed with violations!")
+            .to.eventually.be.rejectedWith("ContractPolice finished contract testing with violations and/or errors!")
             .then(function () {
                 expect(cprStub.called).to.equal(true);
                 expect(junitStub.called).to.equal(false);
             });
     });
+    //endregion
 });

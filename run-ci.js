@@ -6,14 +6,18 @@ const contractsDirectory = "/contractpolice/ci-contracts";
 const outputsDirectory = "/contractpolice/outputs";
 const configFailOnError = (process.env.CP_FAIL_ON_ERROR !== "false");
 const configReporter = (process.env.CP_REPORTER === "junit") ? "junit" : "default";
-const configAppLogs = (process.env.CP_REPORT_LOGS_ENABLED === "true");
+const configAppLogsFile = (process.env.CP_LOGS_FILE_ENABLED === "true");
+const configAppLogsConsole = (process.env.CP_LOGS_CONSOLE_ENABLED === "true");
+const configAppLogsLevel = (process.env.CP_LOGS_LEVEL === undefined) ? "warn" : process.env.CP_LOGS_LEVEL;
 
 // Gather injected config into single object
 let config = {
     reportOutputDir: outputsDirectory,
     failOnError: configFailOnError,
     reporter: configReporter,
-    enableAppLogs: configAppLogs
+    enableAppLogsFile: configAppLogsFile,
+    enableAppLogsConsole: configAppLogsConsole,
+    loglevel: configAppLogsLevel
 };
 
 let contractPolice = new ContractPolice(contractsDirectory, targetUrl, config);
@@ -26,6 +30,6 @@ contractPolice.testContracts()
     })
     .catch(function(err) {
         // Show output of contract test
-        console.error(err);
+        console.error(err.message);
         process.exitCode = 1; // failure
     });
