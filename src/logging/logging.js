@@ -49,7 +49,10 @@ Logging.prototype.writeLogs = function(outputDirectory, timestamp) {
 
     const lineEnd = "\r\n";
     return new Promise(function(resolve, reject) {
-        if(!isFileEnabled) resolve();
+        if(!isFileEnabled) {
+            resolve();
+            return;
+        }
 
         let output = "";
         allLogs.forEach(logLine => output += logLine + lineEnd);

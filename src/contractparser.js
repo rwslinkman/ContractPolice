@@ -16,12 +16,10 @@ async function getFiles(dir) {
     return files.reduce((a, f) => a.concat(f), []);
 }
 
-function isExist(arg) {
-    try {
-        return arg();
-    } catch (e) {
-        return false;
-    }
+function hasDeepChild(obj, arg) {
+    return arg
+        .split(".")
+        .reduce((obj, level) => obj && obj[level], obj);
 }
 
 function ContractParser(logger) {
@@ -60,28 +58,25 @@ ContractParser.prototype.parseContract = function (contractFile) {
     let fileContents = fs.readFileSync(contractFile, 'utf8');
     let contractName = this.extractContractName(contractFile);
     this.logger.info(LOG_TAG, `Reading Contract Definition of "${contractName}" file`)
-    let contractYaml = yaml.safeLoad(fileContents);
 
-    // TODO: simplify YAML content validation
     // Verify that all required attributes are there
+    let contractYaml = yaml.safeLoad(fileContents);
     if (contractYaml === null) {
         throw `${contractName} is not a valid contract`
     }
-    if (!isExist(() => contractYaml.contract)) {
-        throw `${contractName} does not contain a "contract"`;
-    }
-    if (!isExist(() => contractYaml.contract.request)) {
-        throw `${contractName} does not contain a "contract.request"`;
-    }
-    if (!isExist(() => contractYaml.contract.request.path)) {
-        throw `${contractName} does not contain a "contract.request.path"`;
-    }
-    if (!isExist(() => contractYaml.contract.response)) {
-        throw `${contractName} does not contain a "contract.response"`;
-    }
-    if (!isExist(() => contractYaml.contract.response.statusCode)) {
-        throw `${contractName} does not contain a "contract.response.statusCode"`;
-    }
+    const expectedProperties = [
+        "contract",
+        "contract.request",
+        "contract.request.path",
+        "contract.response",
+        "contract.response.statusCode"
+    ];
+    expectedProperties.forEach(function(property) {
+        if(!hasDeepChild(contractYaml, property)) {
+            throw `${contractName} does not contain a "${property}"`;
+        }
+    });
+    // All expected properties exist, no error thrown.
     this.logger.debug(LOG_TAG, `File ${contractName} contains a valid Contract Definition`);
 
     // Verify within request
