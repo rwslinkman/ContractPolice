@@ -1,29 +1,31 @@
 const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
 const rewire = require("rewire");
+const sinon = require("sinon");
 
 chai.use(chaiAsPromised);
 let expect = chai.expect;
 
 const ViolationReport = require("../src/validation/report.js");
 const Violation = require("../src/validation/violation.js");
-const needle = rewire("needle");
+const Validator = require("../src/validation/validator.js");
+const Logging = require("../src/logging/logging.js");
 const TestRunner = rewire("../src/testrunner.js");
 
 describe("TestRunner", () => {
+    const testLogger = new Logging("debug", false, false);
+    let needleStub = sinon.stub();
     function mockValidator(violations = []) {
         return {
-            validate: function () {
-                let report = new ViolationReport(violations);
-                return Promise.resolve(report);
-            }
+            validate: sinon
+                .stub(new Validator(), "validate")
+                .resolves(new ViolationReport(violations))
         };
     }
 
-    function mockNeedleRequest(success) {
-        const needleMock = function(method, url, data, options) {
-            return success ? Promise.resolve() : Promise.reject();
-        };
+    function mockNeedleRequest(response, error = null) {
+        const isSuccess = response !== null;
+        const needleMock = isSuccess ? needleStub.resolves(response) : needleStub.rejects(error);
         TestRunner.__set__({
             "needle": needleMock
         });
@@ -38,7 +40,7 @@ describe("TestRunner", () => {
         const httpSuccess = true;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
@@ -55,14 +57,14 @@ describe("TestRunner", () => {
         const httpSuccess = true;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
         return expect(result).to.eventually.be.fulfilled;
     });
 
-    it("should run the test when 'post' request succeeds and validator returns no violations", () => {
+    it("should run the test when 'POST' request succeeds and validator returns no violations", () => {
         const request = {
             path: "/v1/orders",
             method: "post"
@@ -72,7 +74,7 @@ describe("TestRunner", () => {
         const httpSuccess = true;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
@@ -89,14 +91,14 @@ describe("TestRunner", () => {
         const httpSuccess = true;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
         return expect(result).to.eventually.be.fulfilled;
     });
 
-    it("should run the test when 'put' request succeeds and validator returns no violations", () => {
+    it("should run the test when 'PUT' request succeeds and validator returns no violations", () => {
         const request = {
             path: "/v1/orders",
             method: "put"
@@ -106,7 +108,7 @@ describe("TestRunner", () => {
         const httpSuccess = true;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
@@ -121,11 +123,13 @@ describe("TestRunner", () => {
         const violationList = [
             new Violation("statuscode", 200, 404)
         ];
-        const validator = mockValidator(violationList);
-        const httpSuccess = true;
-        mockNeedleRequest(httpSuccess);
+        const mockedResponse = {
+            statusCode: 200
+        };
+        mockNeedleRequest(mockedResponse);
+        let valid = mockValidator(violationList);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", valid);
 
         const result = runner.runTest();
 
@@ -138,10 +142,13 @@ describe("TestRunner", () => {
             method: "POST"
         };
         const validator = mockValidator();
-        const httpSuccess = false;
-        mockNeedleRequest(httpSuccess);
+        mockNeedleRequest(null, {
+            address: "http://test.test",
+            port: 1337,
+            code: "ERRCONNRESET"
+        });
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
@@ -162,10 +169,12 @@ describe("TestRunner", () => {
         const httpSuccess = true;
         mockNeedleRequest(httpSuccess);
 
-        const runner = new TestRunner("testName", request, "http://doesnot.exist/", validator);
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
 
         return expect(result).to.eventually.be.fulfilled;
     });
+
+    // TODO: Add tests what cover 'then' after validation
 });

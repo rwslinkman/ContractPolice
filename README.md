@@ -27,7 +27,7 @@ docker run \
   -e CP_REPORTER=junit \
   -v $(pwd)/contracts:/contractpolice/ci-contracts \
   -v $(pwd)/build:/contractpolice/outputs \
-  rwslinkman/contractpolice:v0.5.11
+  rwslinkman/contractpolice:v0.6.0
 ```
 
 Define a place to store your contract YAML files and map it to `/contractpolice/ci-contracts`.   
@@ -162,7 +162,8 @@ Within the `contract.response` object it is possible to use the following wildca
 | `<anyNumber>` | Verifies that the value is any number              |   
 
 ## Full example
-Example contract definition.
+Example contract definition in YAML.   
+The file might be defined in the `$(pwd)/contracts` directory.   
 ```yaml
 contract:
   request:
@@ -195,15 +196,26 @@ contract:
           price: 10
 ```
 
-Implementation example for using ContractPolice can be found below:    
+Run the Docker image with the parameters
+```shell script
+docker run \
+  -e CP_TARGET=http://localhost/api \
+  -e CP_REPORTER=junit \
+  -v $(pwd)/contracts:/contractpolice/ci-contracts \
+  -v $(pwd)/build:/contractpolice/outputs \
+  rwslinkman/contractpolice:v0.6.0
+```
+Note: the `$(pwd)/build` directory will be created if it does not exist.   
+
+Custom implementation example for using ContractPolice can be found below:    
 ```javascript
 let ContractPolice = require("contractpolice");
 
 let config = {
-    reportOutputDir: "relative/path/to/outputdir",
+    reportOutputDir: "reports",
     reporter: "junit"
 };
-let contractPolice = new ContractPolice("relative/path/to/contracts", "http://localhost:3000", config);
+let contractPolice = new ContractPolice("contracts", "http://localhost:3000", config);
 
 console.log("Start contract test(s) with ContractPolice");
 contractPolice

@@ -9,25 +9,19 @@ const ContractPoliceReporter = rewire("../../src/reporting/contractpolicereporte
 const TestOutcome = require("../../src/testoutcome");
 
 describe("ContractPoliceReporter", () => {
-    function mockFileSystem(outputDirExists, writeFileError) {
+    function mockFileSystem(writeFileError) {
         const fsMock = {
-            existsSync: function (dir) {
-                return outputDirExists;
-            },
             writeFile: function (filename, data, callback) {
                 return callback(writeFileError);
-            },
-            mkdirSync: function(dir) {
-                // nop
             }
         };
         ContractPoliceReporter.__set__("fs", fsMock);
     }
 
-    it('should write a report to txt file when given a test report with two items and output directory exists', () => {
-        mockFileSystem(true, null);
+    it('should write a report to txt file when given a test report with two items', () => {
+        mockFileSystem(null);
 
-        const reporter = new ContractPoliceReporter("/some/baseDir", "outputDir");
+        const reporter = new ContractPoliceReporter("/some/outputDir");
         let testResults = [
             new TestOutcome("test1", [
                 "Test one passed",
@@ -38,10 +32,10 @@ describe("ContractPoliceReporter", () => {
         return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled;
     });
 
-    it('should write a report to txt file when given a test report with zero items and output directory exists', () => {
-        mockFileSystem(true, null);
+    it('should write a report to txt file when given a test report with zero items', () => {
+        mockFileSystem(null);
 
-        const reporter = new ContractPoliceReporter("/some/baseDir", "outputDir");
+        const reporter = new ContractPoliceReporter("/some/outputDir");
         let testResults = [
             new TestOutcome("test1", [], "PASS")
         ];
@@ -49,32 +43,23 @@ describe("ContractPoliceReporter", () => {
         return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled;
     });
 
-    it('should write a report to txt file when given no test reports and output directory exists', () => {
-        mockFileSystem(true, null);
+    it('should write a report to txt file when given no test reports', () => {
+        mockFileSystem(null);
 
-        const reporter = new ContractPoliceReporter("/some/baseDir", "outputDir");
+        const reporter = new ContractPoliceReporter("/some/outputDir");
         let testResults = [];
 
         return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled;
     });
 
     it('should reject writing a report to txt file when an error occurred on the filesystem', () => {
-        mockFileSystem(true, Error("Something went wrong"));
+        mockFileSystem(Error("Something went wrong"));
 
-        const reporter = new ContractPoliceReporter("/some/baseDir", "outputDir");
+        const reporter = new ContractPoliceReporter("/some/outputDir");
         let testResults = [
             new TestOutcome("test1", [], "PASS")
         ];
 
         return expect(reporter.writeTestReport(testResults)).to.eventually.be.rejectedWith("Something went wrong");
-    });
-
-    it('should write a report to txt file when given no test reports and output directory does not exist', () => {
-        mockFileSystem(false, null);
-
-        const reporter = new ContractPoliceReporter("/some/baseDir", "outputDir");
-        let testResults = [];
-
-        return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled;
     });
 });

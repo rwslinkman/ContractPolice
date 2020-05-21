@@ -1,5 +1,4 @@
 const junitBuilder = require("junit-report-builder");
-const fs = require('fs');
 
 function writeJUnitReport(outputDirectory, timestamp, testResults) {
     const lineEnd = "\r\n";
@@ -33,19 +32,13 @@ function writeJUnitReport(outputDirectory, timestamp, testResults) {
 
 }
 
-function JUnitReporter(baseDir, outputDir) {
-    this.baseDir = baseDir;
+function JUnitReporter(outputDir) {
     this.outputDir = outputDir;
 }
 
-JUnitReporter.prototype.writeTestReport = function(testResults) {
-    const timestamp = new Date().getTime() / 1000;
-    const outputDir = this.baseDir + "/" + this.outputDir;
-
-    if(!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir);
-    }
-    return writeJUnitReport(outputDir, timestamp, testResults);
+JUnitReporter.prototype.writeTestReport = function(testResults, timestamp) {
+    const junitTimestamp = timestamp / 1000;
+    return writeJUnitReport(this.outputDir, junitTimestamp, testResults);
 };
 
 module.exports = JUnitReporter;
