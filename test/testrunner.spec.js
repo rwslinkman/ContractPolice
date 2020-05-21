@@ -170,4 +170,6 @@ describe("TestRunner", () => {
 
         return expect(result).to.eventually.be.fulfilled;
     });
+
+    // TODO: Add tests what cover 'then' after validation
 });

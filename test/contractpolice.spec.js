@@ -10,6 +10,7 @@ const stub = sinon.stub;
 const TestOutcome = require("../src/testoutcome.js");
 const ContractPoliceReporter = require("../src/reporting/contractpolicereporter.js");
 const JUnitReporter = require("../src/reporting/junitreporter.js");
+const Logging = require("../src/logging/logging.js");
 // Subject
 const ContractPolice = rewire("../index.js");
 
@@ -518,6 +519,82 @@ describe("ContractPolice", () => {
                 expect(cprStub.called).to.equal(true);
                 expect(junitStub.called).to.equal(false);
             });
+    });
+
+    it('should write additional logs when given valid input, outputDir exists and tests are passing', () => {
+        //region mocks
+        let parserMock = function() { // constructor returns object with functions
+            return {
+                findContractFiles: function (directory) {
+                    expect(directory).to.equal("some/directory");
+                    return Promise.resolve(["/some/path/to/my-contract.yaml"]);
+                },
+                parseContract: function(contractFile) {
+                    return Promise.resolve({
+                        request: {
+                            path: "/some/path"
+                        },
+                        response: {
+                            statuscode: 200
+                        }
+                    });
+                },
+                extractContractName: function(contractFile, stripExtension) {
+                    return "my-contract";
+                }
+            }
+        };
+        let testRunnerMock = function(contractName, contractRequest, endpoint, validator) { // constructor returns object with functions
+            return {
+                runTest: function() {
+                    return new TestOutcome("my-contract", "Tests were executed", "PASS")
+                }
+            }
+        };
+        const cprStub = stub().returns(Promise.resolve());
+        const cpReporter = function() {
+            return {
+                writeTestReport: cprStub
+            }
+        };
+        const junitStub = stub().returns(Promise.resolve());
+        const junitReporter = function() {
+            return {
+                writeTestReport: junitStub
+            }
+        };
+        const testLogger = function(){
+            return {
+                writeLogs: function() {return Promise.resolve()},
+                log: sinon.stub(),
+                error: sinon.stub(),
+                warn: sinon.stub(),
+                info: sinon.stub(),
+                debug: sinon.stub(),
+                fileEnabled: true
+            };
+        };
+        // Injection
+        ContractPolice.__set__({
+            "ContractParser": parserMock,
+            "TestRunner": testRunnerMock,
+            "ContractPoliceReporter": cpReporter,
+            "JUnitReporter": junitReporter,
+            "fs": mockFileSystem(true),
+            "Logging": testLogger
+        });
+        //endregion mocks
+
+        const contractPolice = new ContractPolice("some/directory", "http://someserver.com", {
+            enableAppLogsFile: true
+        });
+
+        return expect(contractPolice.testContracts())
+            .to.eventually.be.fulfilled
+            .then(function () {
+                expect(cprStub.called).to.equal(true);
+                expect(junitStub.called).to.equal(false);
+            })
     });
     //endregion
 });
