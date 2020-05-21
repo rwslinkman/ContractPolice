@@ -139,11 +139,26 @@ ContractPolice.prototype.testContracts = function() {
                 })
         })
         .then(function(executionReport) {
+            // Write logs if applicable
+            if(logger.fileEnabled) {
+                logger.debug(LOG_TAG, "Writing logs to file");
+            } else {
+                logger.debug(LOG_TAG, "Skipped writing logs to file");
+            }
+            return logger
+                .writeLogs(reportOutputDir, executionReport.timestamp)
+                .then(function() {
+                    if(logger.fileEnabled) {
+                        logger.debug(LOG_TAG, "Contract testing logs written to file");
+                    }
+                    return executionReport;
+                });
+        })
+        .then(function(executionReport) {
             // Finish execution
             const logEnd = executionReport.runSuccess ? "successfully!" : "with violations and/or errors!"
             const message = "ContractPolice finished contract testing " + logEnd;
             logger.log(LOG_TAG, "info", message)
-            logger.writeLogs(reportOutputDir)
             // Throw error on failure to influence process exit code
             if(!executionReport.runSuccess && failOnError) {
                 logger.debug(LOG_TAG, "Quitting with error for runner's awareness");

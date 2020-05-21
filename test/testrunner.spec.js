@@ -24,7 +24,7 @@ describe("TestRunner", () => {
 
     function mockNeedleRequest(success) {
         const needleMock = function(method, url, data, options) {
-            return success ? Promise.resolve() : Promise.reject();
+            return success ? Promise.resolve() : Promise.reject(Error());
         };
         TestRunner.__set__({
             "needle": needleMock
@@ -98,7 +98,7 @@ describe("TestRunner", () => {
         return expect(result).to.eventually.be.fulfilled;
     });
 
-    it("should run the test when 'put' request succeeds and validator returns no violations", () => {
+    it("should run the test when 'PUT' request succeeds and validator returns no violations", () => {
         const request = {
             path: "/v1/orders",
             method: "put"

@@ -1,6 +1,8 @@
 const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
 const rewire = require("rewire");
+const Logging = require("../src/logging/logging.js");
+const TESTLOGGER = new Logging("error", false, false);
 
 chai.use(chaiAsPromised);
 let expect = chai.expect;
@@ -27,7 +29,7 @@ describe("ContractParser", () => {
                 "stat": statMock,
             });
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
 
             let result = parser.findContractFiles("some/directory");
 
@@ -52,7 +54,7 @@ describe("ContractParser", () => {
                 "stat": statMock,
             });
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
 
             let result = parser.findContractFiles("some/directory");
 
@@ -64,7 +66,7 @@ describe("ContractParser", () => {
         it("should return the name of the file without YAML extension", () => {
             const fileName = "some/path/to/my-contract.yaml";
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
             let result = parser.extractContractName(fileName);
 
             expect(result).to.equal("my-contract");
@@ -73,7 +75,7 @@ describe("ContractParser", () => {
         it("should return the name of the file with YAML extension", () => {
             const fileName = "some/path/to/my-contract.yaml";
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
             let result = parser.extractContractName(fileName, false);
 
             expect(result).to.equal("my-contract.yaml");
@@ -111,7 +113,7 @@ describe("ContractParser", () => {
             };
             mockYamlLoading(yamlContent);
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract("some/file.yaml");
 
             expect(result).to.equal(yamlContent.contract);
@@ -120,7 +122,7 @@ describe("ContractParser", () => {
         it("should throw an error when file does not contain a contract at all", () => {
             mockYamlLoading(null);
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
 
             expect(() => parser.parseContract("some/my-file.yaml")).to.throw("my-file is not a valid contract");
         });
@@ -129,7 +131,7 @@ describe("ContractParser", () => {
             const yamlContent = {};
             mockYamlLoading(yamlContent);
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
 
             expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract"`);
         });
@@ -140,7 +142,7 @@ describe("ContractParser", () => {
             };
             mockYamlLoading(yamlContent);
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
 
             expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.request"`);
         });
@@ -153,7 +155,7 @@ describe("ContractParser", () => {
             };
             mockYamlLoading(yamlContent);
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
 
             expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.request.path"`);
         });
@@ -168,7 +170,7 @@ describe("ContractParser", () => {
             };
             mockYamlLoading(yamlContent);
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
 
             expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.response"`);
         });
@@ -184,7 +186,7 @@ describe("ContractParser", () => {
             };
             mockYamlLoading(yamlContent);
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
 
             expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.response.statusCode"`);
         });
@@ -206,7 +208,7 @@ describe("ContractParser", () => {
             };
             mockYamlLoading(yamlContent);
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract("some/file.yaml");
 
             expect(result.request.headers).to.deep.equal([
@@ -232,7 +234,7 @@ describe("ContractParser", () => {
             };
             mockYamlLoading(yamlContent);
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract("some/file.yaml");
 
             expect(result.request.headers).to.deep.equal([
@@ -255,7 +257,7 @@ describe("ContractParser", () => {
             };
             mockYamlLoading(yamlContent);
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
 
             expect(() => parser.parseContract("some/file.yaml")).to.throw("Request header definition in file should be of type 'object' or 'array'");
         });
@@ -277,7 +279,7 @@ describe("ContractParser", () => {
             };
             mockYamlLoading(yamlContent);
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract("some/file.yaml");
 
             expect(result.response.headers).to.deep.equal([
@@ -303,7 +305,7 @@ describe("ContractParser", () => {
             };
             mockYamlLoading(yamlContent);
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract("some/file.yaml");
 
             expect(result.response.headers).to.deep.equal([
@@ -326,7 +328,7 @@ describe("ContractParser", () => {
             };
             mockYamlLoading(yamlContent);
 
-            const parser = new ContractParser();
+            const parser = new ContractParser(TESTLOGGER);
 
             expect(() => parser.parseContract("some/file.yaml")).to.throw("Response header definition in file should be of type 'object' or 'array'");
         });

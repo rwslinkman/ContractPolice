@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const supportedLogLevels = {
     "error": 3,
     "warn": 2,
@@ -41,8 +43,21 @@ Logging.prototype.debug = function(logTag, logMessage) {
     this.log(logTag, "debug", logMessage);
 }
 
-Logging.prototype.writeLogs = function(outputDirectory) {
-    if(!this.fileEnabled) return;
-    // TODO: Write loglines to file
+Logging.prototype.writeLogs = function(outputDirectory, timestamp) {
+    const isFileEnabled = this.fileEnabled;
+    const allLogs = this.logLines;
+
+    const lineEnd = "\r\n";
+    return new Promise(function(resolve, reject) {
+        if(!isFileEnabled) resolve();
+
+        let output = "";
+        allLogs.forEach(logLine => output += logLine + lineEnd);
+        let outputFileName = outputDirectory + "/contractpolice-logs-" + timestamp + ".txt";
+        fs.writeFile(outputFileName, output, function(err) {
+            if (err) reject(err);
+            else resolve();
+        });
+    });
 }
 module.exports = Logging;
