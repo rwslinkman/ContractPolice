@@ -5,6 +5,7 @@ const {resolve} = require('path');
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
 const helper = require("./helper-functions.js");
+const LOG_TAG = "ContractParser";
 
 async function getFiles(dir) {
     const subdirs = await readdir(dir);
@@ -28,14 +29,19 @@ function ContractParser(logger) {
 }
 
 ContractParser.prototype.findContractFiles = function (directory) {
+    const log = this.logger;
+    log.info(LOG_TAG, `Searching "${directory}" for YAML files...`)
     return getFiles(directory)
         .then(function (files) {
+            log.info(LOG_TAG, `Found ${files.length} files in directory`)
             let contractFiles = [];
             files.forEach(function (file) {
                 if (file.endsWith(".yaml") || file.endsWith(".yml")) {
+                    log.debug(LOG_TAG, `YAML file "${file}" discovered`)
                     contractFiles.push(file);
                 }
             });
+            log.info(LOG_TAG, `Found ${contractFiles.length} YAML files that may contain Contract Definitions`);
             return contractFiles;
         });
 };
@@ -53,6 +59,7 @@ ContractParser.prototype.extractContractName = function (contractFile, stripExte
 ContractParser.prototype.parseContract = function (contractFile) {
     let fileContents = fs.readFileSync(contractFile, 'utf8');
     let contractName = this.extractContractName(contractFile);
+    this.logger.info(LOG_TAG, `Reading Contract Definition of "${contractName}" file`)
     let contractYaml = yaml.safeLoad(fileContents);
 
     // TODO: simplify YAML content validation
@@ -75,6 +82,7 @@ ContractParser.prototype.parseContract = function (contractFile) {
     if (!isExist(() => contractYaml.contract.response.statusCode)) {
         throw `${contractName} does not contain a "contract.response.statusCode"`;
     }
+    this.logger.debug(LOG_TAG, `File ${contractName} contains a valid Contract Definition`);
 
     // Verify within request
     let expectedRequest = contractYaml.contract.request;
@@ -87,6 +95,7 @@ ContractParser.prototype.parseContract = function (contractFile) {
         // Formatting headers into desired format; supporting both Object an Array notation
         requestHeaders = helper.normalizeHeaders(requestHeaders);
         contractYaml.contract.request.headers = requestHeaders;
+        this.logger.debug(LOG_TAG, `Request headers of ${contractName} have been normalized`);
     }
 
     // Verify within response
@@ -100,6 +109,7 @@ ContractParser.prototype.parseContract = function (contractFile) {
         // Formatting headers into desired format; supporting both Object an Array notation
         responseHeaders = helper.normalizeHeaders(responseHeaders);
         contractYaml.contract.response.headers = responseHeaders;
+        this.logger.debug(LOG_TAG, `Response headers of ${contractName} have been normalized`);
     }
 
     return contractYaml.contract;

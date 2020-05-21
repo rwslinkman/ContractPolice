@@ -25,6 +25,22 @@ Logging.prototype.log = function(logTag, logSeverity, logMessage) {
     }
 };
 
+Logging.prototype.error = function(logTag, logMessage) {
+    this.log(logTag, "error", logMessage);
+}
+
+Logging.prototype.warn = function(logTag, logMessage) {
+    this.log(logTag, "warn", logMessage);
+}
+
+Logging.prototype.info = function(logTag, logMessage) {
+    this.log(logTag, "info", logMessage);
+}
+
+Logging.prototype.debug = function(logTag, logMessage) {
+    this.log(logTag, "debug", logMessage);
+}
+
 Logging.prototype.writeLogs = function(outputDirectory) {
     if(!this.fileEnabled) return;
     // TODO: Write loglines to file

@@ -97,23 +97,27 @@ ContractPolice.prototype.testContracts = function() {
                 let contract = contractMeta.data;
                 let validator = new ContractValidator(logger, contract.response, validationRules);
                 let runner = new TestRunner(logger, contractMeta.name, contract.request, endpoint, validator);
+                logger.info(LOG_TAG, `Created TestRunner for "${contractMeta.name}" Contract Definition`);
                 tests.push(runner);
             });
             return tests;
         })
         .then(function(testRunners) {
             // Run all tests
+            logger.info(LOG_TAG, "Running contract tests...");
             let testRuns = testRunners.map(it => it.runTest());
             return Promise.all(testRuns);
         })
         .then(function(testResults) {
             // Prepare reporter
+            logger.info(LOG_TAG, "Contract tests completed. Gathering reports...");
             let reporter = new ContractPoliceReporter(reportOutputDir);
             if(reporterType === "junit") {
                 reporter = new JUnitReporter(reportOutputDir);
             }
             // Ensure output dir exists
             if(!fs.existsSync(reportOutputDir)) {
+                logger.debug(LOG_TAG, `Output directory ${reportOutputDir} does not existing, creating...`);
                 fs.mkdirSync(reportOutputDir);
             }
             // Collect execution report and pass on
@@ -126,6 +130,7 @@ ContractPolice.prototype.testContracts = function() {
         })
         .then(function(executionReport) {
             // Write test report & application logs
+            logger.info(LOG_TAG, "Writing contract test report...")
             return executionReport.testReporter
                 .writeTestReport(executionReport.results, executionReport.timestamp)
                 .then(function() {
@@ -141,6 +146,7 @@ ContractPolice.prototype.testContracts = function() {
             logger.writeLogs(reportOutputDir)
             // Throw error on failure to influence process exit code
             if(!executionReport.runSuccess && failOnError) {
+                logger.debug(LOG_TAG, "Quitting with error for runner's awareness");
                 throw Error(message)
             }
         });

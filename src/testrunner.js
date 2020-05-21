@@ -1,6 +1,7 @@
 const needle = require("needle");
 const TestOutcome = require("./testoutcome.js");
 const helper = require("./helper-functions.js");
+const LOG_TAG = "TestRunner";
 
 function TestRunner(logger, name, contractRequest, endpoint, validator) {
     this.logger = logger;
@@ -11,9 +12,12 @@ function TestRunner(logger, name, contractRequest, endpoint, validator) {
 }
 
 TestRunner.prototype.runTest = function() {
+    const loggerLocal = this.logger;
     const contractRequest = this.contractRequest;
     const validator = this.validator;
     const testNameLocal = this.testName;
+    loggerLocal.info(LOG_TAG, `Executing "${testNameLocal}" contract test `)
+
     const method = contractRequest.method || "GET";
     const url = this.endpoint + contractRequest.path;
     const options = {
@@ -25,6 +29,7 @@ TestRunner.prototype.runTest = function() {
     if(contractHeaders.length > 0) {
         options["headers"] = contractHeaders;
     }
+    loggerLocal.debug(LOG_TAG, `Creating request to endpoint: ${method.toUpperCase()} ${url}`);
 
     let request;
     if(method.toUpperCase() === "GET") {
@@ -34,16 +39,20 @@ TestRunner.prototype.runTest = function() {
     }
     return request
         .then(function(response) {
+            loggerLocal.debug(LOG_TAG, `Response statuscode [${response.statusCode}] at ${method.toUpperCase()} ${url}`);
             // Validate HTTP response
             return validator
                 .validate(response)
                 .then(function(violationReport) {
                     // Convert violationReport to testResult
+                    loggerLocal.debug(LOG_TAG, `Contract test "${testNameLocal}" resulted in ${violationReport.getViolationCount()} contract violation(s)`);
                     let testResult = violationReport.hasViolations() ? "FAIL" : "PASS";
+                    loggerLocal.info(LOG_TAG, `Contract test "${testNameLocal}" completed with result ${testResult}`);
                     return new TestOutcome(testNameLocal, violationReport.getViolationTexts(), testResult);
                 })
         })
-        .catch(function(ignored) {
+        .catch(function(needleError) {
+            loggerLocal.error(LOG_TAG, `Cannot reach testing target at "${needleError.address}:${needleError.port}" (errorcode: ${needleError.code})`);
             // HTTP request error
             let violationText = `ContractPolice contacted ${url} but was unable to reach it`;
             return new TestOutcome(testNameLocal, [violationText], "FAIL");

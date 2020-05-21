@@ -3,7 +3,7 @@ function ViolationReport(violations) {
 }
 
 ViolationReport.prototype.hasViolations = function() {
-    return this.violations.length > 0;
+    return this.getViolationCount() > 0;
 };
 
 ViolationReport.prototype.getViolationTexts = function() {
@@ -13,5 +13,9 @@ ViolationReport.prototype.getViolationTexts = function() {
     });
     return texts;
 };
+
+ViolationReport.prototype.getViolationCount = function() {
+    return this.violations.length;
+}
 
 module.exports = ViolationReport;
