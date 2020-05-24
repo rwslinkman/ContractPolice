@@ -59,7 +59,6 @@ function validateHeaders(logger, expectedResponse, actualResponse) {
 
 function ContractValidator(logger, contractResponse, validationRules = []) {
     let defaultRules = [
-        // TODO: Create more violation checks
         validateStatusCode,
         validateMatchingBodyType,
         validateAllKeysExist,

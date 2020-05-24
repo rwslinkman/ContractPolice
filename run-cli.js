@@ -1,15 +1,19 @@
-let ContractPolice = require("./index.js");
+const ContractPolice = require("./index.js");
 
-let config = {
+// Input
+const config = {
     reportOutputDir: "report",
     // reporter: "junit",
     enableAppLogsConsole: true,
-    enableAppLogsFile: true,
+    enableAppLogsFile: false,
     loglevel: "info"
 };
+const contractsDirectory = "contracts";
+const testTarget = "http://localhost:3000";
 
-let contractPolice = new ContractPolice("contracts", "http://localhost:3000", config);
+// Execution
 console.log("Start contract test(s) with ContractPolice");
+const contractPolice = new ContractPolice(contractsDirectory, testTarget, config);
 contractPolice.testContracts()
     .then(function() {
         // Successful test, no errors found

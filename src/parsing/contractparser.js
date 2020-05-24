@@ -4,7 +4,7 @@ const {promisify} = require('util');
 const {resolve} = require('path');
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
-const helper = require("./helper-functions.js");
+const helper = require("../helper-functions.js");
 const LOG_TAG = "ContractParser";
 
 async function getFiles(dir) {
@@ -22,20 +22,39 @@ function hasDeepChild(obj, arg) {
         .reduce((obj, level) => obj && obj[level], obj);
 }
 
+function extractContractName(baseDir, contractFile, stripExtension = true) {
+    let absoluteDir = baseDir.startsWith("/")
+        ? baseDir
+        : `${process.env.PWD}/${baseDir}`;
+    // TODO: Replace 'process.env.pwd' for something more testable.
+
+    let fileName = contractFile.replace(absoluteDir, "");
+    if(fileName.startsWith("/")) {
+        fileName = fileName.substr(1);
+    }
+    // TODO: Improve to keep directory structure for versioning
+    // let fileNameSplit = contractFile.split("/");
+    // let fileName = fileNameSplit[fileNameSplit.length - 1];
+    if (stripExtension) {
+        return fileName.replace(".yaml", "").replace(".yml", "");
+    }
+    return fileName;
+}
+
 function ContractParser(logger) {
     this.logger = logger;
 }
 
-ContractParser.prototype.findContractFiles = function (directory) {
+ContractParser.prototype.findYamlFiles = function (directory) {
     const log = this.logger;
-    log.info(LOG_TAG, `Searching "${directory}" for YAML files...`)
+    log.info(LOG_TAG, `Searching "${directory}" for YAML files...`);
     return getFiles(directory)
         .then(function (files) {
             log.info(LOG_TAG, `Found ${files.length} files in directory`)
             let contractFiles = [];
             files.forEach(function (file) {
                 if (file.endsWith(".yaml") || file.endsWith(".yml")) {
-                    log.debug(LOG_TAG, `YAML file "${file}" discovered`)
+                    log.debug(LOG_TAG, `YAML file "${file}" discovered`);
                     contractFiles.push(file);
                 }
             });
@@ -44,19 +63,10 @@ ContractParser.prototype.findContractFiles = function (directory) {
         });
 };
 
-ContractParser.prototype.extractContractName = function (contractFile, stripExtension = true) {
-    // TODO: Improve to keep directory structure for versioning
-    let fileNameSplit = contractFile.split("/");
-    let fileName = fileNameSplit[fileNameSplit.length - 1];
-    if(stripExtension) {
-        return fileName.replace(".yaml", "").replace(".yml", "");
-    }
-    return fileName
-};
-
-ContractParser.prototype.parseContract = function (contractFile) {
+ContractParser.prototype.parseContract = function (contractsDirectory, contractFile) {
     let fileContents = fs.readFileSync(contractFile, 'utf8');
-    let contractName = this.extractContractName(contractFile);
+    this.logger.debug(LOG_TAG, `Contract file ${contractFile}`);
+    let contractName = extractContractName(contractsDirectory, contractFile);
     this.logger.info(LOG_TAG, `Reading Contract Definition of "${contractName}" file`)
 
     // Verify that all required attributes are there
@@ -71,43 +81,46 @@ ContractParser.prototype.parseContract = function (contractFile) {
         "contract.response",
         "contract.response.statusCode"
     ];
-    expectedProperties.forEach(function(property) {
-        if(!hasDeepChild(contractYaml, property)) {
+    expectedProperties.forEach(function (property) {
+        if (!hasDeepChild(contractYaml, property)) {
             throw `${contractName} does not contain a "${property}"`;
         }
     });
     // All expected properties exist, no error thrown.
-    this.logger.debug(LOG_TAG, `File ${contractName} contains a valid Contract Definition`);
+    this.logger.debug(LOG_TAG, `File '${contractName}' contains a valid Contract Definition`);
 
     // Verify within request
     let expectedRequest = contractYaml.contract.request;
-    if(expectedRequest.hasOwnProperty("headers")) {
+    if (expectedRequest.hasOwnProperty("headers")) {
         let requestHeaders = contractYaml.contract.request.headers;
-        if(typeof requestHeaders !== "object") {
-            throw `Request header definition in ${contractName} should be of type 'object' or 'array'`;
+        if (typeof requestHeaders !== "object") {
+            throw `Request header definition in '${contractName}' should be of type 'object' or 'array'`;
         }
 
         // Formatting headers into desired format; supporting both Object an Array notation
         requestHeaders = helper.normalizeHeaders(requestHeaders);
         contractYaml.contract.request.headers = requestHeaders;
-        this.logger.debug(LOG_TAG, `Request headers of ${contractName} have been normalized`);
+        this.logger.debug(LOG_TAG, `Request headers of '${contractName}' have been normalized`);
     }
 
     // Verify within response
     let expectedResponse = contractYaml.contract.response;
-    if(expectedResponse.hasOwnProperty("headers")) {
+    if (expectedResponse.hasOwnProperty("headers")) {
         let responseHeaders = contractYaml.contract.response.headers;
-        if(typeof responseHeaders !== "object") {
-            throw `Response header definition in ${contractName} should be of type 'object' or 'array'`;
+        if (typeof responseHeaders !== "object") {
+            throw `Response header definition in '${contractName}' should be of type 'object' or 'array'`;
         }
 
         // Formatting headers into desired format; supporting both Object an Array notation
         responseHeaders = helper.normalizeHeaders(responseHeaders);
         contractYaml.contract.response.headers = responseHeaders;
-        this.logger.debug(LOG_TAG, `Response headers of ${contractName} have been normalized`);
+        this.logger.debug(LOG_TAG, `Response headers of '${contractName}' have been normalized`);
     }
 
-    return contractYaml.contract;
+    return {
+        name: contractName,
+        data: contractYaml.contract
+    };
 };
 
 module.exports = ContractParser;

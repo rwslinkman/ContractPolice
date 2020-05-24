@@ -1,4 +1,4 @@
-const ContractParser = require("./src/contractparser.js");
+const ContractParser = require("./src/parsing/contractparser.js");
 const TestRunner = require("./src/testrunner.js");
 const ContractValidator = require("./src/validation/validator.js");
 const ContractPoliceReporter = require("./src/reporting/contractpolicereporter.js");
@@ -69,23 +69,21 @@ ContractPolice.prototype.testContracts = function() {
     const failOnError = this.config.failOnError;
     const reportOutputDir = this.config.reportOutputDir;
     const reporterType = this.config.reporter;
+    const contractsDirectory = this.contractsDirectory;
     const logger = this.logger;
 
     logger.log(LOG_TAG, "info", "Start contract test(s) with ContractPolice");
 
     let contractParser = new ContractParser(logger);
+
     return contractParser
-        .findContractFiles(this.contractsDirectory)
+        .findYamlFiles(contractsDirectory)
         .then(function(filesArray){
             // Collect all contracts from YAML files
             let contracts = [];
-            filesArray.forEach(function(contractFile) {
-                let contract = contractParser.parseContract(contractFile);
-                let contractName = contractParser.extractContractName(contractFile, false);
-                let contractMeta = {
-                    name: contractName,
-                    data: contract
-                };
+            // TODO: map?
+            filesArray.forEach(function(yamlFile) {
+                let contractMeta = contractParser.parseContract(contractsDirectory, yamlFile);
                 contracts.push(contractMeta);
             });
             return contracts;

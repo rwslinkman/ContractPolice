@@ -1,16 +1,16 @@
 const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
 const rewire = require("rewire");
-const Logging = require("../src/logging/logging.js");
+const Logging = require("../../src/logging/logging.js");
 const TESTLOGGER = new Logging("error", false, false);
 
 chai.use(chaiAsPromised);
 let expect = chai.expect;
 
-const ContractParser = rewire("../src/contractparser.js");
+const ContractParser = rewire("../../src/parsing/contractparser.js");
 
 describe("ContractParser", () => {
-    describe("findContractFiles", () => {
+    describe("findYamlFiles", () => {
         it("should return list of file names with YAML extension", () => {
             const readdirMock = function() {
                 return [
@@ -31,7 +31,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            let result = parser.findContractFiles("some/directory");
+            let result = parser.findYamlFiles("some/directory");
 
             return expect(result).to.eventually.have.length(3);
         });
@@ -56,33 +56,21 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            let result = parser.findContractFiles("some/directory");
+            let result = parser.findYamlFiles("some/directory");
 
             return expect(result).to.eventually.have.length(2);
         });
     });
 
-    describe("extractContractName", () => {
-        it("should return the name of the file without YAML extension", () => {
-            const fileName = "some/path/to/my-contract.yaml";
-
-            const parser = new ContractParser(TESTLOGGER);
-            let result = parser.extractContractName(fileName);
-
-            expect(result).to.equal("my-contract");
-        });
-
-        it("should return the name of the file with YAML extension", () => {
-            const fileName = "some/path/to/my-contract.yaml";
-
-            const parser = new ContractParser(TESTLOGGER);
-            let result = parser.extractContractName(fileName, false);
-
-            expect(result).to.equal("my-contract.yaml");
-        });
-    });
-
     describe("parseContract", () => {
+        const testBaseDir   = "/some/basepath/to/contracts";
+        const testFilePath1 = `${testBaseDir}/contract1.yaml`
+        const testFileName1 = "contract1"
+        const testFilePath2 = `${testBaseDir}/v1/contract2.yaml`
+        const testFileName2 = "v1/contract2"
+        const testFilePath3 = `${testBaseDir}/v1/users/contract3.yaml`;
+        const testFileName3 = "v1/users/contract3"
+
         function mockYamlLoading(yamlContent) {
             const fsMock = {
                 readFileSync: function (fileName, options) {
@@ -114,9 +102,70 @@ describe("ContractParser", () => {
             mockYamlLoading(yamlContent);
 
             const parser = new ContractParser(TESTLOGGER);
-            let result = parser.parseContract("some/file.yaml");
+            let result = parser.parseContract(testBaseDir, testFilePath1);
 
-            expect(result).to.equal(yamlContent.contract);
+            expect(result.data).to.equal(yamlContent.contract);
+            expect(result.name).to.equal(testFileName1);
+        });
+
+        it("should return the contract object with correct name when given valid input", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path"
+                    },
+                    response: {
+                        statusCode: 200
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser(TESTLOGGER);
+            let result = parser.parseContract(testBaseDir, testFilePath2);
+
+            expect(result.data).to.equal(yamlContent.contract);
+            expect(result.name).to.equal(testFileName2);
+        });
+
+        it("should return the contract object with correct name when given valid input with relative contracts directory", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path"
+                    },
+                    response: {
+                        statusCode: 200
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser(TESTLOGGER);
+            let result = parser.parseContract("contracts", testFilePath2);
+
+            expect(result.data).to.equal(yamlContent.contract);
+            expect(result.name).to.equal(testFileName2);
+        });
+
+        it("should return the contract object with correct (deep) name when given valid input", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path"
+                    },
+                    response: {
+                        statusCode: 200
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser(TESTLOGGER);
+            let result = parser.parseContract(testBaseDir, testFilePath3);
+
+            expect(result.data).to.equal(yamlContent.contract);
+            expect(result.name).to.equal(testFileName3);
         });
 
         it("should throw an error when file does not contain a contract at all", () => {
@@ -124,7 +173,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            expect(() => parser.parseContract("some/my-file.yaml")).to.throw("my-file is not a valid contract");
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("contract1 is not a valid contract");
         });
 
         it("should throw an error when file does not contain a contract object", () => {
@@ -133,7 +182,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract"`);
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw(`contract1 does not contain a "contract"`);
         });
 
         it("should throw an error when contract does not contain a request object", () => {
@@ -144,7 +193,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.request"`);
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw(`contract1 does not contain a "contract.request"`);
         });
 
         it("should throw an error when contract.request does not contain a path object", () => {
@@ -157,7 +206,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.request.path"`);
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw(`contract1 does not contain a "contract.request.path"`);
         });
 
         it("should throw an error when contract does not contain a response object", () => {
@@ -172,7 +221,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.response"`);
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw(`contract1 does not contain a "contract.response"`);
         });
 
         it("should throw an error when contract.response does not contain a statusCode object", () => {
@@ -188,7 +237,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            expect(() => parser.parseContract("some/my-file.yaml")).to.throw(`my-file does not contain a "contract.response.statusCode"`);
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw(`contract1 does not contain a "contract.response.statusCode"`);
         });
 
         it("should normalize request headers to array when headers are specified as object", () => {
@@ -209,9 +258,11 @@ describe("ContractParser", () => {
             mockYamlLoading(yamlContent);
 
             const parser = new ContractParser(TESTLOGGER);
-            let result = parser.parseContract("some/file.yaml");
+            const result = parser.parseContract(testBaseDir, testFilePath1);
 
-            expect(result.request.headers).to.deep.equal([
+            expect(result.name).to.equal(testFileName1);
+            const payload = result.data;
+            expect(payload.request.headers).to.deep.equal([
                 { "Content-Type": "application/json" },
                 { "Accept": "application/json" }
             ]);
@@ -235,9 +286,11 @@ describe("ContractParser", () => {
             mockYamlLoading(yamlContent);
 
             const parser = new ContractParser(TESTLOGGER);
-            let result = parser.parseContract("some/file.yaml");
+            let result = parser.parseContract(testBaseDir, testFilePath1);
 
-            expect(result.request.headers).to.deep.equal([
+            expect(result.name).to.equal(testFileName1);
+            const payload = result.data;
+            expect(payload.request.headers).to.deep.equal([
                 { "Content-Type": "application/json" },
                 { "Accept": "application/json" }
             ]);
@@ -259,7 +312,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            expect(() => parser.parseContract("some/file.yaml")).to.throw("Request header definition in file should be of type 'object' or 'array'");
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("Request header definition in 'contract1' should be of type 'object' or 'array'");
         });
 
         it("should normalize response headers to array when headers are specified as object", () => {
@@ -280,9 +333,11 @@ describe("ContractParser", () => {
             mockYamlLoading(yamlContent);
 
             const parser = new ContractParser(TESTLOGGER);
-            let result = parser.parseContract("some/file.yaml");
+            let result = parser.parseContract(testBaseDir, testFilePath1);
 
-            expect(result.response.headers).to.deep.equal([
+            expect(result.name).to.equal(testFileName1);
+            const payload = result.data;
+            expect(payload.response.headers).to.deep.equal([
                 { "Content-Type": "application/json" },
                 { "Accept": "application/json" }
             ]);
@@ -306,9 +361,11 @@ describe("ContractParser", () => {
             mockYamlLoading(yamlContent);
 
             const parser = new ContractParser(TESTLOGGER);
-            let result = parser.parseContract("some/file.yaml");
+            let result = parser.parseContract(testBaseDir, testFilePath1);
 
-            expect(result.response.headers).to.deep.equal([
+            expect(result.name).to.equal(testFileName1);
+            const payload = result.data;
+            expect(payload.response.headers).to.deep.equal([
                 { "Content-Type": "application/json" },
                 { "Accept": "application/json" }
             ]);
@@ -330,7 +387,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            expect(() => parser.parseContract("some/file.yaml")).to.throw("Response header definition in file should be of type 'object' or 'array'");
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("Response header definition in 'contract1' should be of type 'object' or 'array'");
         });
     })
 });
