@@ -2,12 +2,13 @@ const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
 const rewire = require("rewire");
 const Logging = require("../../src/logging/logging.js");
-const TESTLOGGER = new Logging("error", false, false);
+const sinon = require("sinon");
 
 chai.use(chaiAsPromised);
 let expect = chai.expect;
 
 const ContractParser = rewire("../../src/parsing/contractparser.js");
+const TESTLOGGER = new Logging("error", false, false);
 
 describe("ContractParser", () => {
     describe("findYamlFiles", () => {
@@ -71,7 +72,7 @@ describe("ContractParser", () => {
         const testFilePath3 = `${testBaseDir}/v1/users/contract3.yaml`;
         const testFileName3 = "v1/users/contract3"
 
-        function mockYamlLoading(yamlContent) {
+        function mockYamlLoading(yamlContent, resolveStub = sinon.stub()) {
             const fsMock = {
                 readFileSync: function (fileName, options) {
                     return "";
@@ -84,7 +85,8 @@ describe("ContractParser", () => {
             };
             ContractParser.__set__({
                 "fs": fsMock,
-                "yaml": yamlMock
+                "yaml": yamlMock,
+                "resolve": resolveStub
             });
         }
 
@@ -129,6 +131,7 @@ describe("ContractParser", () => {
         });
 
         it("should return the contract object with correct name when given valid input with relative contracts directory", () => {
+            const resolveStub = sinon.stub().returns(testBaseDir);
             const yamlContent = {
                 contract: {
                     request: {
@@ -139,8 +142,8 @@ describe("ContractParser", () => {
                     }
                 }
             };
-            mockYamlLoading(yamlContent);
-
+            mockYamlLoading(yamlContent, resolveStub);
+            
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract("contracts", testFilePath2);
 

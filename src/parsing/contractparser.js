@@ -1,7 +1,7 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 const {promisify} = require('util');
-const {resolve} = require('path');
+const resolve = require('path').resolve;
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
 const helper = require("../helper-functions.js");
@@ -22,23 +22,18 @@ function hasDeepChild(obj, arg) {
         .reduce((obj, level) => obj && obj[level], obj);
 }
 
-function extractContractName(baseDir, contractFile, stripExtension = true) {
+function extractContractName(baseDir, contractFile) {
     let absoluteDir = baseDir.startsWith("/")
         ? baseDir
-        : `${process.env.PWD}/${baseDir}`;
-    // TODO: Replace 'process.env.pwd' for something more testable.
+        : resolve(baseDir);
 
     let fileName = contractFile.replace(absoluteDir, "");
     if(fileName.startsWith("/")) {
         fileName = fileName.substr(1);
     }
-    // TODO: Improve to keep directory structure for versioning
-    // let fileNameSplit = contractFile.split("/");
-    // let fileName = fileNameSplit[fileNameSplit.length - 1];
-    if (stripExtension) {
-        return fileName.replace(".yaml", "").replace(".yml", "");
-    }
-    return fileName;
+    return fileName
+        .replace(".yaml", "")
+        .replace(".yml", "");
 }
 
 function ContractParser(logger) {
