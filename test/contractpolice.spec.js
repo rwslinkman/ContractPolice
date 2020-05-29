@@ -11,10 +11,12 @@ const TestOutcome = require("../src/testoutcome.js");
 const ContractPoliceReporter = require("../src/reporting/contractpolicereporter.js");
 const JUnitReporter = require("../src/reporting/junitreporter.js");
 const Logging = require("../src/logging/logging.js");
+const Contract = require("../src/parsing/contract.js");
 // Subject
 const ContractPolice = rewire("../index.js");
 
 describe("ContractPolice", () => {
+    //region Mocks for all tests
     function mockFileSystem(outputDirExists) {
         return {
             existsSync: function (dir) {
@@ -25,6 +27,46 @@ describe("ContractPolice", () => {
             }
         };
     }
+
+    function parserMock() { // constructor returns object with functions
+        return {
+            findYamlFiles: function (directory) {
+                expect(directory).to.equal("some/directory");
+                return Promise.resolve(["/some/path/to/my-contract.yaml"]);
+            },
+            parseContract: function(contractFile) {
+                let contractObj = {
+                    request: {
+                        path: "/some/path"
+                    },
+                    response: {
+                        statuscode: 200
+                    }
+                }
+                return new Contract("contractName", contractObj);
+            },
+            extractContractName: function(contractFile, stripExtension) {
+                return "my-contract";
+            }
+        }
+    }
+
+    function testRunnerMock(contractName, contractRequest, endpoint, validator) { // constructor returns object with functions
+        return {
+            runTest: function() {
+                return new TestOutcome("my-contract", "Tests were executed", "PASS")
+            }
+        }
+    }
+
+    function failedTestRunnerMock(contractName, contractRequest, endpoint, validator) { // constructor returns object with functions
+        return {
+            runTest: function() {
+                return new TestOutcome("my-contract", "Tests were executed", "FAIL")
+            }
+        }
+    }
+    //endregion
 
     //region Tests to setup and config of ContractPolice
     it("should accept a directory parameter and a endpoint parameter", () => {
@@ -148,34 +190,6 @@ describe("ContractPolice", () => {
     //region Tests to verify behaviour of ContractPolice
     it('should resolve a successful promise when given valid input, outputDir exists and tests are passing', () => {
         //region mocks
-        let parserMock = function() { // constructor returns object with functions
-            return {
-                findContractFiles: function (directory) {
-                    expect(directory).to.equal("some/directory");
-                    return Promise.resolve(["/some/path/to/my-contract.yaml"]);
-                },
-                parseContract: function(contractFile) {
-                    return Promise.resolve({
-                        request: {
-                            path: "/some/path"
-                        },
-                        response: {
-                            statuscode: 200
-                        }
-                    });
-                },
-                extractContractName: function(contractFile, stripExtension) {
-                    return "my-contract";
-                }
-            }
-        };
-        let testRunnerMock = function(contractName, contractRequest, endpoint, validator) { // constructor returns object with functions
-            return {
-                runTest: function() {
-                    return new TestOutcome("my-contract", "Tests were executed", "PASS")
-                }
-            }
-        };
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
             return {
@@ -210,34 +224,6 @@ describe("ContractPolice", () => {
 
     it('should resolve a successful promise when given valid input, outputDir does not exist and tests are passing', () => {
         //region mocks
-        let parserMock = function() { // constructor returns object with functions
-            return {
-                findContractFiles: function (directory) {
-                    expect(directory).to.equal("some/directory");
-                    return Promise.resolve(["/some/path/to/my-contract.yaml"]);
-                },
-                parseContract: function(contractFile) {
-                    return Promise.resolve({
-                        request: {
-                            path: "/some/path"
-                        },
-                        response: {
-                            statuscode: 200
-                        }
-                    });
-                },
-                extractContractName: function(contractFile, stripExtension) {
-                    return "my-contract";
-                }
-            }
-        };
-        let testRunnerMock = function(contractName, contractRequest, endpoint, validator) { // constructor returns object with functions
-            return {
-                runTest: function() {
-                    return new TestOutcome("my-contract", "Tests were executed", "PASS")
-                }
-            }
-        };
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
             return {
@@ -270,34 +256,6 @@ describe("ContractPolice", () => {
     });
 
     it('should resolve a successful promise when given valid input, tests are passing, outputDir exists and junit reporter is configured', () => {
-        let parserMock = function() { // constructor returns object with functions
-            return {
-                findContractFiles: function (directory) {
-                    expect(directory).to.equal("some/directory");
-                    return Promise.resolve(["/some/path/to/my-contract.yaml"]);
-                },
-                parseContract: function(contractFile) {
-                    return Promise.resolve({
-                        request: {
-                            path: "/some/path"
-                        },
-                        response: {
-                            statuscode: 200
-                        }
-                    });
-                },
-                extractContractName: function(contractFile, stripExtension) {
-                    return "my-contract";
-                }
-            }
-        };
-        let testRunnerMock = function(contractName, contractRequest, endpoint, validator) { // constructor returns object with functions
-            return {
-                runTest: function() {
-                    return new TestOutcome("my-contract", "Tests were executed", "PASS")
-                }
-            }
-        };
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
             return {
@@ -334,34 +292,7 @@ describe("ContractPolice", () => {
     });
 
     it('should resolve a successful promise when given valid input, tests are passing, outputDir does not exist and junit reporter is configured', () => {
-        let parserMock = function() { // constructor returns object with functions
-            return {
-                findContractFiles: function (directory) {
-                    expect(directory).to.equal("some/directory");
-                    return Promise.resolve(["/some/path/to/my-contract.yaml"]);
-                },
-                parseContract: function(contractFile) {
-                    return Promise.resolve({
-                        request: {
-                            path: "/some/path"
-                        },
-                        response: {
-                            statuscode: 200
-                        }
-                    });
-                },
-                extractContractName: function(contractFile, stripExtension) {
-                    return "my-contract";
-                }
-            }
-        };
-        let testRunnerMock = function(contractName, contractRequest, endpoint, validator) { // constructor returns object with functions
-            return {
-                runTest: function() {
-                    return new TestOutcome("my-contract", "Tests were executed", "PASS")
-                }
-            }
-        };
+        //region mocks
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
             return {
@@ -374,6 +305,7 @@ describe("ContractPolice", () => {
                 writeTestReport: junitStub
             }
         };
+        //endregion
 
         // Injection
         ContractPolice.__set__({
@@ -399,34 +331,6 @@ describe("ContractPolice", () => {
 
     it('should resolve a successful promise when given valid input, outputDir exists and tests are failing', () => {
         //region mocks
-        let parserMock = function() { // constructor returns object with functions
-            return {
-                findContractFiles: function (directory) {
-                    expect(directory).to.equal("some/directory");
-                    return Promise.resolve(["/some/path/to/my-contract.yaml"]);
-                },
-                parseContract: function(contractFile) {
-                    return Promise.resolve({
-                        request: {
-                            path: "/some/path"
-                        },
-                        response: {
-                            statuscode: 200
-                        }
-                    });
-                },
-                extractContractName: function(contractFile, stripExtension) {
-                    return "my-contract";
-                }
-            }
-        };
-        let testRunnerMock = function(contractName, contractRequest, endpoint, validator) { // constructor returns object with functions
-            return {
-                runTest: function() {
-                    return new TestOutcome("my-contract", "Tests were executed", "FAIL")
-                }
-            }
-        };
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
             return {
@@ -442,7 +346,7 @@ describe("ContractPolice", () => {
         // Injection
         ContractPolice.__set__({
             "ContractParser": parserMock,
-            "TestRunner": testRunnerMock,
+            "TestRunner": failedTestRunnerMock,
             "ContractPoliceReporter": cpReporter,
             "JUnitReporter": junitReporter,
             "fs": mockFileSystem(true)
@@ -461,34 +365,6 @@ describe("ContractPolice", () => {
 
     it('should resolve a successful promise when given valid input, outputDir does not exist and tests are failing', () => {
         //region mocks
-        let parserMock = function() { // constructor returns object with functions
-            return {
-                findContractFiles: function (directory) {
-                    expect(directory).to.equal("some/directory");
-                    return Promise.resolve(["/some/path/to/my-contract.yaml"]);
-                },
-                parseContract: function(contractFile) {
-                    return Promise.resolve({
-                        request: {
-                            path: "/some/path"
-                        },
-                        response: {
-                            statuscode: 200
-                        }
-                    });
-                },
-                extractContractName: function(contractFile, stripExtension) {
-                    return "my-contract";
-                }
-            }
-        };
-        let testRunnerMock = function(contractName, contractRequest, endpoint, validator) { // constructor returns object with functions
-            return {
-                runTest: function() {
-                    return new TestOutcome("my-contract", "Tests were executed", "FAIL")
-                }
-            }
-        };
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
             return {
@@ -504,7 +380,7 @@ describe("ContractPolice", () => {
         // Injection
         ContractPolice.__set__({
             "ContractParser": parserMock,
-            "TestRunner": testRunnerMock,
+            "TestRunner": failedTestRunnerMock,
             "ContractPoliceReporter": cpReporter,
             "JUnitReporter": junitReporter,
             "fs": mockFileSystem(false)
@@ -523,34 +399,6 @@ describe("ContractPolice", () => {
 
     it('should write additional logs when given valid input, outputDir exists and tests are passing', () => {
         //region mocks
-        let parserMock = function() { // constructor returns object with functions
-            return {
-                findContractFiles: function (directory) {
-                    expect(directory).to.equal("some/directory");
-                    return Promise.resolve(["/some/path/to/my-contract.yaml"]);
-                },
-                parseContract: function(contractFile) {
-                    return Promise.resolve({
-                        request: {
-                            path: "/some/path"
-                        },
-                        response: {
-                            statuscode: 200
-                        }
-                    });
-                },
-                extractContractName: function(contractFile, stripExtension) {
-                    return "my-contract";
-                }
-            }
-        };
-        let testRunnerMock = function(contractName, contractRequest, endpoint, validator) { // constructor returns object with functions
-            return {
-                runTest: function() {
-                    return new TestOutcome("my-contract", "Tests were executed", "PASS")
-                }
-            }
-        };
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
             return {

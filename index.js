@@ -1,10 +1,11 @@
-const ContractParser = require("./src/contractparser.js");
+const ContractParser = require("./src/parsing/contractparser.js");
 const TestRunner = require("./src/testrunner.js");
 const ContractValidator = require("./src/validation/validator.js");
 const ContractPoliceReporter = require("./src/reporting/contractpolicereporter.js");
 const JUnitReporter = require("./src/reporting/junitreporter.js");
 const fs = require('fs');
 const Logging = require("./src/logging/logging.js");
+const ExecutionReport = require("./src/executionreport.js");
 
 const LOG_TAG = "ContractPolice"
 const defaultConfig = {
@@ -69,26 +70,20 @@ ContractPolice.prototype.testContracts = function() {
     const failOnError = this.config.failOnError;
     const reportOutputDir = this.config.reportOutputDir;
     const reporterType = this.config.reporter;
+    const contractsDirectory = this.contractsDirectory;
     const logger = this.logger;
 
     logger.log(LOG_TAG, "info", "Start contract test(s) with ContractPolice");
 
     let contractParser = new ContractParser(logger);
+
     return contractParser
-        .findContractFiles(this.contractsDirectory)
+        .findYamlFiles(contractsDirectory)
         .then(function(filesArray){
             // Collect all contracts from YAML files
-            let contracts = [];
-            filesArray.forEach(function(contractFile) {
-                let contract = contractParser.parseContract(contractFile);
-                let contractName = contractParser.extractContractName(contractFile, false);
-                let contractMeta = {
-                    name: contractName,
-                    data: contract
-                };
-                contracts.push(contractMeta);
+            return filesArray.map(function(yamlFile) {
+                return contractParser.parseContract(contractsDirectory, yamlFile);
             });
-            return contracts;
         })
         .then(function (contracts) {
             // Compose test runs
@@ -121,12 +116,9 @@ ContractPolice.prototype.testContracts = function() {
                 fs.mkdirSync(reportOutputDir);
             }
             // Collect execution report and pass on
-            return {
-                testReporter: reporter,
-                timestamp: new Date().getTime(),
-                results: testResults,
-                runSuccess: !(testResults.map(it => it.result).includes("FAIL"))
-            }
+            const runSuccess = !(testResults.map(it => it.result).includes("FAIL"));
+            const timestamp = new Date().getTime();
+            return new ExecutionReport(reporter, timestamp, testResults, runSuccess);
         })
         .then(function(executionReport) {
             // Write test report & application logs
