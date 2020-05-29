@@ -109,7 +109,7 @@ describe("deepCompare", () => {
         expect(result).to.have.lengthOf(1);
         let violation = result[0];
         expect(violation.key).to.equal("someKey");
-        expect(violation.expected).to.equal("any String");
+        expect(violation.expected).to.equal("any string");
         expect(violation.actual).to.equal("number");
     });
 
@@ -197,12 +197,104 @@ describe("deepCompare", () => {
         expect(result).to.be.empty;
     });
 
+    it("should return an empty violation list when two equal objects are passed with equal nested objects containing string wildcard", () => {
+        const expectedParam = {
+            someKey: {
+                anotherKey: "<anyString>"
+            }
+        };
+        const actualParam = {
+            someKey: {
+                anotherKey: "anotherValue"
+            }
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.be.empty;
+    });
+
+    it("should return an empty violation list when two equal objects are passed with equal nested objects containing number wildcard", () => {
+        const expectedParam = {
+            someKey: {
+                anotherKey: "<anyNumber>"
+            }
+        };
+        const actualParam = {
+            someKey: {
+                anotherKey: 1337
+            }
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.be.empty;
+    });
+
     it("should return an empty violation list when two equal objects are passed with equal deeper nested objects", () => {
         const expectedParam = {
             product: {
                 name: "Burger",
                 calories: {
                     value: 500,
+                    unit: "kcal"
+                }
+            },
+            price: 5,
+            quantity: 2
+        };
+        const actualParam = {
+            product: {
+                name: "Burger",
+                calories: {
+                    value: 500,
+                    unit: "kcal"
+                }
+            },
+            price: 5,
+            quantity: 2
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.be.empty;
+    });
+
+    it("should return an empty violation list when two equal objects are passed with equal deeper nested objects containing string wildcard", () => {
+        const expectedParam = {
+            product: {
+                name: "Burger",
+                calories: {
+                    value: 500,
+                    unit: "<anyString>"
+                }
+            },
+            price: 5,
+            quantity: 2
+        };
+        const actualParam = {
+            product: {
+                name: "Burger",
+                calories: {
+                    value: 500,
+                    unit: "kcal"
+                }
+            },
+            price: 5,
+            quantity: 2
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.be.empty;
+    });
+
+    it("should return an empty violation list when two equal objects are passed with equal deeper nested objects containing number wildcard", () => {
+        const expectedParam = {
+            product: {
+                name: "Burger",
+                calories: {
+                    value: "<anyNumber>",
                     unit: "kcal"
                 }
             },
@@ -259,6 +351,44 @@ describe("deepCompare", () => {
             someKey: [
                 "someValue",
                 "anotherValue"
+            ]
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.be.empty;
+    });
+
+    it("should return an empty violation list when two equal objects are passed with equal nested arrays containing string wildcard", () => {
+        const expectedParam = {
+            someKey: [
+                "someValue",
+                "<anyString>"
+            ]
+        };
+        const actualParam = {
+            someKey: [
+                "someValue",
+                "anotherValue"
+            ]
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.be.empty;
+    });
+
+    it("should return an empty violation list when two equal objects are passed with equal nested arrays containing number wildcard", () => {
+        const expectedParam = {
+            someKey: [
+                "someValue",
+                "<anyNumber>"
+            ]
+        };
+        const actualParam = {
+            someKey: [
+                "someValue",
+                1337
             ]
         };
 
@@ -422,7 +552,7 @@ describe("deepCompare", () => {
         expect(violation.actual).to.equal("number");
     });
 
-    it("should return an empty violation list when two equal objects are passed with matching String wildcard property", () => {
+    it("should return an empty violation list when two equal objects are passed with matching string wildcard property", () => {
         const expectedParam = {
             someKey: "<anyString>"
         };
@@ -435,7 +565,7 @@ describe("deepCompare", () => {
         expect(result).to.be.empty;
     });
 
-    it("should return an empty violation list when two equal objects are passed with non-matching String wildcard property", () => {
+    it("should return an empty violation list when two equal objects are passed with non-matching string wildcard property", () => {
         const expectedParam = {
             someKey: "<anyString>"
         };
@@ -449,7 +579,7 @@ describe("deepCompare", () => {
         expect(result).to.have.lengthOf(1);
         let violation = result[0];
         expect(violation.key).to.equal("someKey");
-        expect(violation.expected).to.equal("any String");
+        expect(violation.expected).to.equal("any string");
         expect(violation.actual).to.equal("number");
     });
 
@@ -554,7 +684,7 @@ describe("deepCompare", () => {
         expect(result).to.not.be.empty;
         expect(result).to.have.lengthOf(1);
         let violation = result[0];
-        expect(violation.key).to.equal("anotherKey");
+        expect(violation.key).to.equal("someKey.anotherKey");
         expect(violation.expected).to.equal("present");
         expect(violation.actual).to.equal("missing");
     });

@@ -14,24 +14,24 @@ function isSpecialCase(property) {
         && property.endsWith(">")
 }
 
-function compareSpecialCase(key, expectedValue, actualValue) {
+function compareSpecialCase(key, expectedValue, actualValue, prefix = "") {
     let actualType = typeof actualValue;
     if(expectedValue === "<anyString>") {
         // validate that expectedValue is any String
         if(actualType !== "string") {
-            return new Violation(key, "any String", actualType);
+            return new Violation(prefix + key, "any string", actualType);
         }
         return null;
     } else if(expectedValue === "<anyNumber>") {
         if(actualType !== "number") {
-            return new Violation(key, "any number", actualType);
+            return new Violation(prefix + key, "any number", actualType);
         }
         return null;
     }
     return new Violation(key, expectedValue, "not supported");
 }
 
-function deepCompare(expected, actual, caseSensitive = true) {
+function deepCompare(expected, actual, caseSensitive = true, prefix = "") {
     let violations = [];
 
     for (let propertyName in expected) {
@@ -47,12 +47,12 @@ function deepCompare(expected, actual, caseSensitive = true) {
                         let actualItem = actual[propertyName][p];
 
                         if(typeof expectedItem === "object") {
-                            let itemViolations = deepCompare(expectedItem, actualItem);
+                            let itemViolations = deepCompare(expectedItem, actualItem, caseSensitive, `${prefix + propertyName}.`);
                             violations = violations.concat(itemViolations);
                         } else {
                             let actualArray = actual[propertyName];
-                            if(!actualArray.includes(expectedItem)) {
-                                let arrayViolation = new Violation(propertyName, expectedItem, "missing");
+                            if(!actualArray.includes(expectedItem) && !isSpecialCase(expectedItem)) {
+                                let arrayViolation = new Violation(prefix + propertyName, expectedItem, "missing");
                                 violations.push(arrayViolation);
                             }
                         }
@@ -61,10 +61,10 @@ function deepCompare(expected, actual, caseSensitive = true) {
                     if (actual.hasOwnProperty(propertyName)) {
                         // Compare object property
                         let actualPropertyValue = actual[propertyName];
-                        let itemViolations = deepCompare(expectedPropertyValue, actualPropertyValue);
+                        let itemViolations = deepCompare(expectedPropertyValue, actualPropertyValue, caseSensitive, `${prefix + propertyName}.`);
                         violations = violations.concat(itemViolations);
                     } else {
-                        violations.push(new Violation(propertyName, "present", "missing"));
+                        violations.push(new Violation(prefix + propertyName, "present", "missing"));
                     }
                 }
             } else {
@@ -86,25 +86,26 @@ function deepCompare(expected, actual, caseSensitive = true) {
 
                 if(propName === null) {
                     // Property does not exist (even case-insensitive)
-                    violations.push(new Violation(propertyName, "present", "missing"));
+                    violations.push(new Violation(prefix + propertyName, "present", "missing"));
                 }
                 else {
                     // Compare property
                     let actualPropertyValueType = typeof actualPropertyValue;
                     if(expectedPropertyValueType === actualPropertyValueType && !isSpecialCase(expectedPropertyValue)) {
                         if (expectedPropertyValue !== actualPropertyValue) {
-                            violations.push(new Violation(propertyName, expectedPropertyValue, actualPropertyValue));
+                            violations.push(new Violation(prefix + propertyName, expectedPropertyValue, actualPropertyValue));
                         }
                     }
                     else if(isSpecialCase(expectedPropertyValue)){
-                        // anyString, anyNumber, anyBool
-                        let specialCaseViolation = compareSpecialCase(propertyName, expectedPropertyValue, actualPropertyValue);
+                        // anyString, anyNumber
+                        let specialCaseViolation = compareSpecialCase(propertyName, expectedPropertyValue, actualPropertyValue, prefix);
                         if(specialCaseViolation !== null) {
                             violations.push(specialCaseViolation);
                         }
                     }
                     else {
-                        violations.push(new Violation(`type of '${propertyName}'`, expectedPropertyValueType, actualPropertyValueType));
+                        // Type violation
+                        violations.push(new Violation(`type of '${prefix + propertyName}'`, expectedPropertyValueType, actualPropertyValueType));
                     }
                 }
             }
