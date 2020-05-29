@@ -197,6 +197,35 @@ describe("deepCompare", () => {
         expect(result).to.be.empty;
     });
 
+    it("should return an empty violation list when two equal objects are passed with equal deeper nested objects", () => {
+        const expectedParam = {
+            product: {
+                name: "Burger",
+                calories: {
+                    value: 500,
+                    unit: "kcal"
+                }
+            },
+            price: 5,
+            quantity: 2
+        };
+        const actualParam = {
+            product: {
+                name: "Burger",
+                calories: {
+                    value: 500,
+                    unit: "kcal"
+                }
+            },
+            price: 5,
+            quantity: 2
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.be.empty;
+    });
+
     it("should return a violation list when two equal objects are passed with nested object that does not have required property", () => {
         const expectedParam = {
             someKey: {
@@ -615,5 +644,73 @@ describe("deepCompare", () => {
         expect(violation.key).to.equal("product.calories.unit");
         expect(violation.expected).to.equal("present");
         expect(violation.actual).to.equal("missing");
+    });
+
+    it("should return a violation with correct name when two equal objects are passed with deeper nested object that does not have required property type", () => {
+        const expectedParam = {
+            product: {
+                name: "Burger",
+                calories: {
+                    value: 500,
+                    unit: "kcal"
+                }
+            },
+            price: 5,
+            quantity: 2
+        };
+        const actualParam = {
+            product: {
+                name: "Burger",
+                calories: {
+                    value: "500",
+                    unit: "kcal"
+                }
+            },
+            price: 5,
+            quantity: 2
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.not.be.empty;
+        expect(result).to.have.lengthOf(1);
+        let violation = result[0];
+        expect(violation.key).to.equal("type of 'product.calories.value'");
+        expect(violation.expected).to.equal("number");
+        expect(violation.actual).to.equal("string");
+    });
+
+    it("should return a violation with correct name when two equal objects are passed with deeper nested object that does not have required property value", () => {
+        const expectedParam = {
+            product: {
+                name: "Burger",
+                calories: {
+                    value: 500,
+                    unit: "kcal"
+                }
+            },
+            price: 5,
+            quantity: 2
+        };
+        const actualParam = {
+            product: {
+                name: "Burger",
+                calories: {
+                    value: 500,
+                    unit: "joules"
+                }
+            },
+            price: 5,
+            quantity: 2
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.not.be.empty;
+        expect(result).to.have.lengthOf(1);
+        let violation = result[0];
+        expect(violation.key).to.equal("product.calories.unit");
+        expect(violation.expected).to.equal("kcal");
+        expect(violation.actual).to.equal("joules");
     });
 });

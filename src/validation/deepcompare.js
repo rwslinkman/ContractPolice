@@ -8,6 +8,12 @@ function hasOwnPropertyCaseInsensitive(obj, property) {
     return null;
 }
 
+function isSpecialCase(property) {
+    return (typeof property === "string")
+        && property.startsWith("<any")
+        && property.endsWith(">")
+}
+
 function compareSpecialCase(key, expectedValue, actualValue) {
     let actualType = typeof actualValue;
     if(expectedValue === "<anyString>") {
@@ -25,7 +31,6 @@ function compareSpecialCase(key, expectedValue, actualValue) {
     return new Violation(key, expectedValue, "not supported");
 }
 
-// TODO: Add prefix property to print deeper children more correctly
 function deepCompare(expected, actual, caseSensitive = true) {
     let violations = [];
 
@@ -84,21 +89,22 @@ function deepCompare(expected, actual, caseSensitive = true) {
                     violations.push(new Violation(propertyName, "present", "missing"));
                 }
                 else {
+                    // Compare property
                     let actualPropertyValueType = typeof actualPropertyValue;
-
-                    if (expectedPropertyValueType !== actualPropertyValueType && !expectedPropertyValue.startsWith("<any")) {
-                        violations.push(new Violation(`type of '${propertyName}'`, expectedPropertyValueType, actualPropertyValueType));
-                    } else {
-                        // Check for special cases
-                        if (typeof expectedPropertyValue === "string" && expectedPropertyValue.startsWith("<any") && expectedPropertyValue.endsWith(">")) {
-                            let specialCaseViolation = compareSpecialCase(propertyName, expectedPropertyValue, actualPropertyValue);
-                            if(specialCaseViolation !== null) {
-                                violations.push(specialCaseViolation);
-                            }
-                        } else if (expectedPropertyValue !== actualPropertyValue) {
-                            // variable type comparison
+                    if(expectedPropertyValueType === actualPropertyValueType && !isSpecialCase(expectedPropertyValue)) {
+                        if (expectedPropertyValue !== actualPropertyValue) {
                             violations.push(new Violation(propertyName, expectedPropertyValue, actualPropertyValue));
                         }
+                    }
+                    else if(isSpecialCase(expectedPropertyValue)){
+                        // anyString, anyNumber, anyBool
+                        let specialCaseViolation = compareSpecialCase(propertyName, expectedPropertyValue, actualPropertyValue);
+                        if(specialCaseViolation !== null) {
+                            violations.push(specialCaseViolation);
+                        }
+                    }
+                    else {
+                        violations.push(new Violation(`type of '${propertyName}'`, expectedPropertyValueType, actualPropertyValueType));
                     }
                 }
             }
