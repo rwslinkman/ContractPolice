@@ -84,6 +84,7 @@ ContractParser.prototype.parseContract = function (contractsDirectory, contractF
     // All expected properties exist, no error thrown.
     this.logger.debug(LOG_TAG, `File '${contractName}' contains a valid Contract Definition`);
 
+    // TODO: simplify, extract function
     // Verify within request
     let expectedRequest = contractYaml.contract.request;
     if (expectedRequest.hasOwnProperty("headers")) {
@@ -111,6 +112,8 @@ ContractParser.prototype.parseContract = function (contractsDirectory, contractF
         contractYaml.contract.response.headers = responseHeaders;
         this.logger.debug(LOG_TAG, `Response headers of '${contractName}' have been normalized`);
     }
+
+    // TODO Validate/normalize queryparams
 
     return {
         name: contractName,

@@ -50,10 +50,16 @@ TestRunner.prototype.runTest = function() {
                     loggerLocal.info(LOG_TAG, `Contract test "${testNameLocal}" completed with result ${testResult}`);
                     return new TestOutcome(testNameLocal, violationReport.getViolationTexts(), testResult);
                 })
+                .catch(function(validatorError) {
+                    // Validation error
+                    let violationText = `Unable to validate ${testNameLocal} due to error`;
+                    loggerLocal.error(LOG_TAG, `${violationText}: ${validatorError.message}`);
+                    return new TestOutcome(testNameLocal, [violationText], "FAIL");
+                })
         })
         .catch(function(needleError) {
-            loggerLocal.error(LOG_TAG, `Cannot reach testing target at "${needleError.address}:${needleError.port}" (errorcode: ${needleError.code})`);
             // HTTP request error
+            loggerLocal.error(LOG_TAG, `Cannot reach testing target at "${needleError.address}:${needleError.port}" (errorcode: ${needleError.code})`);
             let violationText = `ContractPolice contacted ${url} but was unable to reach it`;
             return new TestOutcome(testNameLocal, [violationText], "FAIL");
         });
