@@ -6,6 +6,7 @@ contract:
       - Accept: application/json
     params:
       - orderId: abcd-efghi-jklmn-opqrst
+      - token: tsrqpo-nmlkj-ihgfe-bcda
   response:
     body:
       orderId: abcd-efghi-jklmn-opqrst

@@ -85,7 +85,7 @@ ContractParser.prototype.parseContract = function (contractsDirectory, contractF
     this.logger.debug(LOG_TAG, `File '${contractName}' contains a valid Contract Definition`);
 
     // TODO: simplify, extract function
-    // Verify within request
+    // Verify headers within request
     let expectedRequest = contractYaml.contract.request;
     if (expectedRequest.hasOwnProperty("headers")) {
         let requestHeaders = contractYaml.contract.request.headers;
@@ -94,12 +94,12 @@ ContractParser.prototype.parseContract = function (contractsDirectory, contractF
         }
 
         // Formatting headers into desired format; supporting both Object an Array notation
-        requestHeaders = helper.normalizeHeaders(requestHeaders);
+        requestHeaders = helper.normalizeObject(requestHeaders);
         contractYaml.contract.request.headers = requestHeaders;
         this.logger.debug(LOG_TAG, `Request headers of '${contractName}' have been normalized`);
     }
 
-    // Verify within response
+    // Verify headers within response
     let expectedResponse = contractYaml.contract.response;
     if (expectedResponse.hasOwnProperty("headers")) {
         let responseHeaders = contractYaml.contract.response.headers;
@@ -108,12 +108,23 @@ ContractParser.prototype.parseContract = function (contractsDirectory, contractF
         }
 
         // Formatting headers into desired format; supporting both Object an Array notation
-        responseHeaders = helper.normalizeHeaders(responseHeaders);
+        responseHeaders = helper.normalizeObject(responseHeaders);
         contractYaml.contract.response.headers = responseHeaders;
         this.logger.debug(LOG_TAG, `Response headers of '${contractName}' have been normalized`);
     }
 
     // TODO Validate/normalize queryparams
+    // Verify query parameters within request
+    if(expectedRequest.hasOwnProperty("params")) {
+        let requestQueryParams = contractYaml.contract.request.params;
+        if(typeof requestQueryParams !== "object") {
+            throw `Query parameter definition in '${contractName}' should be of type 'object' or 'array'`;
+        }
+
+        requestQueryParams = helper.normalizeObject(requestQueryParams);
+        contractYaml.contract.request.params = requestQueryParams;
+        this.logger.debug(LOG_TAG, `Query params of '${contractName}' have been normalized`);
+    }
 
     return {
         name: contractName,
