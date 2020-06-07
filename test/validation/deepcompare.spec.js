@@ -144,9 +144,40 @@ describe("deepCompare", () => {
         expect(violation.actual).to.equal("string");
     });
 
+    it("should return an empty violation list when two equal objects are passed with matching boolean wildcard property", () => {
+        const expectedParam = {
+            someKey: "<anyBool>"
+        };
+        const actualParam = {
+            someKey: true
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.be.empty;
+    });
+
+    it("should return a violation list when two equal objects are passed with non-matching boolean wildcard property", () => {
+        const expectedParam = {
+            someKey: "<anyBool>"
+        };
+        const actualParam = {
+            someKey: "someValue"
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.not.be.empty;
+        expect(result).to.have.lengthOf(1);
+        let violation = result[0];
+        expect(violation.key).to.equal("someKey");
+        expect(violation.expected).to.equal("any boolean");
+        expect(violation.actual).to.equal("string");
+    });
+
     it("should return a violation list when a non-supported wildcard is used", () => {
         const expectedParam = {
-            someKey: "<anyBoolean>"
+            someKey: "<anyThing>"
         };
         const actualParam = {
             someKey: false
@@ -158,7 +189,7 @@ describe("deepCompare", () => {
         expect(result).to.have.lengthOf(1);
         let violation = result[0];
         expect(violation.key).to.equal("someKey");
-        expect(violation.expected).to.equal("<anyBoolean>");
+        expect(violation.expected).to.equal("<anyThing>");
         expect(violation.actual).to.equal("not supported");
     });
 
@@ -223,6 +254,23 @@ describe("deepCompare", () => {
         const actualParam = {
             someKey: {
                 anotherKey: 1337
+            }
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.be.empty;
+    });
+
+    it("should return an empty violation list when two equal objects are passed with equal nested objects containing boolean wildcard", () => {
+        const expectedParam = {
+            someKey: {
+                anotherKey: "<anyBool>"
+            }
+        };
+        const actualParam = {
+            someKey: {
+                anotherKey: true
             }
         };
 
@@ -318,6 +366,37 @@ describe("deepCompare", () => {
         expect(result).to.be.empty;
     });
 
+    it("should return an empty violation list when two equal objects are passed with equal deeper nested objects containing boolean wildcard", () => {
+        const expectedParam = {
+            product: {
+                name: "Burger",
+                calories: {
+                    value: "<anyNumber>",
+                    unit: "kcal",
+                    isExact: "<anyBool>"
+                }
+            },
+            price: 5,
+            quantity: 2
+        };
+        const actualParam = {
+            product: {
+                name: "Burger",
+                calories: {
+                    value: 500,
+                    unit: "kcal",
+                    isExact: false
+                }
+            },
+            price: 5,
+            quantity: 2
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.be.empty;
+    });
+
     it("should return a violation list when two equal objects are passed with nested object that does not have required property", () => {
         const expectedParam = {
             someKey: {
@@ -389,6 +468,25 @@ describe("deepCompare", () => {
             someKey: [
                 "someValue",
                 1337
+            ]
+        };
+
+        const result = deepCompare(expectedParam, actualParam);
+
+        expect(result).to.be.empty;
+    });
+
+    it("should return an empty violation list when two equal objects are passed with equal nested arrays containing boolean wildcard", () => {
+        const expectedParam = {
+            someKey: [
+                "someValue",
+                "<anyBool>"
+            ]
+        };
+        const actualParam = {
+            someKey: [
+                "someValue",
+                false
             ]
         };
 
@@ -614,9 +712,40 @@ describe("deepCompare", () => {
         expect(violation.actual).to.equal("string");
     });
 
+    it("should return an empty violation list when two equal objects are passed with matching boolean wildcard property", () => {
+        const expectedParam = {
+            someKey: "<anyBool>"
+        };
+        const actualParam = {
+            someKey: true
+        };
+
+        const result = deepCompare(expectedParam, actualParam, false);
+
+        expect(result).to.be.empty;
+    });
+
+    it("should return a violation list when two equal objects are passed with non-matching boolean wildcard property", () => {
+        const expectedParam = {
+            someKey: "<anyBool>"
+        };
+        const actualParam = {
+            someKey: "someValue"
+        };
+
+        const result = deepCompare(expectedParam, actualParam, false);
+
+        expect(result).to.not.be.empty;
+        expect(result).to.have.lengthOf(1);
+        let violation = result[0];
+        expect(violation.key).to.equal("someKey");
+        expect(violation.expected).to.equal("any boolean");
+        expect(violation.actual).to.equal("string");
+    });
+
     it("should return a violation list when a non-supported wildcard is used", () => {
         const expectedParam = {
-            someKey: "<anyBoolean>"
+            someKey: "<anyThing>"
         };
         const actualParam = {
             someKey: false
@@ -628,7 +757,7 @@ describe("deepCompare", () => {
         expect(result).to.have.lengthOf(1);
         let violation = result[0];
         expect(violation.key).to.equal("someKey");
-        expect(violation.expected).to.equal("<anyBoolean>");
+        expect(violation.expected).to.equal("<anyThing>");
         expect(violation.actual).to.equal("not supported");
     });
 

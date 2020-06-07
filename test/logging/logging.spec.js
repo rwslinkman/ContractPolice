@@ -40,7 +40,7 @@ describe("Logging", () => {
         });
     });
 
-    describe("log function", () => {
+    describe("tests for console logging function", () => {
         let consoleStub;
         beforeEach(function () {
             consoleStub = sinon.stub(console, "log");
@@ -109,7 +109,7 @@ describe("Logging", () => {
         });
     });
 
-    describe("specific log functions", () => {
+    describe("tests for specific log functions", () => {
         let consoleStub;
         beforeEach(function () {
             consoleStub = sinon.stub(console, "log");
@@ -161,7 +161,7 @@ describe("Logging", () => {
         });
     });
 
-    describe("writing logs to file", () => {
+    describe("tests for writing logs to file", () => {
         it("resolves a promise when writing logs to file", () => {
             setMocks(null);
             const logger = new Logging("debug", false, true);
