@@ -1,0 +1,15 @@
+contract:
+  request:
+    path: /api/v1/tokens/init
+    method: POST
+    body:
+      username: myUsername
+      userSeed: <generate[string(length=32)]>
+      loginCount: <generate[number(min=1337;max=7331)]>
+      nonce: <generate[uuid]>
+  response:
+    statusCode: 200
+    body:
+      accepted: true
+      token: <anyString>
+      validUntil: 2100-03-22T17:35:00.000+02:00

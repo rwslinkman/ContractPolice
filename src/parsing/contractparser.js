@@ -103,6 +103,8 @@ ContractParser.prototype.parseContract = function (contractsDirectory, contractF
     normalizeObjectProperty(this.logger, contractYaml.contract.response, "headers", contractName);
     normalizeObjectProperty(this.logger, contractYaml.contract.request, "params", contractName);
 
+    // TODO: Check for <generate> and replace values
+
     return {
         name: contractName,
         data: contractYaml.contract
