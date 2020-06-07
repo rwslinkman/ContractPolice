@@ -90,6 +90,7 @@ describe("ContractParser", () => {
             });
         }
 
+        //region basic contract test
         it("should return the contract object when given valid input", () => {
             const yamlContent = {
                 contract: {
@@ -242,7 +243,9 @@ describe("ContractParser", () => {
 
             expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw(`contract1 does not contain a "contract.response.statusCode"`);
         });
+        //endregion
 
+        //region header tests
         it("should normalize request headers to array when headers are specified as object", () => {
             const yamlContent = {
                 contract: {
@@ -315,7 +318,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("Request header definition in 'contract1' should be of type 'object' or 'array'");
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("Definition of 'headers' in 'contract1' should be of type 'object' or 'array'");
         });
 
         it("should normalize response headers to array when headers are specified as object", () => {
@@ -390,7 +393,87 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("Response header definition in 'contract1' should be of type 'object' or 'array'");
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("Definition of 'headers' in 'contract1' should be of type 'object' or 'array'");
         });
+        //endregion
+
+        //region
+        it("should normalize query parameters to array when params are specified as object", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path",
+                        params: {
+                            orderId: 1337,
+                            token: "abcd"
+                        }
+                    },
+                    response: {
+                        statusCode: 200
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser(TESTLOGGER);
+            let result = parser.parseContract(testBaseDir, testFilePath1);
+
+            expect(result.data).to.equal(yamlContent.contract);
+            expect(result.name).to.equal(testFileName1);
+            const payload = result.data;
+            expect(payload.request.params).to.deep.equal([
+                { "orderId": 1337 },
+                { "token": "abcd" }
+            ]);
+        });
+
+        it("should normalize query parameters to array when params are specified as array", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path",
+                        params: [
+                            { "orderId": 1337 },
+                            { "token": "abcd" }
+                        ]
+                    },
+                    response: {
+                        statusCode: 200
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser(TESTLOGGER);
+            let result = parser.parseContract(testBaseDir, testFilePath1);
+
+            expect(result.data).to.equal(yamlContent.contract);
+            expect(result.name).to.equal(testFileName1);
+            const payload = result.data;
+            expect(payload.request.params).to.deep.equal([
+                { "orderId": 1337 },
+                { "token": "abcd" }
+            ]);
+        });
+
+        it("should throw an error when query parameters are specified as non-object type", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path",
+                        params: "orderId=1337"
+                    },
+                    response: {
+                        statusCode: 200
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser(TESTLOGGER);
+
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("Definition of 'params' in 'contract1' should be of type 'object' or 'array'");
+        });
+        // endregion
     })
 });

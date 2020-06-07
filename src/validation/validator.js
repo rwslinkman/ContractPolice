@@ -14,8 +14,9 @@ function validateStatusCode(logger, expectedResponse, actualResponse) {
 }
 
 function validateAllKeysExist(logger, expectedResponse, actualResponse) {
-    let bodyTypeViolations = validateMatchingBodyType(logger, expectedResponse, actualResponse);
-    if(bodyTypeViolations.length === 0) {
+    let violations = validateMatchingBodyType(logger, expectedResponse, actualResponse);
+    violations = violations.concat(validateStatusCode(logger, expectedResponse, actualResponse));
+    if(violations.length === 0) {
         // Validation is only needed when types are the same
         return deepCompare(expectedResponse.body, actualResponse.body);
     }

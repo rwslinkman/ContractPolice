@@ -14,7 +14,7 @@ const TestRunner = rewire("../src/testrunner.js");
 
 describe("TestRunner", () => {
     const testLogger = new Logging("debug", false, false);
-    let needleStub = sinon.stub();
+    let needleStub
     function mockValidator(violations = []) {
         return {
             validate: sinon
@@ -31,14 +31,32 @@ describe("TestRunner", () => {
         });
     }
 
+    function mockValidatorError() {
+        return {
+            validate: sinon
+                .stub(new Validator(), "validate")
+                .rejects(new Error("Unexpected error"))
+        };
+    }
+
+    beforeEach(function () {
+        needleStub = sinon.stub();
+    });
+
+    afterEach(function() {
+        needleStub.reset();
+    });
+
     it("should run the test when minimal request succeeds and validator returns no violations", () => {
         const request = {
             path: "/v1/orders"
         };
         const violationList = [];
+        const mockedResponse = {
+            statusCode: 200
+        };
         const validator = mockValidator(violationList);
-        const httpSuccess = true;
-        mockNeedleRequest(httpSuccess);
+        mockNeedleRequest(mockedResponse);
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
@@ -53,9 +71,11 @@ describe("TestRunner", () => {
             method: "POST"
         };
         const violationList = [];
+        const mockedResponse = {
+            statusCode: 200
+        };
         const validator = mockValidator(violationList);
-        const httpSuccess = true;
-        mockNeedleRequest(httpSuccess);
+        mockNeedleRequest(mockedResponse);
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
@@ -70,9 +90,11 @@ describe("TestRunner", () => {
             method: "post"
         };
         const violationList = [];
+        const mockedResponse = {
+            statusCode: 200
+        };
         const validator = mockValidator(violationList);
-        const httpSuccess = true;
-        mockNeedleRequest(httpSuccess);
+        mockNeedleRequest(mockedResponse);
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
@@ -87,9 +109,11 @@ describe("TestRunner", () => {
             method: "PUT"
         };
         const violationList = [];
+        const mockedResponse = {
+            statusCode: 200
+        };
         const validator = mockValidator(violationList);
-        const httpSuccess = true;
-        mockNeedleRequest(httpSuccess);
+        mockNeedleRequest(mockedResponse);
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
@@ -104,9 +128,11 @@ describe("TestRunner", () => {
             method: "put"
         };
         const violationList = [];
+        const mockedResponse = {
+            statusCode: 200
+        };
         const validator = mockValidator(violationList);
-        const httpSuccess = true;
-        mockNeedleRequest(httpSuccess);
+        mockNeedleRequest(mockedResponse);
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
@@ -165,13 +191,65 @@ describe("TestRunner", () => {
             ]
         };
         const violationList = [];
+        const mockedResponse = {
+            statusCode: 200
+        };
         const validator = mockValidator(violationList);
-        const httpSuccess = true;
-        mockNeedleRequest(httpSuccess);
+        mockNeedleRequest(mockedResponse);
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
         const result = runner.runTest();
+
+        return expect(result).to.eventually.be.fulfilled;
+    });
+
+    it("should append query parameters to URL when running the test", () => {
+        const request = {
+            path: "/v3/orders",
+            method: "GET",
+            params: [
+                { "orderId": 1337 },
+                { "token": "abcd" }
+            ]
+        };
+
+        const violationList = [];
+        const mockedResponse = {
+            statusCode: 200
+        };
+        const validator = mockValidator(violationList);
+        mockNeedleRequest(mockedResponse);
+
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/api", validator);
+
+        runner.runTest();
+
+        const callArguments = needleStub.getCall(0).args;
+        const urlArgument = callArguments[1];
+        return expect(urlArgument).to.equal("http://doesnot.exist/api/v3/orders?orderId=1337&token=abcd");
+    });
+
+    it("should return 'unable to validate' violation when validator throws unexpected error", () => {
+        const request = {
+            path: "/v3/orders"
+        };
+        const mockedResponse = {
+            statusCode: 200
+        };
+        const validator = mockValidatorError();
+        mockNeedleRequest(mockedResponse);
+
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/api", validator);
+
+        const result = runner.runTest()
+            .then(function(report) {
+                expect(report.result).to.equal("FAIL");
+                expect(report.testName).to.equal("testName");
+                expect(report.report).to.not.be.empty;
+                expect(report.report[0]).to.equal("Unable to validate testName due to error")
+                return report;
+            });
 
         return expect(result).to.eventually.be.fulfilled;
     });

@@ -1,5 +1,5 @@
 module.exports = {
-    normalizeHeaders: function(headersObject) {
+    normalizeObject: function(headersObject) {
         if(!Array.isArray(headersObject)) {
             headersObject = Object.entries(headersObject);
         }

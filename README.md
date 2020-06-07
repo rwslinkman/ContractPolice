@@ -14,7 +14,7 @@ When running ContractPolice on a regular basis, you can make sure to work with v
 
 ## Usage
 ContractPolice takes a `Contract` defined in YAML and tests a given endpoint.   
-For more details on the defining a contract, see `Contract Definitions`
+For more details on the defining a contract, see [Contract Definitions](#Contract-Definitions)
 
 ### Docker 
 An easy to use Docker image is available on [Docker Hub](https://hub.docker.com/r/rwslinkman/contractpolice).   
@@ -27,7 +27,7 @@ docker run \
   -e CP_REPORTER=junit \
   -v $(pwd)/contracts:/contractpolice/ci-contracts \
   -v $(pwd)/build:/contractpolice/outputs \
-  rwslinkman/contractpolice:v0.6.1
+  rwslinkman/contractpolice:v0.7.0
 ```
 
 Define a place to store your contract YAML files and map it to `/contractpolice/ci-contracts`.   
@@ -40,6 +40,8 @@ Most CI systems will automatically do this when you execute the `docker` command
 ContractPolice will set the exit status to `0` for success; `1` means a test has failed or an error occurred.   
 This can be overriden using the `CP_FAIL_ON_ERROR` environment variable.   
 Pass `-e CP_FAIL_ON_ERROR=false` in the `docker` command to do so.
+
+For more options, see the [Options](#Options) section.
 
 ### Installation
 You could also integrate ContractPolice manually to fit the needs of your project.   
@@ -63,7 +65,20 @@ contractPolice
     });
 ```
 
-### Reporting
+## Options
+ContractPolice allows for a (minimal) set of properties to be configured to your desire.   
+
+| Config                  | Environment variable (Docker) | Explanation                                                                             | Default value |
+|-------------------------|-------------------------------|-----------------------------------------------------------------------------------------|---------------|
+| `failOnError`           | `CP_FAIL_ON_ERROR`            | Determines the signal given to the CLI after ContractPolice detects contract violations | `true`        |
+| `reporter`              | `CP_REPORTER`                 | Defines which reporter should be used by ContractPolice.                                | `default`     |
+| `reportOutputDir`       | n/a (volume)                  | Allows to set a location for the reports to be placed                                   | `build`       |
+| `enableAppLogsConsole`  | `CP_LOGS_CONSOLE_ENABLED`     | Enables console logging of ContractPolice application logs                              | `false`       |
+| `enableAppLogsFile`     | `CP_LOGS_FILE_ENABLED`        | Enables file logging of ContractPolice application logs                                 | `false`       |
+| `loglevel`              | `CP_LOGS_LEVEL`               | Loglevel for ContractPolice application logs (one of `error`, `warn`, `info`, `debug`   | `warn`        |
+| `customValidationRules` | not implemented               | List of custom rules for ContractPolice to use when validating contracts                | `[]`          |
+
+### Reporter configuration
 ContractPolice is a tool that keeps CI pipelines close to the heart.   
 By default, it generates a `*.txt` file that reports on the APIs contract state.   
 
@@ -78,15 +93,6 @@ const contractPoliceConfig = {
     reportOutputDir: "relative/path/to/outputdir"
 }
 ```
-
-### Configuration
-ContractPolice allows for a (minimal) set of properties to be configured to your desire.   
-
-| Option            | Explanation                                                                             | Default value |
-|-------------------|-----------------------------------------------------------------------------------------|---------------|
-| `failOnError`     | Determines the signal given to the CLI after ContractPolice detects contract violations | `true`        |
-| `reporter`        | Defines which reporter should be used by ContractPolice.                                | `default`     |
-| `reportOutputDir` | Allows to set a location for the reports to be placed                                   | `build`       |
 
 ## Contract Definitions
 ContractPolice uses YAML files that define the contracts you have with a web service.   
@@ -149,7 +155,35 @@ contract:
     headers:
       Content-Type: application/json
 ```
+#### Request headers
+To add a header to a contract test request, simply specify a `headers` section in the request.   
+It could for example be used to pass an authentication token.   
 
+An example of a contract with request headers looks like this:   
+```yaml
+contract:
+  request:
+    path: /v1/orders/my-order-id
+    headers:
+      X-Custom-Token: someToken
+  response:
+    statusCode: 200
+```
+#### Query parameters
+Query parameters can dynamically be added to a contract test request.   
+All specified `params` will be appended to the request sent to the target API.   
+Parameters can be specified as arrays or objects.   
+
+An example of a contract with query parameters looks like this:   
+```yaml
+contract:
+  request:
+    path: /v1/orders/my-order-id
+    params:
+      token: someToken
+  response:
+    statusCode: 200
+```
 #### Wildcards
 Wildcards can be used if the exact value of the outcome does not matter.   
 Using these wildcards, you can verify the type of the variable, ignoring its exact value.   
@@ -180,6 +214,8 @@ contract:
         - product: Fries
           quantity: 1
           price: 10
+    params:
+      orderId: 1337
   response:
     statusCode: 200
     headers:
@@ -203,7 +239,7 @@ docker run \
   -e CP_REPORTER=junit \
   -v $(pwd)/contracts:/contractpolice/ci-contracts \
   -v $(pwd)/build:/contractpolice/outputs \
-  rwslinkman/contractpolice:v0.6.1
+  rwslinkman/contractpolice:v0.7.0
 ```
 Note: the `$(pwd)/build` directory will be created if it does not exist.   
 
