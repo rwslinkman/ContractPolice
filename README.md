@@ -68,12 +68,15 @@ contractPolice
 ## Options
 ContractPolice allows for a (minimal) set of properties to be configured to your desire.   
 
-| Config            | Environment variable (Docker) | Explanation                                                                             | Default value |
-|-------------------|-------------------------------|-----------------------------------------------------------------------------------------|---------------|
-| `failOnError`     | CP_FAIL_ON_ERROR              | Determines the signal given to the CLI after ContractPolice detects contract violations | `true`        |
-| `reporter`        | CP_REPORTER                   | Defines which reporter should be used by ContractPolice.                                | `default`     |
-| `reportOutputDir` | n/a (volume)                  | Allows to set a location for the reports to be placed                                   | `build`       |
-
+| Config                  | Environment variable (Docker) | Explanation                                                                             | Default value |
+|-------------------------|-------------------------------|-----------------------------------------------------------------------------------------|---------------|
+| `failOnError`           | `CP_FAIL_ON_ERROR`            | Determines the signal given to the CLI after ContractPolice detects contract violations | `true`        |
+| `reporter`              | `CP_REPORTER`                 | Defines which reporter should be used by ContractPolice.                                | `default`     |
+| `reportOutputDir`       | n/a (volume)                  | Allows to set a location for the reports to be placed                                   | `build`       |
+| `enableAppLogsConsole`  | `CP_LOGS_CONSOLE_ENABLED`     | Enables console logging of ContractPolice application logs                              | `false`       |
+| `enableAppLogsFile`     | `CP_LOGS_FILE_ENABLED`        | Enables file logging of ContractPolice application logs                                 | `false`       |
+| `loglevel`              | `CP_LOGS_LEVEL`               | Loglevel for ContractPolice application logs (one of `error`, `warn`, `info`, `debug`   | `warn`        |
+| `customValidationRules` | not implemented               | List of custom rules for ContractPolice to use when validating contracts                | `[]`          |
 
 ### Reporter configuration
 ContractPolice is a tool that keeps CI pipelines close to the heart.   
@@ -152,10 +155,35 @@ contract:
     headers:
       Content-Type: application/json
 ```
+#### Request headers
+To add a header to a contract test request, simply specify a `headers` section in the request.   
+It could for example be used to pass an authentication token.   
 
-#### Query paramers
-TODO: how to use
+An example of a contract with request headers looks like this:   
+```yaml
+contract:
+  request:
+    path: /v1/orders/my-order-id
+    headers:
+      X-Custom-Token: someToken
+  response:
+    statusCode: 200
+```
+#### Query parameters
+Query parameters can dynamically be added to a contract test request.   
+All specified `params` will be appended to the request sent to the target API.   
+Parameters can be specified as arrays or objects.   
 
+An example of a contract with query parameters looks like this:   
+```yaml
+contract:
+  request:
+    path: /v1/orders/my-order-id
+    params:
+      token: someToken
+  response:
+    statusCode: 200
+```
 #### Wildcards
 Wildcards can be used if the exact value of the outcome does not matter.   
 Using these wildcards, you can verify the type of the variable, ignoring its exact value.   

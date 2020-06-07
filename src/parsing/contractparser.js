@@ -36,6 +36,20 @@ function extractContractName(baseDir, contractFile) {
         .replace(".yml", "");
 }
 
+function normalizeObjectProperty(logger, target, propertyName, contractName) {
+    if (target.hasOwnProperty(propertyName)) {
+        let targetObject = target[propertyName];
+        if (typeof targetObject !== "object") {
+            throw `Definition of '${propertyName}' in '${contractName}' should be of type 'object' or 'array'`;
+        }
+
+        // Formatting headers into desired format; supporting both Object an Array notation
+        targetObject = helper.normalizeObject(targetObject);
+        target[propertyName] = targetObject;
+        logger.debug(LOG_TAG, `Definition of '${propertyName}' in '${contractName}' have been normalized`);
+    }
+}
+
 function ContractParser(logger) {
     this.logger = logger;
 }
@@ -84,47 +98,10 @@ ContractParser.prototype.parseContract = function (contractsDirectory, contractF
     // All expected properties exist, no error thrown.
     this.logger.debug(LOG_TAG, `File '${contractName}' contains a valid Contract Definition`);
 
-    // TODO: simplify, extract function
-    // Verify headers within request
-    let expectedRequest = contractYaml.contract.request;
-    if (expectedRequest.hasOwnProperty("headers")) {
-        let requestHeaders = contractYaml.contract.request.headers;
-        if (typeof requestHeaders !== "object") {
-            throw `Request header definition in '${contractName}' should be of type 'object' or 'array'`;
-        }
-
-        // Formatting headers into desired format; supporting both Object an Array notation
-        requestHeaders = helper.normalizeObject(requestHeaders);
-        contractYaml.contract.request.headers = requestHeaders;
-        this.logger.debug(LOG_TAG, `Request headers of '${contractName}' have been normalized`);
-    }
-
-    // Verify headers within response
-    let expectedResponse = contractYaml.contract.response;
-    if (expectedResponse.hasOwnProperty("headers")) {
-        let responseHeaders = contractYaml.contract.response.headers;
-        if (typeof responseHeaders !== "object") {
-            throw `Response header definition in '${contractName}' should be of type 'object' or 'array'`;
-        }
-
-        // Formatting headers into desired format; supporting both Object an Array notation
-        responseHeaders = helper.normalizeObject(responseHeaders);
-        contractYaml.contract.response.headers = responseHeaders;
-        this.logger.debug(LOG_TAG, `Response headers of '${contractName}' have been normalized`);
-    }
-
-    // TODO Validate/normalize queryparams
-    // Verify query parameters within request
-    if(expectedRequest.hasOwnProperty("params")) {
-        let requestQueryParams = contractYaml.contract.request.params;
-        if(typeof requestQueryParams !== "object") {
-            throw `Query parameter definition in '${contractName}' should be of type 'object' or 'array'`;
-        }
-
-        requestQueryParams = helper.normalizeObject(requestQueryParams);
-        contractYaml.contract.request.params = requestQueryParams;
-        this.logger.debug(LOG_TAG, `Query params of '${contractName}' have been normalized`);
-    }
+    // Verify objects within request & response
+    normalizeObjectProperty(this.logger, contractYaml.contract.request, "headers", contractName);
+    normalizeObjectProperty(this.logger, contractYaml.contract.response, "headers", contractName);
+    normalizeObjectProperty(this.logger, contractYaml.contract.request, "params", contractName);
 
     return {
         name: contractName,

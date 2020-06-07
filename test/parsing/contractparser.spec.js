@@ -318,7 +318,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("Request header definition in 'contract1' should be of type 'object' or 'array'");
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("Definition of 'headers' in 'contract1' should be of type 'object' or 'array'");
         });
 
         it("should normalize response headers to array when headers are specified as object", () => {
@@ -393,7 +393,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("Response header definition in 'contract1' should be of type 'object' or 'array'");
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("Definition of 'headers' in 'contract1' should be of type 'object' or 'array'");
         });
         //endregion
 
@@ -472,7 +472,7 @@ describe("ContractParser", () => {
 
             const parser = new ContractParser(TESTLOGGER);
 
-            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("Query parameter definition in 'contract1' should be of type 'object' or 'array'");
+            expect(() => parser.parseContract(testBaseDir, testFilePath1)).to.throw("Definition of 'params' in 'contract1' should be of type 'object' or 'array'");
         });
         // endregion
     })
