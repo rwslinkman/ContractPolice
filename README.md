@@ -194,6 +194,7 @@ Within the `contract.response` object it is possible to use the following wildca
 |---------------|----------------------------------------------------|
 | `<anyString>` | Verifies that the value is a string of any length  |
 | `<anyNumber>` | Verifies that the value is any number              |   
+| `<anyBool>`   | Verifies that the value is any boolean             |   
 
 ## Full example
 Example contract definition in YAML.   

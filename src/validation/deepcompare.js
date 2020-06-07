@@ -27,6 +27,11 @@ function compareSpecialCase(key, expectedValue, actualValue, prefix = "") {
             return new Violation(prefix + key, "any number", actualType);
         }
         return null;
+    } else if(expectedValue === "<anyBool>") {
+        if(actualType !== "boolean") {
+            return new Violation(prefix + key, "any boolean", actualType);
+        }
+        return null;
     }
     return new Violation(key, expectedValue, "not supported");
 }
