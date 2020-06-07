@@ -14,7 +14,7 @@ When running ContractPolice on a regular basis, you can make sure to work with v
 
 ## Usage
 ContractPolice takes a `Contract` defined in YAML and tests a given endpoint.   
-For more details on the defining a contract, see [Contract Definitions](#-contract-definitions)
+For more details on the defining a contract, see [Contract Definitions](#Contract-Definitions)
 
 ### Docker 
 An easy to use Docker image is available on [Docker Hub](https://hub.docker.com/r/rwslinkman/contractpolice).   
@@ -41,7 +41,7 @@ ContractPolice will set the exit status to `0` for success; `1` means a test has
 This can be overriden using the `CP_FAIL_ON_ERROR` environment variable.   
 Pass `-e CP_FAIL_ON_ERROR=false` in the `docker` command to do so.
 
-For more options, see the [Options](#-options) section.
+For more options, see the [Options](#Options) section.
 
 ### Installation
 You could also integrate ContractPolice manually to fit the needs of your project.   
