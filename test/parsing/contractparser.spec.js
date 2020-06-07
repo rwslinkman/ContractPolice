@@ -685,6 +685,79 @@ describe("ContractParser", () => {
             expect(generatedValue).to.not.contain("generate");
             expect(typeof generatedValue).to.equal("boolean");
         });
+
+        it("should replace a value with a random string when deep property contains generator keyword for string", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path",
+                        body: {
+                            user: {
+                                name: "<generate[string]>",
+                                id: {
+                                    type: "UUID",
+                                    value: "<generate[uuid]>"
+                                }
+                            }
+                        }
+                    },
+                    response: {
+                        statusCode: 200
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser(TESTLOGGER);
+            let result = parser.parseContract(testBaseDir, testFilePath3);
+
+            expect(result.data).to.equal(yamlContent.contract);
+            expect(result.name).to.equal(testFileName3);
+            const generatedStringValue = result.data.request.body.user.name;
+            expect(generatedStringValue).to.not.contain("generate");
+            expect(typeof generatedStringValue).to.equal("string");
+            const generatedUuidValue = result.data.request.body.user.id.value;
+            expect(generatedUuidValue).to.not.contain("generate");
+            expect(typeof generatedUuidValue).to.equal("string");
+        });
+
+        it("should replace a value with a random string when deep array property contains generator keyword for string", () => {
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path",
+                        body: {
+                            user: {
+                                name: "<generate[string]>",
+                                tokens: [
+                                    "<generate[uuid]>",
+                                    "<generate[uuid]>",
+                                    "<generate[uuid]>"
+                                ]
+                            }
+                        }
+                    },
+                    response: {
+                        statusCode: 200
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser(TESTLOGGER);
+            let result = parser.parseContract(testBaseDir, testFilePath3);
+
+            expect(result.data).to.equal(yamlContent.contract);
+            expect(result.name).to.equal(testFileName3);
+            const generatedStringValue = result.data.request.body.user.name;
+            expect(generatedStringValue).to.not.contain("generate");
+            expect(typeof generatedStringValue).to.equal("string");
+            const generatedArray = result.data.request.body.user.tokens;
+            generatedArray.forEach(function(item) {
+                expect(item).to.not.contain("generate");
+                expect(typeof item).to.equal("string");
+            });
+        });
         //endregion
     })
 });
