@@ -1,0 +1,31 @@
+contract:
+  request:
+    path: /v4/orders
+    method: GET
+    headers:
+      - Accept: application/json
+    params:
+      - orderId: tsrqpo-nmlkj-ihgfe-bcda
+      - token: abcd-efghi-jklmn-opqrst
+  response:
+    body:
+      orderId: tsrqpo-nmlkj-ihgfe-bcda
+      customer:
+        firstname: <anyString>
+        lastname: <anyString>
+        email: username@provider.com
+      items:
+        - product: Hamburger
+          quantity: 2
+          price: 20
+        - product: Fries
+          quantity: 1
+          price: 5
+        - product: Chicken nuggets
+          quantity: 1
+          price: 5
+        - product: Milkshake
+          quantity: 2
+          price: 10
+      payment: <anyBool>
+    statusCode: 200
