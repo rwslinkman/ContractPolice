@@ -4,15 +4,15 @@ const helper = require("./helper-functions.js");
 const LOG_TAG = "TestRunner";
 
 function formatUrl(target, endpoint, queryParams) {
-    let url = target + endpoint;
-    if(queryParams.length > 0) {
-        url += "?";
-        queryParams.forEach(function(param) {
-            let key = Object.keys(param)[0];
-            url += `${key}=${param[key]}`;
-        })
+    if(target.endsWith("/") && endpoint.startsWith("/")) {
+        endpoint = endpoint.substr(1);
     }
-    return url;
+    let url = new URL(target + endpoint);
+    queryParams.forEach(function(param) {
+        let key = Object.keys(param)[0];
+        url.searchParams.append(key, param[key]);
+    })
+    return url.toString();
 }
 
 
@@ -48,7 +48,6 @@ TestRunner.prototype.runTest = function() {
     const endpoint = formatUrl(this.target, contractRequest.path, contractQueryParams);
     loggerLocal.debug(LOG_TAG, `Creating request to endpoint: ${method.toUpperCase()} ${endpoint}`);
 
-    console.log(endpoint);
     let request;
     if(method.toUpperCase() === "GET") {
         request = needle('get', endpoint, options);

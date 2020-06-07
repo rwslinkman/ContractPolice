@@ -5,11 +5,11 @@ contract:
     headers:
       - Accept: application/json
     params:
-      - orderId: abcd-efghi-jklmn-opqrst
-      - token: tsrqpo-nmlkj-ihgfe-bcda
+      - orderId: tsrqpo-nmlkj-ihgfe-bcda
+      - token: abcd-efghi-jklmn-opqrst
   response:
     body:
-      orderId: abcd-efghi-jklmn-opqrst
+      orderId: tsrqpo-nmlkj-ihgfe-bcda
       customer:
         firstname: Rick
         lastname: Slinkman

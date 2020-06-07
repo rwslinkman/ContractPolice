@@ -31,6 +31,14 @@ describe("TestRunner", () => {
         });
     }
 
+    function mockValidatorError() {
+        return {
+            validate: sinon
+                .stub(new Validator(), "validate")
+                .rejects(new Error("Unexpected error"))
+        };
+    }
+
     beforeEach(function () {
         needleStub = sinon.stub();
     });
@@ -220,5 +228,29 @@ describe("TestRunner", () => {
         const callArguments = needleStub.getCall(0).args;
         const urlArgument = callArguments[1];
         return expect(urlArgument).to.equal("http://doesnot.exist/api/v3/orders?orderId=1337&token=abcd");
+    });
+
+    it("should return 'unable to validate' violation when validator throws unexpected error", () => {
+        const request = {
+            path: "/v3/orders"
+        };
+        const mockedResponse = {
+            statusCode: 200
+        };
+        const validator = mockValidatorError();
+        mockNeedleRequest(mockedResponse);
+
+        const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/api", validator);
+
+        const result = runner.runTest()
+            .then(function(report) {
+                expect(report.result).to.equal("FAIL");
+                expect(report.testName).to.equal("testName");
+                expect(report.report).to.not.be.empty;
+                expect(report.report[0]).to.equal("Unable to validate testName due to error")
+                return report;
+            });
+
+        return expect(result).to.eventually.be.fulfilled;
     });
 });
