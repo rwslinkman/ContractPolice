@@ -758,6 +758,33 @@ describe("ContractParser", () => {
                 expect(typeof item).to.equal("string");
             });
         });
+
+        it("should not replace a value with a random value when request contains unsupported generator keyword", () => {
+            const keyword = "<generate[problem]>"
+            const yamlContent = {
+                contract: {
+                    request: {
+                        path: "/some/path",
+                        body: {
+                            username: keyword
+                        }
+                    },
+                    response: {
+                        statusCode: 200
+                    }
+                }
+            };
+            mockYamlLoading(yamlContent);
+
+            const parser = new ContractParser(TESTLOGGER);
+            let result = parser.parseContract(testBaseDir, testFilePath3);
+
+            expect(result.data).to.equal(yamlContent.contract);
+            expect(result.name).to.equal(testFileName3);
+            const generatedValue = result.data.request.body.username;
+            expect(generatedValue).to.equal(keyword);
+            expect(typeof generatedValue).to.equal("string");
+        });
         //endregion
     })
 });

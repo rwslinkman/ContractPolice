@@ -5,6 +5,7 @@ const resolve = require('path').resolve;
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
 const helper = require("../helper-functions.js");
+const WildcardGenerator = require("./wildcard-generator.js");
 const LOG_TAG = "ContractParser";
 
 async function getFiles(dir) {
@@ -48,6 +49,20 @@ function normalizeObjectProperty(logger, target, propertyName, contractName) {
         target[propertyName] = targetObject;
         logger.debug(LOG_TAG, `Definition of '${propertyName}' in '${contractName}' have been normalized`);
     }
+}
+
+function injectGenerateWildcardValues(logger, target, contractName) {
+    let wildcardGenerator = new WildcardGenerator();
+    Object.keys(target).forEach(function (key) {
+        let property = target[key];
+        if (property !== null && typeof property === 'object') {
+            injectGenerateWildcardValues(property);
+            return;
+        }
+        if (typeof property === 'string') {
+            target[property] = "wildcard"
+        }
+    });
 }
 
 function ContractParser(logger) {
@@ -104,6 +119,8 @@ ContractParser.prototype.parseContract = function (contractsDirectory, contractF
     normalizeObjectProperty(this.logger, contractYaml.contract.request, "params", contractName);
 
     // TODO: Check for <generate> and replace values
+    // Check request for <generate> wildcards and inject values there
+    injectGenerateWildcardValues(this.logger, contractYaml.contract.request, contractName);
 
     return {
         name: contractName,
