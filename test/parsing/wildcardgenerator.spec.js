@@ -15,6 +15,13 @@ describe("WildcardGenerator", () => {
         "<generate[bool]>",
         "<generate[uuid]>"
     ];
+    const unsupportedValues = [
+        "<generate[problem]>",
+        "some string that is not supported",
+        1,
+        true,
+        "weOnlySupportGenerate[]stuff"
+    ]
 
     describe("isGenerateWildcard", () => {
         // Define test case for each supported value
@@ -28,13 +35,15 @@ describe("WildcardGenerator", () => {
             });
         });
 
-        const problemCase = "<generate[problem]>"
-        it("should return false when given " + problemCase, () => {
-            const generator = new WildcardGenerator(TESTLOGGER);
+        // Failing cases
+        unsupportedValues.forEach((problemCase) => {
+            it("should return false when given " + problemCase, () => {
+                const generator = new WildcardGenerator(TESTLOGGER);
 
-            const result = generator.isGenerateWildcard(problemCase)
+                const result = generator.isGenerateWildcard(problemCase)
 
-            expect(result).to.be.false;
+                expect(result).to.be.false;
+            });
         });
     });
 
