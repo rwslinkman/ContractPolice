@@ -16,7 +16,7 @@ Lightweight Node HTTP client that validates a API contract on a given endpoint.
     * [Response header validation](#Response-header-validation)
     * [Request headers](#Request-headers)
     * [Query parameters](#Query-parameters)
-    * [Response-wildcards](#Response-wildcards)
+    * [Response wildcards](#Response-wildcards)
     * [Request data generation](#Request-data-generation)
  * [Full example](#Full-example) 
 
@@ -229,7 +229,7 @@ The supported types are `string`, `number`, `bool`, and `uuid`.
 Providing arguments is optional, if applicable they must be noted in the following format:   
 `argument=value`
 
-Some of the variable types take arguments when generating the desired value.
+The following arguments are supported:   
 
 | Supported type | Arguments    |
 |----------------|--------------|
