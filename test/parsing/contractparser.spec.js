@@ -548,8 +548,9 @@ describe("ContractParser", () => {
             expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
             const generatedValue = result.data.request.body.username;
-            expect(generatedValue).to.not.contain("generate");
             expect(typeof generatedValue).to.equal("number");
+            expect(generatedValue).to.be.at.least(1);
+            expect(generatedValue).to.be.at.most(9_999_999);
         });
 
         it("should replace a value with a random number when request contains generator keyword for number with max param", () => {
@@ -574,8 +575,8 @@ describe("ContractParser", () => {
             expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
             const generatedValue = result.data.request.body.username;
-            expect(generatedValue).to.not.contain("generate");
             expect(typeof generatedValue).to.equal("number");
+            expect(generatedValue).to.be.at.least(1);
             expect(generatedValue).to.be.at.most(31);
         });
 
@@ -601,9 +602,9 @@ describe("ContractParser", () => {
             expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
             const generatedValue = result.data.request.body.username;
-            expect(generatedValue).to.not.contain("generate");
             expect(typeof generatedValue).to.equal("number");
             expect(generatedValue).to.be.at.least(10);
+            expect(generatedValue).to.be.at.most(9_999_999);
         });
 
         it("should replace a value with a random number when request contains generator keyword for number with two params", () => {
@@ -628,10 +629,9 @@ describe("ContractParser", () => {
             expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
             const generatedValue = result.data.request.body.username;
-            expect(generatedValue).to.not.contain("generate");
             expect(typeof generatedValue).to.equal("number");
-            expect(generatedValue).to.be.at.most(31);
             expect(generatedValue).to.be.at.least(10);
+            expect(generatedValue).to.be.at.most(31);
         });
 
         it("should replace a value with a random boolean when request contains generator keyword for boolean", () => {
@@ -656,7 +656,6 @@ describe("ContractParser", () => {
             expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
             const generatedValue = result.data.request.body.username;
-            expect(generatedValue).to.not.contain("generate");
             expect(typeof generatedValue).to.equal("boolean");
         });
 
@@ -683,7 +682,7 @@ describe("ContractParser", () => {
             expect(result.name).to.equal(testFileName3);
             const generatedValue = result.data.request.body.username;
             expect(generatedValue).to.not.contain("generate");
-            expect(typeof generatedValue).to.equal("boolean");
+            expect(generatedValue).to.contain("-");
         });
 
         it("should replace a value with a random string when deep property contains generator keyword for string", () => {
@@ -753,6 +752,7 @@ describe("ContractParser", () => {
             expect(generatedStringValue).to.not.contain("generate");
             expect(typeof generatedStringValue).to.equal("string");
             const generatedArray = result.data.request.body.user.tokens;
+            console.log(generatedArray);
             generatedArray.forEach(function(item) {
                 expect(item).to.not.contain("generate");
                 expect(typeof item).to.equal("string");

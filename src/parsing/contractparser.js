@@ -8,6 +8,17 @@ const helper = require("../helper-functions.js");
 const WildcardGenerator = require("./wildcard-generator.js");
 const LOG_TAG = "ContractParser";
 
+Array.prototype.remove = function() {
+    let what, a = arguments, L = a.length, ax;
+    while (L && this.length) {
+        what = a[--L];
+        while ((ax = this.indexOf(what)) !== -1) {
+            this.splice(ax, 1);
+        }
+    }
+    return this;
+};
+
 async function getFiles(dir) {
     const subdirs = await readdir(dir);
     const files = await Promise.all(subdirs.map(async (subdir) => {
@@ -53,14 +64,29 @@ function normalizeObjectProperty(logger, target, propertyName, contractName) {
 
 function injectGenerateWildcardValues(logger, target, contractName) {
     let wildcardGenerator = new WildcardGenerator();
-    Object.keys(target).forEach(function (key) {
-        let property = target[key];
-        if (property !== null && typeof property === 'object') {
-            injectGenerateWildcardValues(property);
+    Object.keys(target).forEach(function (propName) {
+        let value = target[propName];
+        if (value !== null && typeof value === 'object') {
+            if(Array.isArray(value)) {
+                value.forEach(arrItem => {
+                    if(typeof arrItem === "object") {
+                        injectGenerateWildcardValues(logger, arrItem, contractName)
+                    } else {
+                        if (wildcardGenerator.isGenerateWildcard(arrItem)) {
+                            // replace item
+                            target[propName].remove(arrItem);
+                            target[propName].push(wildcardGenerator.generateWildcardValue(arrItem));
+                        }
+                    }
+                });
+                return;
+            }
+            injectGenerateWildcardValues(logger, value, contractName);
             return;
         }
-        if (typeof property === 'string') {
-            target[property] = "wildcard"
+
+        if (wildcardGenerator.isGenerateWildcard(value)) {
+            target[propName] = wildcardGenerator.generateWildcardValue(value);
         }
     });
 }
@@ -118,7 +144,6 @@ ContractParser.prototype.parseContract = function (contractsDirectory, contractF
     normalizeObjectProperty(this.logger, contractYaml.contract.response, "headers", contractName);
     normalizeObjectProperty(this.logger, contractYaml.contract.request, "params", contractName);
 
-    // TODO: Check for <generate> and replace values
     // Check request for <generate> wildcards and inject values there
     injectGenerateWildcardValues(this.logger, contractYaml.contract.request, contractName);
 
