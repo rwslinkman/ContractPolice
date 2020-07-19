@@ -1,29 +1,38 @@
 module.exports = WildcardGenerator;
 
-const generatorRegex = /<generate\[([a-z]*(\(.*\))?)\]>/g;
+const generatorRegex = /<generate\[([a-z]*)\(?([a-z,=,\d,;]*)?\)?\]>/g;
+const supportedTypes = [
+    "string",
+    "number",
+    "bool",
+    "uuid"
+];
+
+function parseValue(value) {
+    let matches = value.matchAll(generatorRegex);
+    let matchesArr = [];
+    for (const match of matches) {
+        matchesArr = match;
+    }
+    return matchesArr;
+}
 
 function WildcardGenerator(logger) {
     this.logger = logger;
 }
 
 WildcardGenerator.prototype.isGenerateWildcard = function(value) {
-    // will output array of matches, or null
-    // let matches = generatorRegex.exec(value);
-    let matches = value.matchAll(generatorRegex);
-    for (const match of matches) {
-        console.log(match);
-        console.log(match.index)
+    const valueType = typeof value;
+    if(valueType !== "string") {
+        return false;
     }
-    // console.log(matches);
-    if (matches === null) return false;
 
-    let generationValueType = matches[1];
-    let generationArguments = matches[2];
-    console.log(generationValueType);
-    console.log(generationArguments)
+    let matchesArr = parseValue(value);
+    if (matchesArr === null) return false;
 
-    let valueType = typeof value;
-    return valueType === 'string'
+    let generationValueType = matchesArr[1];
+    return !(generationValueType === undefined || !supportedTypes.includes(generationValueType));
+
 };
 
 WildcardGenerator.prototype.generateWildcardValue = function(value) {
