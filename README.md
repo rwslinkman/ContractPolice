@@ -3,6 +3,23 @@ ContractPolice helps you find contract violations in REST APIs fast and easily!
 
 Lightweight Node HTTP client that validates a API contract on a given endpoint.
 
+#### Table of Content
+ * [About ContractPolice](#About-ContractPolice)
+ * [Usage](#Usage)
+     * [Docker](#Docker) 
+     * [Installation in your project](#Installation-in-your-project)
+ * [Options](#Options)
+    * [Reporter configuration](#Reporter-configuration)
+ * [Contract Definitions](#Contract-Definitions)
+    * [Basics](#Basics)
+    * [Response body validation](#Response-body-validation)
+    * [Response header validation](#Response-header-validation)
+    * [Request headers](#Request-headers)
+    * [Query parameters](#Query-parameters)
+    * [Response-wildcards](#Response-wildcards)
+    * [Request data generation](#Request-data-generation)
+ * [Full example](#Full-example) 
+
 ## About ContractPolice
 Many applications depend on a web service to deliver data and fetch configuration using HTTP.   
 In most cases, this is done using a REST API.   
@@ -43,7 +60,7 @@ Pass `-e CP_FAIL_ON_ERROR=false` in the `docker` command to do so.
 
 For more options, see the [Options](#Options) section.
 
-### Installation
+### Installation in your project
 You could also integrate ContractPolice manually to fit the needs of your project.   
 Create a basic NodeJS project and include ContractPolice to the dependency list.   
 ```bash
@@ -64,6 +81,7 @@ contractPolice
         // Violations found
     });
 ```
+**Note:** ContractPolice requires Node version >= 12
 
 ## Options
 ContractPolice allows for a (minimal) set of properties to be configured to your desire.   
@@ -155,6 +173,7 @@ contract:
     headers:
       Content-Type: application/json
 ```
+
 #### Request headers
 To add a header to a contract test request, simply specify a `headers` section in the request.   
 It could for example be used to pass an authentication token.   
@@ -169,6 +188,7 @@ contract:
   response:
     statusCode: 200
 ```
+
 #### Query parameters
 Query parameters can dynamically be added to a contract test request.   
 All specified `params` will be appended to the request sent to the target API.   
@@ -184,8 +204,9 @@ contract:
   response:
     statusCode: 200
 ```
-#### Wildcards
-Wildcards can be used if the exact value of the outcome does not matter.   
+
+#### Response wildcards
+Wildcards can be used if the exact value of the response does not matter.   
 Using these wildcards, you can verify the type of the variable, ignoring its exact value.   
 
 Within the `contract.response` object it is possible to use the following wildcards:   
@@ -195,6 +216,37 @@ Within the `contract.response` object it is possible to use the following wildca
 | `<anyString>` | Verifies that the value is a string of any length  |
 | `<anyNumber>` | Verifies that the value is any number              |   
 | `<anyBool>`   | Verifies that the value is any boolean             |   
+
+#### Request data generation
+To make contract tests less predictive, its also possible to generate data for your requests.   
+It is possible to generate strings, numbers, booleans and UUIDs.   
+Use these in the `contract.request` part of the Contract Definition.   
+
+A generated value can be defined like this:      
+`<generate[type(arg1=val1;arg2=val2)]>`   
+
+The supported types are `string`, `number`, `bool`, and `uuid`.     
+Providing arguments is optional, if applicable they must be noted in the following format:   
+`argument=value`
+
+Some of the variable types take arguments when generating the desired value.
+
+| Supported type | Arguments    |
+|----------------|--------------|
+| string         | `length`     |
+| number         | `min`, `max` |
+| bool           | none         |
+| uuid           | none         |
+
+Some examples:   
+
+| Example                             | Explanation                                        |
+|-------------------------------------|----------------------------------------------------|
+| `<generate[string]>`                | Injects a random string in the request             |
+| `<generate[string(length=32)]>`     | Injects a random of 32 characters string           |
+| `<generate[number(min=10;max=31)]>` | Injects a random number between 10 and 31          |   
+| `<generate[bool]>`                  | Injects a random boolean (true/false)              |   
+| `<generate[uuid]>`                  | Injects a randomly generated UUID                  |   
 
 ## Full example
 Example contract definition in YAML.   
@@ -207,16 +259,16 @@ contract:
     headers:
       Content-Type: application/json
     body:
-      customer: John Doe
+      customer: <generate[string]>
       items:
         - product: Hamburger
           quantity: 2
           price: 20
         - product: Fries
           quantity: 1
-          price: 10
+          price: <generate[number(min=5;max=25)]>
     params:
-      orderId: 1337
+      orderId: <generate[number]>
   response:
     statusCode: 200
     headers:
