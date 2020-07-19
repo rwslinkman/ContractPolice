@@ -17,6 +17,7 @@ describe("WildcardGenerator", () => {
     ];
     const unsupportedValues = [
         "<generate[problem]>",
+        "<generate[problem(this=test)]>",
         "some string that is not supported",
         1,
         true,
@@ -76,9 +77,9 @@ describe("WildcardGenerator", () => {
 
             let result = generator.generateWildcardValue("<generate[number]>")
 
-            expect(result).to.not.contain("generate");
-            expect(result).to.not.contain("number");
             expect(typeof result).to.equal("number");
+            expect(result).to.be.at.least(1);
+            expect(result).to.be.at.most(9_999_999);
         });
 
         it("should replace a value with a random number when request contains generator keyword for number with max param", () => {
@@ -86,10 +87,8 @@ describe("WildcardGenerator", () => {
 
             let result = generator.generateWildcardValue("<generate[number(max=31)]>")
 
-            expect(result).to.not.contain("generate");
-            expect(result).to.not.contain("number");
-            expect(result).to.not.contain("max");
             expect(typeof result).to.equal("number");
+            expect(result).to.be.at.least(1);
             expect(result).to.be.at.most(31);
         });
 
@@ -98,11 +97,9 @@ describe("WildcardGenerator", () => {
 
             let result = generator.generateWildcardValue("<generate[number(min=10)]>")
 
-            expect(result).to.not.contain("generate");
-            expect(result).to.not.contain("number");
-            expect(result).to.not.contain("min");
             expect(typeof result).to.equal("number");
             expect(result).to.be.at.least(10);
+            expect(result).to.be.at.most(9_999_999);
         });
 
         it("should replace a value with a random number when request contains generator keyword for number with two params", () => {
@@ -110,13 +107,19 @@ describe("WildcardGenerator", () => {
 
             let result = generator.generateWildcardValue("<generate[number(min=10;max=31)]>")
 
-            expect(result).to.not.contain("generate");
-            expect(result).to.not.contain("number");
-            expect(result).to.not.contain("min");
-            expect(result).to.not.contain("max");
             expect(typeof result).to.equal("number");
-            expect(result).to.be.at.most(31);
             expect(result).to.be.at.least(10);
+            expect(result).to.be.at.most(31);
+        });
+
+        it("should replace a value with a random number when request contains generator keyword for number with two params where min > max", () => {
+            const generator = new WildcardGenerator(TESTLOGGER);
+
+            let result = generator.generateWildcardValue("<generate[number(min=31;max=10)]>")
+
+            expect(typeof result).to.equal("number");
+            expect(result).to.be.at.least(10);
+            expect(result).to.be.at.most(31);
         });
 
         it("should replace a value with a random boolean when request contains generator keyword for boolean", () => {
@@ -124,15 +127,13 @@ describe("WildcardGenerator", () => {
 
             let result = generator.generateWildcardValue("<generate[bool]>")
 
-            expect(result).to.not.contain("generate");
-            expect(result).to.not.contain("bool");
             expect(typeof result).to.equal("boolean");
         });
 
         it("should replace a value with a random UUID when request contains generator keyword for uuid", () => {
             const generator = new WildcardGenerator(TESTLOGGER);
 
-            let result = generator.generateWildcardValue("<generate[uuid]>")
+            let result = generator.generateWildcardValue("<generate[uuid]>");
 
             expect(result).to.not.contain("generate");
             expect(result).to.not.contain("uuid");
@@ -141,6 +142,15 @@ describe("WildcardGenerator", () => {
 
         it("should not replace a value with a random value when request contains unsupported generator keyword", () => {
             const keyword = "<generate[problem]>"
+            const generator = new WildcardGenerator(TESTLOGGER);
+
+            let result = generator.generateWildcardValue(keyword)
+
+            expect(result).to.equal(keyword);
+        });
+
+        it("should not replace a value with a random value when request contains unsupported generator keyword", () => {
+            const keyword = "<generate[problem(this=test)]>"
             const generator = new WildcardGenerator(TESTLOGGER);
 
             let result = generator.generateWildcardValue(keyword)
