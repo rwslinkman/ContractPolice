@@ -79,7 +79,7 @@ describe("WildcardGenerator", () => {
 
             expect(typeof result).to.equal("number");
             expect(result).to.be.at.least(1);
-            expect(result).to.be.at.most(9_999_999);
+            expect(result).to.be.at.most(9999999);
         });
 
         it("should replace a value with a random number when request contains generator keyword for number with max param", () => {
@@ -99,7 +99,7 @@ describe("WildcardGenerator", () => {
 
             expect(typeof result).to.equal("number");
             expect(result).to.be.at.least(10);
-            expect(result).to.be.at.most(9_999_999);
+            expect(result).to.be.at.most(9999999);
         });
 
         it("should replace a value with a random number when request contains generator keyword for number with two params", () => {

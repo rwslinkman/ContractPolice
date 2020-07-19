@@ -11,7 +11,7 @@ const ARGUMENT_DELIMITER = ";";
 const ARGUMENT_VALUE_DELIMITER = "=";
 const DEFAULT_STRING_LENGTH = 10;
 const DEFAULT_NUMBER_MIN = 1;
-const DEFAULT_NUMBER_MAX = 9_999_999;
+const DEFAULT_NUMBER_MAX = 9999999;
 
 function generateRandomString(length) {
     let result = '';
