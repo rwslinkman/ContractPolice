@@ -6,6 +6,8 @@ const JUnitReporter = require("./src/reporting/junitreporter.js");
 const fs = require('fs');
 const Logging = require("./src/logging/logging.js");
 const ExecutionReport = require("./src/executionreport.js");
+//
+const SwaggerParser = require("@apidevtools/swagger-parser");
 
 const LOG_TAG = "ContractPolice"
 const defaultConfig = {
@@ -157,6 +159,11 @@ ContractPolice.prototype.testContracts = function() {
                 throw Error(message)
             }
         });
+};
+
+ContractPolice.prototype.generateContractTest = async function() {
+    let api = await SwaggerParser.parse("openapi/api.github.com.yaml");
+    console.log(api);
 };
 
 module.exports = ContractPolice;

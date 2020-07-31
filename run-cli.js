@@ -14,7 +14,11 @@ const testTarget = "http://localhost:3000";
 // Execution
 console.log("Start contract test(s) with ContractPolice");
 const contractPolice = new ContractPolice(contractsDirectory, testTarget, config);
-contractPolice.testContracts()
+contractPolice
+    .generateContractTest()
+    .then(function() {
+        return contractPolice.testContracts()
+    })
     .then(function() {
         // Successful test, no errors found
         console.log("ContractPolice successfully finished executing contract tests");
