@@ -1,4 +1,5 @@
 const fs = require('fs');
+const LOG_TAG = "ContractPoliceReporter";
 
 function writeTxtFile(outputDirectory, timestamp, testResults) {
     const lineEnd = "\r\n";
@@ -20,11 +21,13 @@ function writeTxtFile(outputDirectory, timestamp, testResults) {
     });
 }
 
-function ContractPoliceReporter(outputDir) {
+function ContractPoliceReporter(logger, outputDir) {
+    this.logger = logger;
     this.outputDir = outputDir;
 }
 
 ContractPoliceReporter.prototype.writeTestReport = function(testResults, timestamp) {
+    this.logger.debug(LOG_TAG, "Writing application logs in default format");
     return writeTxtFile(this.outputDir, timestamp, testResults);
 };
 

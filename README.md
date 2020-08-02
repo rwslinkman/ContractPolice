@@ -69,17 +69,15 @@ npm install contractpolice --save
 
 Create a script that `require`s ContractPolice and point it to the directory where you keep the contract definitions.   
 ```javascript
-let ContractPolice = require("contractpolice");
-
-let contractPolice = new ContractPolice("relative/path/to/contracts", "https://some-webservice.com/api");
-contractPolice
-    .testContracts()
-    .then(function() {
+(async () => {
+    const contractPolice = new ContractPolice(contractsDirectory, testTarget, config);    
+    try {
+        await contractPolice.testContracts()
         // Success
-    })
-    .catch(function(err) {
-        // Violations found
-    });
+    } catch (err) {
+        // Handle the error however you like
+    }
+})();
 ```
 **Note:** ContractPolice requires Node version >= 12
 
@@ -297,6 +295,24 @@ docker run \
 Note: the `$(pwd)/build` directory will be created if it does not exist.   
 
 Custom implementation example for using ContractPolice can be found below:    
+```javascript
+(async () => {
+    try {
+        // Execution
+        console.log("Start contract test(s) with ContractPolice");
+        const contractPolice = new ContractPolice(contractsDirectory, testTarget, config);
+        await contractPolice.testContracts()
+        // Successful test, no errors found
+        console.log("ContractPolice successfully finished executing contract tests");
+        process.exitCode = 0; // success
+    } catch (err) {
+        // Show output of contract test
+        console.error(err.message);
+        process.exitCode = 1; // failure
+    }
+})();
+```
+or:
 ```javascript
 let ContractPolice = require("contractpolice");
 

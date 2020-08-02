@@ -1,12 +1,14 @@
 const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
 const rewire = require("rewire");
+const Logging = require("../../src/logging/logging.js");
 
 chai.use(chaiAsPromised);
 let expect = chai.expect;
 
 const ContractPoliceReporter = rewire("../../src/reporting/contractpolicereporter.js");
 const TestOutcome = require("../../src/testoutcome");
+const TESTLOGGER = new Logging("error", false, false);
 
 describe("ContractPoliceReporter", () => {
     function mockFileSystem(writeFileError) {
@@ -21,7 +23,7 @@ describe("ContractPoliceReporter", () => {
     it('should write a report to txt file when given a test report with two items', () => {
         mockFileSystem(null);
 
-        const reporter = new ContractPoliceReporter("/some/outputDir");
+        const reporter = new ContractPoliceReporter(TESTLOGGER, "/some/outputDir");
         let testResults = [
             new TestOutcome("test1", [
                 "Test one passed",
@@ -29,37 +31,37 @@ describe("ContractPoliceReporter", () => {
             ], "PASS")
         ];
 
-        return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled;
+        return expect(reporter.writeTestReport(testResults, 1337)).to.eventually.be.fulfilled;
     });
 
     it('should write a report to txt file when given a test report with zero items', () => {
         mockFileSystem(null);
 
-        const reporter = new ContractPoliceReporter("/some/outputDir");
+        const reporter = new ContractPoliceReporter(TESTLOGGER, "/some/outputDir");
         let testResults = [
             new TestOutcome("test1", [], "PASS")
         ];
 
-        return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled;
+        return expect(reporter.writeTestReport(testResults, 1337)).to.eventually.be.fulfilled;
     });
 
     it('should write a report to txt file when given no test reports', () => {
         mockFileSystem(null);
 
-        const reporter = new ContractPoliceReporter("/some/outputDir");
+        const reporter = new ContractPoliceReporter(TESTLOGGER, "/some/outputDir");
         let testResults = [];
 
-        return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled;
+        return expect(reporter.writeTestReport(testResults, 1337)).to.eventually.be.fulfilled;
     });
 
     it('should reject writing a report to txt file when an error occurred on the filesystem', () => {
         mockFileSystem(Error("Something went wrong"));
 
-        const reporter = new ContractPoliceReporter("/some/outputDir");
+        const reporter = new ContractPoliceReporter(TESTLOGGER, "/some/outputDir");
         let testResults = [
             new TestOutcome("test1", [], "PASS")
         ];
 
-        return expect(reporter.writeTestReport(testResults)).to.eventually.be.rejectedWith("Something went wrong");
+        return expect(reporter.writeTestReport(testResults, 1337)).to.eventually.be.rejectedWith("Something went wrong");
     });
 });
