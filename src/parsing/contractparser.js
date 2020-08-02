@@ -8,17 +8,6 @@ const helper = require("../helper-functions.js");
 const WildcardGenerator = require("./wildcard-generator.js");
 const LOG_TAG = "ContractParser";
 
-Array.prototype.remove = function() {
-    let what, a = arguments, L = a.length, ax;
-    while (L && this.length) {
-        what = a[--L];
-        while ((ax = this.indexOf(what)) !== -1) {
-            this.splice(ax, 1);
-        }
-    }
-    return this;
-};
-
 async function getFiles(dir) {
     const subdirs = await readdir(dir);
     const files = await Promise.all(subdirs.map(async (subdir) => {
@@ -74,8 +63,8 @@ function injectGenerateWildcardValues(logger, target, contractName) {
                     } else {
                         if (wildcardGenerator.isGenerateWildcard(arrItem)) {
                             // replace item
-                            target[propName].remove(arrItem);
-                            target[propName].push(wildcardGenerator.generateWildcardValue(arrItem));
+                            let wildcardValue = wildcardGenerator.generateWildcardValue(arrItem);
+                            helper.replaceInArray(target[propName], arrItem, wildcardValue);
                         }
                     }
                 });
@@ -95,22 +84,20 @@ function ContractParser(logger) {
     this.logger = logger;
 }
 
-ContractParser.prototype.findYamlFiles = function (directory) {
+ContractParser.prototype.findYamlFiles = async function (directory) {
     const log = this.logger;
     log.info(LOG_TAG, `Searching "${directory}" for YAML files...`);
-    return getFiles(directory)
-        .then(function (files) {
-            log.info(LOG_TAG, `Found ${files.length} files in directory`)
-            let contractFiles = [];
-            files.forEach(function (file) {
-                if (file.endsWith(".yaml") || file.endsWith(".yml")) {
-                    log.debug(LOG_TAG, `YAML file "${file}" discovered`);
-                    contractFiles.push(file);
-                }
-            });
-            log.info(LOG_TAG, `Found ${contractFiles.length} YAML files that may contain Contract Definitions`);
-            return contractFiles;
-        });
+    let files = await getFiles(directory)
+    log.info(LOG_TAG, `Found ${files.length} files in directory`)
+    let contractFiles = [];
+    files.forEach(function (file) {
+        if (file.endsWith(".yaml") || file.endsWith(".yml")) {
+            log.debug(LOG_TAG, `YAML file "${file}" discovered`);
+            contractFiles.push(file);
+        }
+    });
+    log.info(LOG_TAG, `Found ${contractFiles.length} YAML files that may contain Contract Definitions`);
+    return contractFiles;
 };
 
 ContractParser.prototype.parseContract = function (contractsDirectory, contractFile) {

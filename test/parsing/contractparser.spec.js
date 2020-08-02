@@ -752,7 +752,6 @@ describe("ContractParser", () => {
             expect(generatedStringValue).to.not.contain("generate");
             expect(typeof generatedStringValue).to.equal("string");
             const generatedArray = result.data.request.body.user.tokens;
-            console.log(generatedArray);
             generatedArray.forEach(function(item) {
                 expect(item).to.not.contain("generate");
                 expect(typeof item).to.equal("string");

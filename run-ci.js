@@ -20,16 +20,18 @@ let config = {
     loglevel: configAppLogsLevel
 };
 
-let contractPolice = new ContractPolice(contractsDirectory, targetUrl, config);
-console.log("Start contract test(s) with ContractPolice");
-contractPolice.testContracts()
-    .then(function() {
+(async () => {
+    try {
+        // Execution
+        const contractPolice = new ContractPolice(contractsDirectory, testTarget, config);
+        console.log("Start contract test(s) with ContractPolice");
+        await contractPolice.testContracts()
         // Successful test, no errors found
         console.log("ContractPolice successfully finished executing contract tests");
         process.exitCode = 0; // success
-    })
-    .catch(function(err) {
+    } catch (err) {
         // Show output of contract test
         console.error(err.message);
         process.exitCode = 1; // failure
-    });
+    }
+})();

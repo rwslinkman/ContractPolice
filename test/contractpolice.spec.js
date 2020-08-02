@@ -188,7 +188,7 @@ describe("ContractPolice", () => {
     //endregion
 
     //region Tests to verify behaviour of ContractPolice
-    it('should resolve a successful promise when given valid input, outputDir exists and tests are passing', () => {
+    it('should resolve a successful promise when given valid input, outputDir exists and tests are passing', async () => {
         //region mocks
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
@@ -213,16 +213,13 @@ describe("ContractPolice", () => {
         //endregion mocks
 
         const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
+        await contractPolice.testContracts()
 
-        return expect(contractPolice.testContracts())
-            .to.eventually.be.fulfilled
-            .then(function () {
-                expect(cprStub.called).to.equal(true);
-                expect(junitStub.called).to.equal(false);
-            })
+        expect(cprStub.called).to.equal(true);
+        expect(junitStub.called).to.equal(false);
     });
 
-    it('should resolve a successful promise when given valid input, outputDir does not exist and tests are passing', () => {
+    it('should resolve a successful promise when given valid input, outputDir does not exist and tests are passing', async () => {
         //region mocks
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
@@ -246,16 +243,13 @@ describe("ContractPolice", () => {
         });
 
         const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
+        await contractPolice.testContracts()
 
-        return expect(contractPolice.testContracts())
-            .to.eventually.be.fulfilled
-            .then(function () {
-                expect(cprStub.called).to.equal(true);
-                expect(junitStub.called).to.equal(false);
-            });
+        expect(cprStub.called).to.equal(true);
+        expect(junitStub.called).to.equal(false);
     });
 
-    it('should resolve a successful promise when given valid input, tests are passing, outputDir exists and junit reporter is configured', () => {
+    it('should resolve a successful promise when given valid input, tests are passing, outputDir exists and junit reporter is configured', async () => {
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
             return {
@@ -282,16 +276,13 @@ describe("ContractPolice", () => {
             reporter: "junit"
         };
         const contractPolice = new ContractPolice("some/directory", "http://someserver.com", config);
+        await contractPolice.testContracts()
 
-        return expect(contractPolice.testContracts())
-            .to.eventually.be.fulfilled
-            .then(function () {
-                expect(cprStub.called).to.equal(false);
-                expect(junitStub.called).to.equal(true);
-        });
+        expect(cprStub.called).to.equal(false);
+        expect(junitStub.called).to.equal(true);
     });
 
-    it('should resolve a successful promise when given valid input, tests are passing, outputDir does not exist and junit reporter is configured', () => {
+    it('should resolve a successful promise when given valid input, tests are passing, outputDir does not exist and junit reporter is configured', async () => {
         //region mocks
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
@@ -320,16 +311,13 @@ describe("ContractPolice", () => {
             reporter: "junit"
         };
         const contractPolice = new ContractPolice("some/directory", "http://someserver.com", config);
+        await contractPolice.testContracts()
 
-        return expect(contractPolice.testContracts())
-            .to.eventually.be.fulfilled
-            .then(function () {
-                expect(cprStub.called).to.equal(false);
-                expect(junitStub.called).to.equal(true);
-            });
+        expect(cprStub.called).to.equal(false);
+        expect(junitStub.called).to.equal(true);
     });
 
-    it('should resolve a successful promise when given valid input, outputDir exists and tests are failing', () => {
+    it('should resolve a successful promise when given valid input, outputDir exists and tests are failing', async () => {
         //region mocks
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
@@ -354,16 +342,20 @@ describe("ContractPolice", () => {
         //endregion mocks
 
         const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
+        let actualError = null
+        try {
+            await contractPolice.testContracts()
+        } catch(err) {
+            actualError = err;
+        }
 
-        return expect(contractPolice.testContracts())
-            .to.eventually.be.rejectedWith("ContractPolice finished contract testing with violations and/or errors!")
-            .then(function () {
-                expect(cprStub.called).to.equal(true);
-                expect(junitStub.called).to.equal(false);
-            });
+        expect(actualError).to.be.an('error');
+        expect(actualError.message).to.equal("ContractPolice finished contract testing with violations and/or errors!")
+        expect(cprStub.called).to.equal(true);
+        expect(junitStub.called).to.equal(false);
     });
 
-    it('should resolve a successful promise when given valid input, outputDir does not exist and tests are failing', () => {
+    it('should resolve a successful promise when given valid input, outputDir does not exist and tests are failing', async () => {
         //region mocks
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
@@ -389,15 +381,20 @@ describe("ContractPolice", () => {
 
         const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
 
-        return expect(contractPolice.testContracts())
-            .to.eventually.be.rejectedWith("ContractPolice finished contract testing with violations and/or errors!")
-            .then(function () {
-                expect(cprStub.called).to.equal(true);
-                expect(junitStub.called).to.equal(false);
-            });
+        let actualError = null
+        try {
+            await contractPolice.testContracts()
+        } catch(err) {
+            actualError = err;
+        }
+
+        expect(actualError).to.be.an('error');
+        expect(actualError.message).to.equal("ContractPolice finished contract testing with violations and/or errors!")
+        expect(cprStub.called).to.equal(true);
+        expect(junitStub.called).to.equal(false);
     });
 
-    it('should write additional logs when given valid input, outputDir exists and tests are passing', () => {
+    it('should write additional logs when given valid input, outputDir exists and tests are passing', async () => {
         //region mocks
         const cprStub = stub().returns(Promise.resolve());
         const cpReporter = function() {
@@ -436,13 +433,10 @@ describe("ContractPolice", () => {
         const contractPolice = new ContractPolice("some/directory", "http://someserver.com", {
             enableAppLogsFile: true
         });
+        await contractPolice.testContracts();
 
-        return expect(contractPolice.testContracts())
-            .to.eventually.be.fulfilled
-            .then(function () {
-                expect(cprStub.called).to.equal(true);
-                expect(junitStub.called).to.equal(false);
-            })
+        expect(cprStub.called).to.equal(true);
+        expect(junitStub.called).to.equal(false);
     });
     //endregion
 });

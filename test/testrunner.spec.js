@@ -47,7 +47,7 @@ describe("TestRunner", () => {
         needleStub.reset();
     });
 
-    it("should run the test when minimal request succeeds and validator returns no violations", () => {
+    it("should run the test when minimal request succeeds and validator returns no violations", async () => {
         const request = {
             path: "/v1/orders"
         };
@@ -60,12 +60,14 @@ describe("TestRunner", () => {
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
-        const result = runner.runTest();
+        const testOutcome = await runner.runTest();
 
-        return expect(result).to.eventually.be.fulfilled;
+        expect(testOutcome).to.be.an('object');
+        expect(testOutcome).to.have.property('result');
+        expect(testOutcome.result).to.equal("PASS");
     });
 
-    it("should run the test when 'POST' request succeeds and validator returns no violations", () => {
+    it("should run the test when 'POST' request succeeds and validator returns no violations", async () => {
         const request = {
             path: "/v1/orders",
             method: "POST"
@@ -79,12 +81,14 @@ describe("TestRunner", () => {
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
-        const result = runner.runTest();
+        const testOutcome = await runner.runTest();
 
-        return expect(result).to.eventually.be.fulfilled;
+        expect(testOutcome).to.be.an('object');
+        expect(testOutcome).to.have.property('result');
+        expect(testOutcome.result).to.equal("PASS");
     });
 
-    it("should run the test when 'POST' request succeeds and validator returns no violations", () => {
+    it("should run the test when 'POST' request succeeds and validator returns no violations", async () => {
         const request = {
             path: "/v1/orders",
             method: "post"
@@ -98,12 +102,14 @@ describe("TestRunner", () => {
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
-        const result = runner.runTest();
+        const testOutcome = await runner.runTest();
 
-        return expect(result).to.eventually.be.fulfilled;
+        expect(testOutcome).to.be.an('object');
+        expect(testOutcome).to.have.property('result');
+        expect(testOutcome.result).to.equal("PASS");
     });
 
-    it("should run the test when 'PUT' request succeeds and validator returns no violations", () => {
+    it("should run the test when 'PUT' request succeeds and validator returns no violations", async () => {
         const request = {
             path: "/v1/orders",
             method: "PUT"
@@ -117,12 +123,14 @@ describe("TestRunner", () => {
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
-        const result = runner.runTest();
+        const testOutcome = await runner.runTest();
 
-        return expect(result).to.eventually.be.fulfilled;
+        expect(testOutcome).to.be.an('object');
+        expect(testOutcome).to.have.property('result');
+        expect(testOutcome.result).to.equal("PASS");
     });
 
-    it("should run the test when 'PUT' request succeeds and validator returns no violations", () => {
+    it("should run the test when 'PUT' request succeeds and validator returns no violations", async () => {
         const request = {
             path: "/v1/orders",
             method: "put"
@@ -136,12 +144,14 @@ describe("TestRunner", () => {
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
-        const result = runner.runTest();
+        const testOutcome = await runner.runTest();
 
-        return expect(result).to.eventually.be.fulfilled;
+        expect(testOutcome).to.be.an('object');
+        expect(testOutcome).to.have.property('result');
+        expect(testOutcome.result).to.equal("PASS");
     });
 
-    it("should run the test when 'POST' request succeeds and validator returns a violation", () => {
+    it("should run the test when 'POST' request succeeds and validator returns a violation", async () => {
         const request = {
             path: "/v1/orders",
             method: "POST"
@@ -157,12 +167,14 @@ describe("TestRunner", () => {
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", valid);
 
-        const result = runner.runTest();
+        const testOutcome = await runner.runTest();
 
-        return expect(result).to.eventually.be.fulfilled;
+        expect(testOutcome).to.be.an('object');
+        expect(testOutcome).to.have.property('result');
+        expect(testOutcome.result).to.equal("FAIL");
     });
 
-    it("should run the test when 'POST' request fails", () => {
+    it("should run the test when 'POST' request fails", async () => {
         const request = {
             path: "/v1/orders",
             method: "POST"
@@ -176,12 +188,14 @@ describe("TestRunner", () => {
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
-        const result = runner.runTest();
+        const testOutcome = await runner.runTest();
 
-        return expect(result).to.eventually.be.fulfilled;
+        expect(testOutcome).to.be.an('object');
+        expect(testOutcome).to.have.property('result');
+        expect(testOutcome.result).to.equal("FAIL");
     });
 
-    it("should run the test when 'POST' request with headers succeeds and validator returns no violations", () => {
+    it("should run the test when 'POST' request with headers succeeds and validator returns no violations", async () => {
         const request = {
             path: "/v1/orders",
             method: "POST",
@@ -199,12 +213,14 @@ describe("TestRunner", () => {
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/", validator);
 
-        const result = runner.runTest();
+        const testOutcome = await runner.runTest();
 
-        return expect(result).to.eventually.be.fulfilled;
+        expect(testOutcome).to.be.an('object');
+        expect(testOutcome).to.have.property('result');
+        expect(testOutcome.result).to.equal("PASS");
     });
 
-    it("should append query parameters to URL when running the test", () => {
+    it("should append query parameters to URL when running the test", async () => {
         const request = {
             path: "/v3/orders",
             method: "GET",
@@ -223,14 +239,14 @@ describe("TestRunner", () => {
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/api", validator);
 
-        runner.runTest();
+        await runner.runTest();
 
         const callArguments = needleStub.getCall(0).args;
         const urlArgument = callArguments[1];
         return expect(urlArgument).to.equal("http://doesnot.exist/api/v3/orders?orderId=1337&token=abcd");
     });
 
-    it("should return 'unable to validate' violation when validator throws unexpected error", () => {
+    it("should return 'unable to validate' violation when validator throws unexpected error", async () => {
         const request = {
             path: "/v3/orders"
         };
@@ -242,15 +258,10 @@ describe("TestRunner", () => {
 
         const runner = new TestRunner(testLogger, "testName", request, "http://doesnot.exist/api", validator);
 
-        const result = runner.runTest()
-            .then(function(report) {
-                expect(report.result).to.equal("FAIL");
-                expect(report.testName).to.equal("testName");
-                expect(report.report).to.not.be.empty;
-                expect(report.report[0]).to.equal("Unable to validate testName due to error")
-                return report;
-            });
-
-        return expect(result).to.eventually.be.fulfilled;
+        const resultReport = await runner.runTest()
+        expect(resultReport.result).to.equal("FAIL");
+        expect(resultReport.testName).to.equal("testName");
+        expect(resultReport.report).to.not.be.empty;
+        expect(resultReport.report[0]).to.equal("Unable to validate testName due to error")
     });
 });
