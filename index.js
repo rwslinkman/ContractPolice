@@ -138,9 +138,11 @@ ContractPolice.prototype.testContracts = async function () {
     }
 };
 
-ContractPolice.prototype.generateContractTest = async function() {
-    let api = await SwaggerParser.parse("openapi/api.github.com.yaml");
-    console.log(api);
+ContractPolice.prototype.generateContractTests = async function() {
+    let api = await SwaggerParser.parse("openapi/openapi-example-github.yaml");
+    console.log(api.info);
+    let swagger = await SwaggerParser.parse("openapi/swagger-example.yaml")
+    console.log(swagger.info);
 };
 
 module.exports = ContractPolice;

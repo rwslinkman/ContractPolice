@@ -15,6 +15,7 @@ const testTarget = "http://localhost:3000";
     try {
         // Execution
         const contractPolice = new ContractPolice(contractsDirectory, testTarget, config);
+        await contractPolice.generateContractTests()
         console.log("Start contract test(s) with ContractPolice");
         await contractPolice.testContracts()
         // Successful test, no errors found
