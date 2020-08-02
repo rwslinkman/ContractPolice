@@ -3,7 +3,7 @@ const ContractPolice = require("./index.js");
 // Input
 const config = {
     reportOutputDir: "report",
-    // reporter: "junit",
+    reporter: "junit",
     enableAppLogsConsole: true,
     enableAppLogsFile: false,
     loglevel: "info"

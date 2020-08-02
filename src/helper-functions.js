@@ -16,5 +16,14 @@ module.exports = {
 
         });
         return headersObject;
+    },
+
+    replaceInArray: function(haystack, needle, replacement) {
+        const index = haystack.indexOf(needle);
+        if (index > -1) {
+            haystack.splice(index, 1);
+            haystack.unshift(replacement);
+        }
+        return haystack;
     }
 };

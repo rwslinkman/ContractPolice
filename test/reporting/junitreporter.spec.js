@@ -3,12 +3,14 @@ const chaiAsPromised = require("chai-as-promised");
 const rewire = require("rewire");
 const sinon = require("sinon");
 const junit = require('junit-report-builder');
+const Logging = require("../../src/logging/logging.js");
 
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 
 const JUnitReporter = rewire("../../src/reporting/junitreporter.js");
 const TestOutcome = require("../../src/testoutcome");
+const TESTLOGGER = new Logging("error", false, false);
 
 describe("JUnitReporter", () => {
     function injectMocks(writeStub) {
@@ -22,11 +24,11 @@ describe("JUnitReporter", () => {
         });
     }
 
-    it('should write a JUnit report to file when given a test report with two items', () => {
+    it('should write a JUnit report to file when given a test report with two items', async () => {
         const writeStub = sinon.stub();
         injectMocks(writeStub);
 
-        const reporter = new JUnitReporter("/some/outputDir");
+        const reporter = new JUnitReporter(TESTLOGGER, "/some/outputDir");
         let testResults = [
             new TestOutcome("test1", [
                 "Test one passed",
@@ -34,54 +36,50 @@ describe("JUnitReporter", () => {
             ], "PASS")
         ];
 
-        return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled.then(function() {
-            expect(writeStub.called).to.equal(true);
-        });
+        await reporter.writeTestReport(testResults, 1337);
+        expect(writeStub.called).to.equal(true);
     });
 
-    it('should write a JUnit report to file when given a test report with zero items', () => {
+    it('should write a JUnit report to file when given a test report with zero items', async () => {
         const writeStub = sinon.stub();
         injectMocks(writeStub);
 
-        const reporter = new JUnitReporter("/some/outputDir");
+        const reporter = new JUnitReporter(TESTLOGGER, "/some/outputDir");
         let testResults = [
             new TestOutcome("test1", [], "PASS")
         ];
 
-        return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled.then(function() {
-            expect(writeStub.called).to.equal(true);
-        });
+        await reporter.writeTestReport(testResults, 1337);
+        expect(writeStub.called).to.equal(true);
     });
 
-    it('should write a JUnit report to file when given no test reports', () => {
+    it('should write a JUnit report to file when given no test reports', async () => {
         const writeStub = sinon.stub();
         injectMocks(writeStub);
 
-        const reporter = new JUnitReporter("/some/outputDir");
+        const reporter = new JUnitReporter(TESTLOGGER, "/some/outputDir");
         let testResults = [];
 
-        return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled.then(function() {
-            expect(writeStub.called).to.equal(true);
-        });
+        await reporter.writeTestReport(testResults, 1337);
+        expect(writeStub.called).to.equal(true);
     });
 
-    it('should write a JUnit report to file when given no reports', () => {
+    it('should write a JUnit report to file when given no reports', async () => {
         const writeStub = sinon.stub();
         injectMocks(writeStub);
 
-        const reporter = new JUnitReporter("/some/outputDir");
+        const reporter = new JUnitReporter(TESTLOGGER, "/some/outputDir");
         let testResults = [];
 
-        return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled.then(function() {
-            expect(writeStub.called).to.equal(true);
-        });
+        await reporter.writeTestReport(testResults, 1337);
+        expect(writeStub.called).to.equal(true);
     });
 
-    it('should write a JUnit report to file when given failing test reports', () => {
+    it('should write a JUnit report to file when given failing test reports', async () => {
         const writeStub = sinon.stub();
         injectMocks(writeStub);
 
-        const reporter = new JUnitReporter("/some/baseDir", "outputDir");
+        const reporter = new JUnitReporter(TESTLOGGER, "outputDir");
         let testResults = [
             new TestOutcome("test1", [
                 "Test one passed",
@@ -89,8 +87,7 @@ describe("JUnitReporter", () => {
             ], "FAIL")
         ];
 
-        return expect(reporter.writeTestReport(testResults)).to.eventually.be.fulfilled.then(function() {
-            expect(writeStub.called).to.equal(true);
-        });
+        await reporter.writeTestReport(testResults, 1337);
+        expect(writeStub.called).to.equal(true);
     });
 });
