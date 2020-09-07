@@ -66,83 +66,84 @@ function ContractPolice(contractsDirectory, endpoint, userConfig = {}) {
 }
 
 ContractPolice.prototype.testContracts = async function () {
-    const endpoint = this.endpoint;
-    const validationRules = this.config.customValidationRules;
-    const failOnError = this.config.failOnError;
-    const reportOutputDir = this.config.reportOutputDir;
-    const reporterType = this.config.reporter;
-    const contractsDirectory = this.contractsDirectory;
-    const logger = this.logger;
-    logger.log(LOG_TAG, "info", "Start contract test(s) with ContractPolice");
+    this.logger.info(LOG_TAG, "Start contract test(s) with ContractPolice");
 
     // Parse contracts
-    let contractParser = new ContractParser(logger);
-    let contractFiles = await contractParser.findYamlFiles(contractsDirectory);
-    let contracts = contractFiles.map(function (yamlFile) {
-        return contractParser.parseContract(contractsDirectory, yamlFile);
+    let contractParser = new ContractParser(this.logger);
+    let contractFiles = await contractParser.findYamlFiles(this.contractsDirectory);
+    let contracts = contractFiles.map((yamlFile) => {
+        return contractParser.parseContract(this.contractsDirectory, yamlFile);
     });
 
     // Prepare test runners
-    let testRunners = [];
-    contracts.forEach(function (contractMeta) {
+    let testRunners = contracts.map((contractMeta) => {
         let contract = contractMeta.data;
-        let validator = new ContractValidator(logger, contract.response, validationRules);
-        let runner = new TestRunner(logger, contractMeta.name, contract.request, endpoint, validator);
-        logger.info(LOG_TAG, `Created TestRunner for "${contractMeta.name}" Contract Definition`);
-        testRunners.push(runner);
+        let validator = new ContractValidator(this.logger, contract.response, this.config.validationRules);
+        this.logger.info(LOG_TAG, `Created TestRunner for "${contractMeta.name}" Contract Definition`);
+        return new TestRunner(this.logger, contractMeta.name, contract.request, this.endpoint, validator);
     });
 
     // Run tests
-    logger.info(LOG_TAG, "Running contract tests...");
+    this.logger.info(LOG_TAG, "Running contract tests...");
     let testRuns = testRunners.map(it => it.runTest());
     let testResults = await Promise.all(testRuns);
-    logger.info(LOG_TAG, "Contract tests completed. Gathering reports...");
+    this.logger.info(LOG_TAG, "Contract tests completed. Gathering reports...");
 
     // Ensure output dir exists
-    if (!fs.existsSync(reportOutputDir)) {
-        logger.debug(LOG_TAG, `Output directory ${reportOutputDir} does not existing, creating...`);
-        fs.mkdirSync(reportOutputDir);
+    if (!fs.existsSync(this.config.reportOutputDir)) {
+        this.logger.debug(LOG_TAG, `Output directory ${this.config.reportOutputDir} does not existing, creating...`);
+        fs.mkdirSync(this.config.reportOutputDir);
     }
-    // Collect execution report and pass on
+    // Collect execution report variables
     const runSuccess = !(testResults.map(it => it.result).includes("FAIL"));
     const timestamp = new Date().getTime();
 
-    // Write test report & application logs
-    logger.info(LOG_TAG, "Writing contract test report...")
-    let reporter = new ContractPoliceReporter(logger, reportOutputDir);
-    if (reporterType === "junit") {
-        reporter = new JUnitReporter(logger, reportOutputDir);
+    // Write test report
+    this.logger.info(LOG_TAG, "Writing contract test report...")
+    let reporter = new ContractPoliceReporter(this.logger, this.config.reportOutputDir);
+    if (this.config.reporter === "junit") {
+        reporter = new JUnitReporter(this.logger, this.config.reportOutputDir);
     }
     await reporter.writeTestReport(testResults, timestamp)
-    logger.log(LOG_TAG, "info", "Contract test report written to file")
+    this.logger.log(LOG_TAG, "info", "Contract test report written to file")
 
     // Write application logs if applicable
-    if (logger.fileEnabled) {
-        logger.debug(LOG_TAG, "Writing application logs to file");
+    if (this.logger.fileEnabled) {
+        this.logger.debug(LOG_TAG, "Writing application logs to file");
     } else {
-        logger.debug(LOG_TAG, "Skipped writing logs to file");
+        this.logger.debug(LOG_TAG, "Skipped writing logs to file");
     }
-    await logger.writeLogs(reportOutputDir, timestamp)
-    if (logger.fileEnabled) {
-        logger.debug(LOG_TAG, "Contract testing logs written to file");
+    await this.logger.writeLogs(this.config.reportOutputDir, timestamp)
+    if (this.logger.fileEnabled) {
+        this.logger.debug(LOG_TAG, "Contract testing logs written to file");
     }
 
     // Finish execution
     const logEnd = runSuccess ? "successfully!" : "with violations and/or errors!"
     const message = "ContractPolice finished contract testing " + logEnd;
-    logger.log(LOG_TAG, "info", message)
+    this.logger.log(LOG_TAG, "info", message)
     // Throw error on failure to influence process exit code
-    if (!runSuccess && failOnError) {
-        logger.debug(LOG_TAG, "Quitting with error for runner's awareness");
+    if (!runSuccess && this.config.failOnError) {
+        this.logger.debug(LOG_TAG, "Quitting with error for runner's awareness");
         throw Error(message)
     }
 };
 
 ContractPolice.prototype.generateContractTests = async function() {
-    let api = await SwaggerParser.parse("openapi/openapi-example-github.yaml");
-    console.log(api.info);
-    let swagger = await SwaggerParser.parse("openapi/swagger-example.yaml")
-    console.log(swagger.info);
+    // let api = await SwaggerParser.parse("openapi/openapi-example-github.yaml");
+    // console.log(api);
+    try {
+        let swagger = await SwaggerParser.parse("openapi/invalid.yaml")
+        console.log(swagger);
+    }
+    catch(e) {
+        this.logger.warn(LOG_TAG, "Unable to read file. No contract tests generated.");
+        console.error(e);
+    }
+
+
+
+    // throw new Error("");
 };
 
 module.exports = ContractPolice;

@@ -15,9 +15,9 @@ const testTarget = "http://localhost:3000";
     try {
         // Execution
         const contractPolice = new ContractPolice(contractsDirectory, testTarget, config);
-        await contractPolice.generateContractTests()
+        await contractPolice.generateContractTests();
         console.log("Start contract test(s) with ContractPolice");
-        await contractPolice.testContracts()
+        await contractPolice.testContracts();
         // Successful test, no errors found
         console.log("ContractPolice successfully finished executing contract tests");
         process.exitCode = 0; // success
