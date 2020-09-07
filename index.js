@@ -130,11 +130,26 @@ ContractPolice.prototype.testContracts = async function () {
 };
 
 ContractPolice.prototype.generateContractTests = async function() {
-    // let api = await SwaggerParser.parse("openapi/openapi-example-github.yaml");
-    // console.log(api);
     try {
-        let swagger = await SwaggerParser.parse("openapi/invalid.yaml")
-        console.log(swagger);
+        // let swagger = await SwaggerParser.parse("openapi/openapi-example-github.yaml");
+        let swagger = await SwaggerParser.parse("openapi/swagger-example.yaml")
+        let paths = Object.keys(swagger.paths);
+
+        paths.forEach(path => {
+            let pathDef = swagger.paths[path];
+            let pathMethods = Object.keys(pathDef);
+            pathMethods.forEach(pathMethod => {
+                // console.log(`${pathMethod.toUpperCase()}\t${path}`);
+                let methodDef = pathDef[pathMethod];
+                let expectedResponses = Object.keys(methodDef["responses"]);
+                expectedResponses.forEach(response => {
+                    console.log(`${response}\t${pathMethod.toUpperCase()}\t${path}`);
+                    console.log(methodDef["responses"][response]);
+                    // console.log(response);
+                });
+            })
+            // console.log(pathMethods);
+        });
     }
     catch(e) {
         this.logger.warn(LOG_TAG, "Unable to read file. No contract tests generated.");
@@ -143,7 +158,7 @@ ContractPolice.prototype.generateContractTests = async function() {
 
 
 
-    // throw new Error("");
+    throw new Error("");
 };
 
 module.exports = ContractPolice;
