@@ -31,7 +31,7 @@ describe("ContractPolice", () => {
     function parserMock() { // constructor returns object with functions
         return {
             findYamlFiles: function (directory) {
-                expect(directory).to.equal("some/directory");
+                // expect(directory).to.equal("some/directory");
                 return Promise.resolve(["/some/path/to/my-contract.yaml"]);
             },
             parseContract: function(contractFile) {
@@ -70,7 +70,10 @@ describe("ContractPolice", () => {
 
     //region Tests to setup and config of ContractPolice
     it("should accept a directory parameter and a endpoint parameter", () => {
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
+        const options = {
+            contractDefinitionsDir: "some/directory"
+        };
+        const contractPolice = new ContractPolice("http://someserver.com", options);
         expect(contractPolice).to.not.be.null;
         expect(contractPolice.contractsDirectory).to.equal("some/directory");
         expect(contractPolice.endpoint).to.equal("http://someserver.com");
@@ -78,43 +81,58 @@ describe("ContractPolice", () => {
         expect(contractPolice.config.reportOutputDir).to.equal("/contractpolice/build");
     });
 
-    it("should throw an exception when directory parameter is null", () => {
-        expect(() =>  new ContractPolice(null, "http://someserver.com")).to.throw("Required parameter 'contractsDirectory' not found.");
+    it("should throw an exception when 'contractDefinitionsDir' option is null", () => {
+        const options = {
+            contractDefinitionsDir: null
+        };
+        expect(() =>  new ContractPolice("http://someserver.com", options)).to.throw("Required parameter 'config.contractDefinitionsDir' not found.");
+    });
+
+    it("should throw an exception when 'contractDefinitionsDir' option is missing", () => {
+        const options = {};
+        expect(() =>  new ContractPolice("http://someserver.com", options)).to.throw("Required parameter 'config.contractDefinitionsDir' not found.");
     });
 
     it("should throw an exception when endpoint parameter is null", () => {
-        expect(() => new ContractPolice("some/directory")).to.throw("Required parameter 'endpoint' not found.");
+        const options = {
+            contractDefinitionsDir: "some/directory"
+        };
+        expect(() => new ContractPolice(null, options)).to.throw("Required parameter 'endpoint' not found.");
     });
 
     it("should fallback to defaults when config is not provided", () => {
         const defaultConfig = {
+            openApiFile: "",
             customValidationRules: [],
             failOnError: true,
             reportOutputDir: "/contractpolice/build",
             reporter: "default",
-            enableAppLogsConsole: false,
+            enableAppLogsConsole: true,
             enableAppLogsFile: false,
             loglevel: "warn"
         };
 
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com", {});
+        const contractPolice = new ContractPolice("http://someserver.com", {
+            contractDefinitionsDir: "contracts"
+        });
         expect(contractPolice).to.not.be.null;
-        expect(contractPolice.contractsDirectory).to.equal("some/directory");
+        expect(contractPolice.contractsDirectory).to.equal("contracts");
         expect(contractPolice.endpoint).to.equal("http://someserver.com");
         expect(contractPolice.config.customValidationRules).to.deep.equal(defaultConfig.customValidationRules);
         expect(contractPolice.config.failOnError).to.equal(defaultConfig.failOnError);
         expect(contractPolice.config.reportOutputDir).to.equal(defaultConfig.reportOutputDir);
         expect(contractPolice.config.reporter).to.equal(defaultConfig.reporter);
-        expect(contractPolice.config.enableAppLogsConsole).to.equal(false, defaultConfig.enableAppLogsConsole);
+        expect(contractPolice.config.enableAppLogsConsole).to.equal(defaultConfig.enableAppLogsConsole);
         expect(contractPolice.config.enableAppLogsFile).to.equal(defaultConfig.enableAppLogsFile);
         expect(contractPolice.config.loglevel).to.equal(defaultConfig.loglevel);
     });
 
     it("should accept the parameters when config.reporter is 'default'", () => {
         const options = {
+            contractDefinitionsDir: "some/directory",
             reporter: "default"
         };
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com", options);
+        const contractPolice = new ContractPolice("http://someserver.com", options);
         expect(contractPolice).to.not.be.null;
         expect(contractPolice.contractsDirectory).to.equal("some/directory");
         expect(contractPolice.endpoint).to.equal("http://someserver.com");
@@ -124,9 +142,10 @@ describe("ContractPolice", () => {
 
     it("should accept the parameters when config.reporter is 'junit'", () => {
         const options = {
-            reporter: "junit"
+            reporter: "junit",
+            contractDefinitionsDir: "some/directory"
         };
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com", options);
+        const contractPolice = new ContractPolice("http://someserver.com", options);
         expect(contractPolice).to.not.be.null;
         expect(contractPolice.contractsDirectory).to.equal("some/directory");
         expect(contractPolice.endpoint).to.equal("http://someserver.com");
@@ -136,9 +155,10 @@ describe("ContractPolice", () => {
 
     it("should fallback to default when config.reporter is not supported", () => {
         const options = {
-            reporter: "somethingElse"
+            reporter: "somethingElse",
+            contractDefinitionsDir: "some/directory"
         };
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com", options);
+        const contractPolice = new ContractPolice("http://someserver.com", options);
         expect(contractPolice).to.not.be.null;
         expect(contractPolice.contractsDirectory).to.equal("some/directory");
         expect(contractPolice.endpoint).to.equal("http://someserver.com");
@@ -148,9 +168,10 @@ describe("ContractPolice", () => {
 
     it("should fallback to default when config.reporter is not supported", () => {
         const options = {
-            reporter: "somethingElse"
+            reporter: "somethingElse",
+            contractDefinitionsDir: "some/directory"
         };
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com", options);
+        const contractPolice = new ContractPolice("http://someserver.com", options);
         expect(contractPolice).to.not.be.null;
         expect(contractPolice.contractsDirectory).to.equal("some/directory");
         expect(contractPolice.endpoint).to.equal("http://someserver.com");
@@ -161,9 +182,10 @@ describe("ContractPolice", () => {
     it("should accept the parameters when config.loglevel is 'error', 'warn', 'info', 'debug'", () => {
         ['error', 'warn', 'info', 'debug'].forEach(function(supportedLogLevel) {
             const options = {
-                loglevel: supportedLogLevel
+                loglevel: supportedLogLevel,
+                contractDefinitionsDir: "some/directory"
             };
-            const contractPolice = new ContractPolice("some/directory", "http://someserver.com", options);
+            const contractPolice = new ContractPolice("http://someserver.com", options);
             expect(contractPolice).to.not.be.null;
             expect(contractPolice.contractsDirectory).to.equal("some/directory");
             expect(contractPolice.endpoint).to.equal("http://someserver.com");
@@ -175,15 +197,39 @@ describe("ContractPolice", () => {
 
     it("should fallback to default when config.loglevel is not supported", () => {
         const options = {
-            loglevel: "appelflap"
+            loglevel: "appelflap",
+            contractDefinitionsDir: "some/directory"
         };
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com", options);
+        const contractPolice = new ContractPolice("http://someserver.com", options);
         expect(contractPolice).to.not.be.null;
         expect(contractPolice.contractsDirectory).to.equal("some/directory");
         expect(contractPolice.endpoint).to.equal("http://someserver.com");
         expect(contractPolice.config.reporter).to.equal("default");
         expect(contractPolice.config.reportOutputDir).to.equal("/contractpolice/build");
         expect(contractPolice.config.loglevel).to.equal("warn");
+    });
+
+    it("should accept the openApiFile parameter when given", () => {
+        ["yaml", "yml"].forEach((extension) => {
+            const options = {
+                openApiFile: "openapi/some-openapi-file." + extension,
+                contractDefinitionsDir: "some/directory"
+            };
+            const contractPolice = new ContractPolice("http://someserver.com", options);
+            expect(contractPolice).to.not.be.null;
+            expect(contractPolice.contractsDirectory).to.equal("some/directory");
+            expect(contractPolice.config.openApiFile).to.equal("openapi/some-openapi-file." + extension);
+        });
+    });
+
+    it("should choose default for the openApiFile parameter when not given", () => {
+        const options = {
+            contractDefinitionsDir: "some/directory"
+        };
+        const contractPolice = new ContractPolice("http://someserver.com", options);
+        expect(contractPolice).to.not.be.null;
+        expect(contractPolice.contractsDirectory).to.equal("some/directory");
+        expect(contractPolice.config.openApiFile).to.equal("");
     });
     //endregion
 
@@ -212,7 +258,9 @@ describe("ContractPolice", () => {
         });
         //endregion mocks
 
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
+        const contractPolice = new ContractPolice("http://someserver.com", {
+            contractDefinitionsDir: "some/directory",
+        });
         await contractPolice.testContracts()
 
         expect(cprStub.called).to.equal(true);
@@ -242,7 +290,9 @@ describe("ContractPolice", () => {
             "fs": mockFileSystem(false)
         });
 
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
+        const contractPolice = new ContractPolice("http://someserver.com", {
+            contractDefinitionsDir: "some/directory"
+        });
         await contractPolice.testContracts()
 
         expect(cprStub.called).to.equal(true);
@@ -273,9 +323,10 @@ describe("ContractPolice", () => {
         });
 
         const config = {
+            contractDefinitionsDir: "some/directory",
             reporter: "junit"
         };
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com", config);
+        const contractPolice = new ContractPolice("http://someserver.com", config);
         await contractPolice.testContracts()
 
         expect(cprStub.called).to.equal(false);
@@ -308,9 +359,10 @@ describe("ContractPolice", () => {
         });
 
         const config = {
+            contractDefinitionsDir: "some/directory",
             reporter: "junit"
         };
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com", config);
+        const contractPolice = new ContractPolice("http://someserver.com", config);
         await contractPolice.testContracts()
 
         expect(cprStub.called).to.equal(false);
@@ -341,7 +393,9 @@ describe("ContractPolice", () => {
         });
         //endregion mocks
 
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
+        const contractPolice = new ContractPolice("http://someserver.com", {
+            contractDefinitionsDir: "some/directory",
+        });
         let actualError = null
         try {
             await contractPolice.testContracts()
@@ -379,7 +433,9 @@ describe("ContractPolice", () => {
         });
         //endregion mocks
 
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com");
+        const contractPolice = new ContractPolice("http://someserver.com", {
+            contractDefinitionsDir: "some/directory",
+        });
 
         let actualError = null
         try {
@@ -430,7 +486,8 @@ describe("ContractPolice", () => {
         });
         //endregion mocks
 
-        const contractPolice = new ContractPolice("some/directory", "http://someserver.com", {
+        const contractPolice = new ContractPolice("http://someserver.com", {
+            contractDefinitionsDir: "some/directory",
             enableAppLogsFile: true
         });
         await contractPolice.testContracts();

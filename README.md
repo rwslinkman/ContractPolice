@@ -89,7 +89,7 @@ ContractPolice allows for a (minimal) set of properties to be configured to your
 | `failOnError`           | `CP_FAIL_ON_ERROR`            | Determines the signal given to the CLI after ContractPolice detects contract violations | `true`        |
 | `reporter`              | `CP_REPORTER`                 | Defines which reporter should be used by ContractPolice.                                | `default`     |
 | `reportOutputDir`       | n/a (volume)                  | Allows to set a location for the reports to be placed                                   | `build`       |
-| `enableAppLogsConsole`  | `CP_LOGS_CONSOLE_ENABLED`     | Enables console logging of ContractPolice application logs                              | `false`       |
+| `enableAppLogsConsole`  | `CP_LOGS_CONSOLE_ENABLED`     | Enables console logging of ContractPolice application logs                              | `true`        |
 | `enableAppLogsFile`     | `CP_LOGS_FILE_ENABLED`        | Enables file logging of ContractPolice application logs                                 | `false`       |
 | `loglevel`              | `CP_LOGS_LEVEL`               | Loglevel for ContractPolice application logs (one of `error`, `warn`, `info`, `debug`   | `warn`        |
 | `customValidationRules` | not implemented               | List of custom rules for ContractPolice to use when validating contracts                | `[]`          |

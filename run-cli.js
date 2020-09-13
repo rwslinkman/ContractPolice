@@ -2,19 +2,20 @@ const ContractPolice = require("./index.js");
 
 // Input
 const config = {
+    contractDefinitionsDir: "contracts",
+    openApiFile: "openapi/swagger-example.yaml",
     reportOutputDir: "report",
     // reporter: "junit",
     enableAppLogsConsole: true,
     enableAppLogsFile: false,
     loglevel: "info"
 };
-const contractsDirectory = "contracts";
 const testTarget = "http://localhost:3000";
 
 (async () => {
     try {
         // Execution
-        const contractPolice = new ContractPolice(contractsDirectory, testTarget, config);
+        const contractPolice = new ContractPolice(testTarget, config);
         await contractPolice.generateContractTests();
         console.log("Start contract test(s) with ContractPolice");
         await contractPolice.testContracts();

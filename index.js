@@ -10,11 +10,13 @@ const SwaggerParser = require("@apidevtools/swagger-parser");
 
 const LOG_TAG = "ContractPolice"
 const defaultConfig = {
+    contractDefinitionsDir: null, // required
+    openApiFile: "",
     customValidationRules: [],
     failOnError: true,
     reportOutputDir: "/contractpolice/build",
     reporter: "default",
-    enableAppLogsConsole: false,
+    enableAppLogsConsole: true,
     enableAppLogsFile: false,
     loglevel: "warn"
 };
@@ -27,6 +29,7 @@ initializeConfig = function (logger, targetConfig, inputConfig) {
     targetConfig['enableAppLogsConsole'] = inputConfig.enableAppLogsConsole || defaultConfig.enableAppLogsConsole;
     targetConfig['enableAppLogsFile'] = inputConfig.enableAppLogsFile || defaultConfig.enableAppLogsFile;
     targetConfig['loglevel'] = inputConfig.loglevel || defaultConfig.loglevel;
+    targetConfig['openApiFile'] = inputConfig.openApiFile || defaultConfig.openApiFile;
 
     if (!['error', 'warn', 'info', 'debug'].includes(inputConfig.loglevel)) {
         targetConfig.loglevel = defaultConfig.loglevel;
@@ -39,7 +42,7 @@ initializeConfig = function (logger, targetConfig, inputConfig) {
     }
 }
 
-function ContractPolice(contractsDirectory, endpoint, userConfig = {}) {
+function ContractPolice(endpoint, userConfig = {}) {
     let loglevel = userConfig.loglevel || defaultConfig.loglevel;
     if (!['error', 'warn', 'info', 'debug'].includes(loglevel)) {
         loglevel = defaultConfig.loglevel;
@@ -50,17 +53,19 @@ function ContractPolice(contractsDirectory, endpoint, userConfig = {}) {
         userConfig.enableAppLogsFile || defaultConfig.enableAppLogsFile
     );
 
+    let contractsDirectory = userConfig.contractDefinitionsDir || defaultConfig.contractDefinitionsDir;
     if (contractsDirectory === null || contractsDirectory === undefined) {
-        this.logger.log(LOG_TAG, "error", "Required parameter 'contractsDirectory' not found. Please provide the directory where contracts are stored.");
-        throw Error("Required parameter 'contractsDirectory' not found.");
+        this.logger.log(LOG_TAG, "error", "Required parameter 'config.contractDefinitionsDir' not found. Please provide the directory where contracts are stored.");
+        throw Error("Required parameter 'config.contractDefinitionsDir' not found.");
     }
     if (endpoint === null || endpoint === undefined) {
         this.logger.log(LOG_TAG, "error", "Required parameter 'endpoint' not found. Please provide the endpoint that will be placed under test.");
         throw Error(`Required parameter 'endpoint' not found.`);
     }
-    this.contractsDirectory = contractsDirectory;
-    this.endpoint = endpoint;
 
+    // Store parameters for later use
+    this.endpoint = endpoint;
+    this.contractsDirectory = contractsDirectory;
     this.config = {};
     initializeConfig(this.logger, this.config, userConfig);
 }
@@ -130,34 +135,13 @@ ContractPolice.prototype.testContracts = async function () {
 };
 
 ContractPolice.prototype.generateContractTests = async function() {
-    try {
-        // let swagger = await SwaggerParser.parse("openapi/openapi-example-github.yaml");
-        let swagger = await SwaggerParser.parse("openapi/swagger-example.yaml")
-        let paths = Object.keys(swagger.paths);
-
-        paths.forEach(path => {
-            let pathDef = swagger.paths[path];
-            let pathMethods = Object.keys(pathDef);
-            pathMethods.forEach(pathMethod => {
-                // console.log(`${pathMethod.toUpperCase()}\t${path}`);
-                let methodDef = pathDef[pathMethod];
-                let expectedResponses = Object.keys(methodDef["responses"]);
-                expectedResponses.forEach(response => {
-                    console.log(`${response}\t${pathMethod.toUpperCase()}\t${path}`);
-                    console.log(methodDef["responses"][response]);
-                    // console.log(response);
-                });
-            })
-            // console.log(pathMethods);
-        });
-    }
-    catch(e) {
-        this.logger.warn(LOG_TAG, "Unable to read file. No contract tests generated.");
-        console.error(e);
-    }
 
 
-
+    // TODO: Find *.yaml files
+    // TODO: Parse all files and check format
+    // TODO: Create instance of ContractGenerator
+    // TODO: Pass all valid Swagger/OpenAPI files to ContractGenerator
+    // TODO: Write all generated contract definitions to file
     throw new Error("");
 };
 
