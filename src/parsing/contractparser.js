@@ -87,7 +87,8 @@ function convertToRequestModel(dataObj) {
         dataObj.path,
         dataObj.method,
         dataObj.headers,
-        dataObj.params
+        dataObj.params,
+        dataObj.body
     );
 }
 

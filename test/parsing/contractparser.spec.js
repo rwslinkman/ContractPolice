@@ -103,8 +103,9 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath1);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName1);
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
         });
 
         it("should return the contract object with correct name when given valid input", () => {
@@ -123,8 +124,9 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath2);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName2);
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
         });
 
         it("should return the contract object with correct name when given valid input with relative contracts directory", () => {
@@ -144,8 +146,9 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract("contracts", testFilePath2);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName2);
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
         });
 
         it("should return the contract object with correct (deep) name when given valid input", () => {
@@ -164,8 +167,9 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath3);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
         });
 
         it("should throw an error when file does not contain a contract at all", () => {
@@ -263,8 +267,7 @@ describe("ContractParser", () => {
             const result = parser.parseContract(testBaseDir, testFilePath1);
 
             expect(result.name).to.equal(testFileName1);
-            const payload = result.data;
-            expect(payload.request.headers).to.deep.equal([
+            expect(result.request.headers).to.deep.equal([
                 { "Content-Type": "application/json" },
                 { "Accept": "application/json" }
             ]);
@@ -291,8 +294,7 @@ describe("ContractParser", () => {
             let result = parser.parseContract(testBaseDir, testFilePath1);
 
             expect(result.name).to.equal(testFileName1);
-            const payload = result.data;
-            expect(payload.request.headers).to.deep.equal([
+            expect(result.request.headers).to.deep.equal([
                 { "Content-Type": "application/json" },
                 { "Accept": "application/json" }
             ]);
@@ -338,8 +340,7 @@ describe("ContractParser", () => {
             let result = parser.parseContract(testBaseDir, testFilePath1);
 
             expect(result.name).to.equal(testFileName1);
-            const payload = result.data;
-            expect(payload.response.headers).to.deep.equal([
+            expect(result.response.headers).to.deep.equal([
                 { "Content-Type": "application/json" },
                 { "Accept": "application/json" }
             ]);
@@ -366,8 +367,7 @@ describe("ContractParser", () => {
             let result = parser.parseContract(testBaseDir, testFilePath1);
 
             expect(result.name).to.equal(testFileName1);
-            const payload = result.data;
-            expect(payload.response.headers).to.deep.equal([
+            expect(result.response.headers).to.deep.equal([
                 { "Content-Type": "application/json" },
                 { "Accept": "application/json" }
             ]);
@@ -414,10 +414,10 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath1);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName1);
-            const payload = result.data;
-            expect(payload.request.params).to.deep.equal([
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
+            expect(result.request.params).to.deep.equal([
                 { "orderId": 1337 },
                 { "token": "abcd" }
             ]);
@@ -443,10 +443,10 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath1);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName1);
-            const payload = result.data;
-            expect(payload.request.params).to.deep.equal([
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
+            expect(result.request.params).to.deep.equal([
                 { "orderId": 1337 },
                 { "token": "abcd" }
             ]);
@@ -492,9 +492,10 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath3);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
-            const generatedValue = result.data.request.body.username;
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
+            const generatedValue = result.request.body.username;
             expect(generatedValue).to.not.contain("generate");
             expect(typeof generatedValue).to.equal("string");
         });
@@ -518,9 +519,10 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath3);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
-            const generatedValue = result.data.request.body.username;
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
+            const generatedValue = result.request.body.username;
             expect(generatedValue).to.not.contain("generate");
             expect(typeof generatedValue).to.equal("string");
             expect(generatedValue.length).to.equal(64);
@@ -545,9 +547,10 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath3);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
-            const generatedValue = result.data.request.body.username;
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
+            const generatedValue = result.request.body.username;
             expect(typeof generatedValue).to.equal("number");
             expect(generatedValue).to.be.at.least(1);
             expect(generatedValue).to.be.at.most(9999999);
@@ -572,9 +575,10 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath3);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
-            const generatedValue = result.data.request.body.username;
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
+            const generatedValue = result.request.body.username;
             expect(typeof generatedValue).to.equal("number");
             expect(generatedValue).to.be.at.least(1);
             expect(generatedValue).to.be.at.most(31);
@@ -599,9 +603,10 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath3);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
-            const generatedValue = result.data.request.body.username;
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
+            const generatedValue = result.request.body.username;
             expect(typeof generatedValue).to.equal("number");
             expect(generatedValue).to.be.at.least(10);
             expect(generatedValue).to.be.at.most(9999999);
@@ -626,9 +631,10 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath3);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
-            const generatedValue = result.data.request.body.username;
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
+            const generatedValue = result.request.body.username;
             expect(typeof generatedValue).to.equal("number");
             expect(generatedValue).to.be.at.least(10);
             expect(generatedValue).to.be.at.most(31);
@@ -653,9 +659,10 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath3);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
-            const generatedValue = result.data.request.body.username;
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
+            const generatedValue = result.request.body.username;
             expect(typeof generatedValue).to.equal("boolean");
         });
 
@@ -678,9 +685,10 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath3);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
-            const generatedValue = result.data.request.body.username;
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
+            const generatedValue = result.request.body.username;
             expect(generatedValue).to.not.contain("generate");
             expect(generatedValue).to.contain("-");
         });
@@ -710,12 +718,13 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath3);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
-            const generatedStringValue = result.data.request.body.user.name;
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
+            const generatedStringValue = result.request.body.user.name;
             expect(generatedStringValue).to.not.contain("generate");
             expect(typeof generatedStringValue).to.equal("string");
-            const generatedUuidValue = result.data.request.body.user.id.value;
+            const generatedUuidValue = result.request.body.user.id.value;
             expect(generatedUuidValue).to.not.contain("generate");
             expect(typeof generatedUuidValue).to.equal("string");
         });
@@ -746,12 +755,13 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath3);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
-            const generatedStringValue = result.data.request.body.user.name;
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
+            const generatedStringValue = result.request.body.user.name;
             expect(generatedStringValue).to.not.contain("generate");
             expect(typeof generatedStringValue).to.equal("string");
-            const generatedArray = result.data.request.body.user.tokens;
+            const generatedArray = result.request.body.user.tokens;
             generatedArray.forEach(function(item) {
                 expect(item).to.not.contain("generate");
                 expect(typeof item).to.equal("string");
@@ -778,9 +788,10 @@ describe("ContractParser", () => {
             const parser = new ContractParser(TESTLOGGER);
             let result = parser.parseContract(testBaseDir, testFilePath3);
 
-            expect(result.data).to.equal(yamlContent.contract);
             expect(result.name).to.equal(testFileName3);
-            const generatedValue = result.data.request.body.username;
+            expect(result.request.path).to.equal(yamlContent.contract.request.path);
+            expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
+            const generatedValue = result.request.body.username;
             expect(generatedValue).to.equal(keyword);
             expect(typeof generatedValue).to.equal("string");
         });

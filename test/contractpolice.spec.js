@@ -36,6 +36,7 @@ describe("ContractPolice", () => {
             },
             parseContract: function(contractFile) {
                 let contractObj = {
+                    name: contractFile.replace(".yaml", ""),
                     request: {
                         path: "/some/path"
                     },
