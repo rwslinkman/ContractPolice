@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
+const helper = require("../helper-functions.js");
 
 const generatorRegex = /<generate\[([a-z]*)\(?([a-z=\d;]*)?\)?\]>/g;
 const supportedTypes = [
@@ -12,16 +13,6 @@ const ARGUMENT_VALUE_DELIMITER = "=";
 const DEFAULT_STRING_LENGTH = 10;
 const DEFAULT_NUMBER_MIN = 1;
 const DEFAULT_NUMBER_MAX = 9999999;
-
-function generateRandomString(length) {
-    let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    for ( let i = 0; i < length; i++ ) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-}
 
 function parseValue(value) {
     let matches = value.matchAll(generatorRegex);
@@ -49,12 +40,6 @@ function parseArguments(arguments) {
 function filterNamedArgument(arguments, argName, defaultValue) {
     let namedArgument = arguments.filter(arg => arg.argument === argName);
     return (namedArgument.length === 0) ? defaultValue : namedArgument[0].value;
-}
-
-function generateRandomNumber(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function generateRandomBoolean() {
@@ -92,7 +77,7 @@ WildcardGenerator.prototype.generateWildcardValue = function(value) {
         if(generationArguments != null) {
             lengthValue = filterNamedArgument(generationArguments, "length", DEFAULT_STRING_LENGTH);
         }
-        return generateRandomString(lengthValue);
+        return helper.generateRandomString(lengthValue);
     }
     else if(generationValueType === "number") {
         let minValue = DEFAULT_NUMBER_MIN;
@@ -101,7 +86,7 @@ WildcardGenerator.prototype.generateWildcardValue = function(value) {
             minValue = filterNamedArgument(generationArguments, "min", DEFAULT_NUMBER_MIN);
             maxValue = filterNamedArgument(generationArguments, "max", DEFAULT_NUMBER_MAX);
         }
-        return generateRandomNumber(minValue, maxValue);
+        return helper.generateRandomNumber(minValue, maxValue);
     }
     else if(generationValueType === "bool") {
         return generateRandomBoolean();
