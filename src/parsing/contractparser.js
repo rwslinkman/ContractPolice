@@ -6,6 +6,8 @@ const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
 const helper = require("../helper-functions.js");
 const WildcardGenerator = require("./wildcard-generator.js");
+const Contract = require("../model/contract.js");
+const ContractRequest = require("../model/contractrequest.js");
 const LOG_TAG = "ContractParser";
 
 async function getFiles(dir) {
@@ -80,6 +82,15 @@ function injectGenerateWildcardValues(logger, target, contractName) {
     });
 }
 
+function convertToRequestModel(dataObj) {
+    return new ContractRequest(
+        dataObj.path,
+        dataObj.method,
+        dataObj.headers,
+        dataObj.params
+    );
+}
+
 function ContractParser(logger) {
     this.logger = logger;
 }
@@ -134,10 +145,8 @@ ContractParser.prototype.parseContract = function (contractsDirectory, contractF
     // Check request for <generate> wildcards and inject values there
     injectGenerateWildcardValues(this.logger, contractYaml.contract.request, contractName);
 
-    return {
-        name: contractName,
-        data: contractYaml.contract
-    };
+    let requestModel = convertToRequestModel(contractYaml.contract.request)
+    return new Contract(contractName, requestModel, contractYaml.contract.response);
 };
 
 module.exports = ContractParser;

@@ -1,19 +1,17 @@
-const SwaggerParser = require("@apidevtools/swagger-parser");
+const LOG_TAG = "ContractGenerator";
 
-function ContractGenerator() {
-
+function ContractGenerator(logger) {
+    this.logger = logger;
 }
 
-ContractGenerator.prototype.generateContracts = function(apiDefinitionObjects) {
-    // TODO: Analyse files
+ContractGenerator.prototype.generateContractDefinitions = function(apiDefinitionObjects) {
+    // TODO: Analyse objects
     // TODO: Return contract definition data
     try {
-        // let swagger = await SwaggerParser.parse("openapi/openapi-example-github.yaml");
-        let swagger = await SwaggerParser.parse("")
-        let paths = Object.keys(swagger.paths);
+        let paths = Object.keys(apiDefinitionObjects.paths);
 
         paths.forEach(path => {
-            let pathDef = swagger.paths[path];
+            let pathDef = apiDefinitionObjects.paths[path];
             let pathMethods = Object.keys(pathDef);
             pathMethods.forEach(pathMethod => {
                 // console.log(`${pathMethod.toUpperCase()}\t${path}`);
@@ -34,7 +32,7 @@ ContractGenerator.prototype.generateContracts = function(apiDefinitionObjects) {
     }
 
 
-
+    return [];
 }
 
 module.exports = ContractGenerator;

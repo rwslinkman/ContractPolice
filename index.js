@@ -7,6 +7,7 @@ const fs = require('fs');
 const Logging = require("./src/logging/logging.js");
 //
 const SwaggerParser = require("@apidevtools/swagger-parser");
+const ContractGenerator = require("./src/generation/contractgenerator.js");
 
 const LOG_TAG = "ContractPolice"
 const defaultConfig = {
@@ -82,10 +83,9 @@ ContractPolice.prototype.testContracts = async function () {
 
     // Prepare test runners
     let testRunners = contracts.map((contractMeta) => {
-        let contract = contractMeta.data;
-        let validator = new ContractValidator(this.logger, contract.response, this.config.validationRules);
+        let validator = new ContractValidator(this.logger, contractMeta.response, this.config.validationRules);
         this.logger.info(LOG_TAG, `Created TestRunner for "${contractMeta.name}" Contract Definition`);
-        return new TestRunner(this.logger, contractMeta.name, contract.request, this.endpoint, validator);
+        return new TestRunner(this.logger, contractMeta.name, contractMeta.request, this.endpoint, validator);
     });
 
     // Run tests
@@ -134,13 +134,24 @@ ContractPolice.prototype.testContracts = async function () {
     }
 };
 
-ContractPolice.prototype.generateContractTests = async function() {
+ContractPolice.prototype.generateContractTests = async function () {
+    let apiDefinition = null;
+    try {
+        apiDefinition = await SwaggerParser.parse(this.config.openApiFile);
+    } catch (e) {
+        let errorMessage = e.message.substr(0, e.message.indexOf('\n'));
+        this.logger.error(LOG_TAG, "Unable to parse OpenAPI file: " + errorMessage);
+    }
 
+    if (apiDefinition == null) {
+        this.logger.warn(LOG_TAG, "No OpenAPI definition found. Skipping generate step.")
+        return;
+    }
 
-    // TODO: Find *.yaml files
-    // TODO: Parse all files and check format
-    // TODO: Create instance of ContractGenerator
-    // TODO: Pass all valid Swagger/OpenAPI files to ContractGenerator
+    // Convert data from OpenAPI file to (ContractPolice) Contract Definitions
+    let generator = new ContractGenerator(this.logger);
+    let generatedContractDefinitions = generator.generateContractDefinitions(apiDefinition);
+    console.log(`Generated ${generatedContractDefinitions.length} contract definitions`);
     // TODO: Write all generated contract definitions to file
     throw new Error("");
 };

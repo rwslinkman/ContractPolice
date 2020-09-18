@@ -11,7 +11,7 @@ const TestOutcome = require("../src/testoutcome.js");
 const ContractPoliceReporter = require("../src/reporting/contractpolicereporter.js");
 const JUnitReporter = require("../src/reporting/junitreporter.js");
 const Logging = require("../src/logging/logging.js");
-const Contract = require("../src/parsing/contract.js");
+const Contract = require("../src/model/contract.js");
 // Subject
 const ContractPolice = rewire("../index.js");
 
