@@ -1,38 +1,48 @@
-const LOG_TAG = "ContractGenerator";
+const SwaggerParser = require("@apidevtools/swagger-parser");
+const SwaggerGenerator = require("./swagger/swaggergenerator.js");
+const OpenApiGenerator = require("./openapi/openapigenerator.js");
+const NullGenerator = require("./nullgenerator.js");
 
+function isSwagger(api) {
+    return api.swagger !== undefined && api.swagger.length > 0 && api.openapi === undefined;
+}
+
+function isOpenAPI(api) {
+    return api.openapi !== undefined && api.openapi.length > 0 && api.swagger === undefined;
+}
+
+const LOG_TAG = "ContractGenerator";
 function ContractGenerator(logger) {
     this.logger = logger;
 }
 
-ContractGenerator.prototype.generateContractDefinitions = function(apiDefinitionObjects) {
+ContractGenerator.prototype.generateContractDefinitions = async function(openApiFile) {
+    let apiDefinition = null;
+    try {
+        apiDefinition = await SwaggerParser.dereference(openApiFile);
+    } catch (e) {
+        let errorMessage = e.message.substr(0, e.message.indexOf('\n'));
+        this.logger.error(LOG_TAG, "Unable to parse OpenAPI file: " + errorMessage);
+    }
+
+    if (apiDefinition == null) {
+        this.logger.warn(LOG_TAG, "No OpenAPI definition found. Skipping generate step.")
+        return;
+    }
+
     // TODO: Analyse objects
     // TODO: Return contract definition data
-    try {
-        let paths = Object.keys(apiDefinitionObjects.paths);
+    console.log("It's a Swagger API -> " + isSwagger(apiDefinition));
+    console.log("It's a OpenAPI API -> " + isOpenAPI(apiDefinition));
 
-        paths.forEach(path => {
-            let pathDef = apiDefinitionObjects.paths[path];
-            let pathMethods = Object.keys(pathDef);
-            pathMethods.forEach(pathMethod => {
-                // console.log(`${pathMethod.toUpperCase()}\t${path}`);
-                let methodDef = pathDef[pathMethod];
-                let expectedResponses = Object.keys(methodDef["responses"]);
-                expectedResponses.forEach(response => {
-                    console.log(`${response}\t${pathMethod.toUpperCase()}\t${path}`);
-                    console.log(methodDef["responses"][response]);
-                    // console.log(response);
-                });
-            })
-            // console.log(pathMethods);
-        });
-    }
-    catch(e) {
-        this.logger.warn(LOG_TAG, "Unable to read file. No contract tests generated.");
-        console.error(e);
+    let apiGenerator = new NullGenerator();
+    if(isSwagger(apiDefinition)) {
+        apiGenerator = new SwaggerGenerator(this.logger);
+    } else if(isOpenAPI(apiDefinition)) {
+        apiGenerator = new OpenApiGenerator(this.logger);
     }
 
-
-    return [];
+    return apiGenerator.generate(apiDefinition);
 }
 
 module.exports = ContractGenerator;

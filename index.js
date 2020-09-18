@@ -6,7 +6,6 @@ const JUnitReporter = require("./src/reporting/junitreporter.js");
 const fs = require('fs');
 const Logging = require("./src/logging/logging.js");
 //
-const SwaggerParser = require("@apidevtools/swagger-parser");
 const ContractGenerator = require("./src/generation/contractgenerator.js");
 
 const LOG_TAG = "ContractPolice"
@@ -135,22 +134,9 @@ ContractPolice.prototype.testContracts = async function () {
 };
 
 ContractPolice.prototype.generateContractTests = async function () {
-    let apiDefinition = null;
-    try {
-        apiDefinition = await SwaggerParser.parse(this.config.openApiFile);
-    } catch (e) {
-        let errorMessage = e.message.substr(0, e.message.indexOf('\n'));
-        this.logger.error(LOG_TAG, "Unable to parse OpenAPI file: " + errorMessage);
-    }
-
-    if (apiDefinition == null) {
-        this.logger.warn(LOG_TAG, "No OpenAPI definition found. Skipping generate step.")
-        return;
-    }
-
     // Convert data from OpenAPI file to (ContractPolice) Contract Definitions
     let generator = new ContractGenerator(this.logger);
-    let generatedContractDefinitions = generator.generateContractDefinitions(apiDefinition);
+    let generatedContractDefinitions = generator.generateContractDefinitions(this.config.openApiFile);
     console.log(`Generated ${generatedContractDefinitions.length} contract definitions`);
     // TODO: Write all generated contract definitions to file
     throw new Error("");

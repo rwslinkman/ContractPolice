@@ -4,6 +4,7 @@ const ContractPolice = require("./index.js");
 const config = {
     contractDefinitionsDir: "contracts",
     openApiFile: "openapi/swagger-example.yaml",
+    // openApiFile: "openapi/openapi-example-github.yaml",
     reportOutputDir: "report",
     // reporter: "junit",
     enableAppLogsConsole: true,
