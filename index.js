@@ -136,7 +136,7 @@ ContractPolice.prototype.testContracts = async function () {
 ContractPolice.prototype.generateContractTests = async function () {
     // Convert data from OpenAPI file to (ContractPolice) Contract Definitions
     let generator = new ContractGenerator(this.logger);
-    let generatedContractDefinitions = generator.generateContractDefinitions(this.config.openApiFile);
+    let generatedContractDefinitions = await generator.generateContractDefinitions(this.config.openApiFile);
     console.log(`Generated ${generatedContractDefinitions.length} contract definitions`);
     // TODO: Write all generated contract definitions to file
     throw new Error("");

@@ -29,17 +29,12 @@ ContractGenerator.prototype.generateContractDefinitions = async function(openApi
         this.logger.warn(LOG_TAG, "No OpenAPI definition found. Skipping generate step.")
         return;
     }
-
-    // TODO: Analyse objects
-    // TODO: Return contract definition data
-    console.log("It's a Swagger API -> " + isSwagger(apiDefinition));
-    console.log("It's a OpenAPI API -> " + isOpenAPI(apiDefinition));
-
     let apiGenerator = new NullGenerator();
     if(isSwagger(apiDefinition)) {
         apiGenerator = new SwaggerGenerator(this.logger);
     } else if(isOpenAPI(apiDefinition)) {
-        apiGenerator = new OpenApiGenerator(this.logger);
+        apiGenerator = new SwaggerGenerator(this.logger);
+        // apiGenerator = new OpenApiGenerator(this.logger);
     }
 
     return apiGenerator.generate(apiDefinition);
