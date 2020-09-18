@@ -73,12 +73,18 @@ SwaggerGenerator.prototype.generate = function (swaggerDefinition) {
     let paths = Object.keys(swaggerDefinition.paths);
     paths.forEach(path => {
         let pathDef = swaggerDefinition.paths[path];
-        let pathMethods = Object.keys(pathDef);
+        let pathMethods = Object
+            .keys(pathDef)
+            .filter(method => method !== "parameters");
+
+        let pathLevelParameters = [];
+        if(pathDef.hasOwnProperty("parameters")) {
+            pathLevelParameters = pathDef.parameters;
+        }
+
         pathMethods.forEach(pathMethod => {
-
-
             let methodDef = pathDef[pathMethod];
-            let methodDefParams = methodDef["parameters"] || [];
+            let methodDefParams = methodDef["parameters"] || pathLevelParameters;
             let methodSummary = methodDef['summary'] || methodDef['description'] || "";
             let url = replacePathParams(path, methodDefParams);
 
@@ -107,12 +113,7 @@ SwaggerGenerator.prototype.generate = function (swaggerDefinition) {
             requestBody = (Object.keys(requestBody).length > 0) ? requestBody : null;
             let request = new ContractRequest(url, pathMethod.toUpperCase(), null, null, requestBody);
 
-
-            console.log(pathMethod);
-            console.log(methodDef['responses']);
-            console.log(url);
             let expectedResponses = Object.keys(methodDef["responses"]);
-            console.log(expectedResponses);
             expectedResponses.forEach(responseStatusCode => {
                 let expectedResponse = methodDef["responses"][responseStatusCode];
 
@@ -126,11 +127,9 @@ SwaggerGenerator.prototype.generate = function (swaggerDefinition) {
 
 
                     if(methodSummary.length === 0) {
-                        methodSummary = request.path.substr(1, request.path.length).split("/").join("-");
+                        methodSummary = request.path.substr(1, request.path.length);
                     }
-                    else {
-                        methodSummary = methodSummary.split(" ").join("-");
-                    }
+                    methodSummary = methodSummary.split(" ").join("-");
                     contractDefinitions.push(new Contract(`test_${request.method}_${methodSummary}_${statusCode}`, request, response));
                 }
             });

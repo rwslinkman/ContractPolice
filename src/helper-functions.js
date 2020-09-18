@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 module.exports = {
     normalizeObject: function (headersObject) {
         if (!Array.isArray(headersObject)) {
@@ -41,5 +43,15 @@ module.exports = {
         min = Math.ceil(min);
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+
+    writeFile: function(outputFileName, outputData) {
+        console.log(outputFileName);
+        return new Promise(function(resolve, reject) {
+            fs.writeFile(outputFileName, outputData, function(err) {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
     }
 };

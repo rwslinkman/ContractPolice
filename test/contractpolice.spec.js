@@ -17,13 +17,16 @@ const ContractPolice = rewire("../index.js");
 
 describe("ContractPolice", () => {
     //region Mocks for all tests
-    function mockFileSystem(outputDirExists) {
+    function mockFileSystem(outputDirExists, writeFileError = null) {
         return {
             existsSync: function (dir) {
                 return outputDirExists;
             },
             mkdirSync: function(dir) {
                 // nop
+            },
+            writeFile: function (filename, data, callback) {
+                return callback(writeFileError);
             }
         };
     }

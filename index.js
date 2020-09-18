@@ -7,6 +7,8 @@ const fs = require('fs');
 const Logging = require("./src/logging/logging.js");
 //
 const ContractGenerator = require("./src/generation/contractgenerator.js");
+const yaml = require('js-yaml');
+const helper = require("./src/helper-functions.js");
 
 const LOG_TAG = "ContractPolice"
 const defaultConfig = {
@@ -137,9 +139,29 @@ ContractPolice.prototype.generateContractTests = async function () {
     // Convert data from OpenAPI file to (ContractPolice) Contract Definitions
     let generator = new ContractGenerator(this.logger);
     let generatedContractDefinitions = await generator.generateContractDefinitions(this.config.openApiFile);
+
     console.log(`Generated ${generatedContractDefinitions.length} contract definitions`);
+
+    // Write newly created Contract Definitions to YAML files.
+    const generatedSourcesDir = `${this.contractsDirectory}/generated`;
+    if (!fs.existsSync(generatedSourcesDir)) {
+        // Ensure output dir exists
+        this.logger.debug(LOG_TAG, `Contracts directory ${generatedSourcesDir} does not existing, creating...`);
+        fs.mkdirSync(generatedSourcesDir);
+    }
+
+    for (const definition of generatedContractDefinitions) {
+        // Write each definition to file
+        let contractWrapper = {
+            contract: {
+                request: definition.request.clean(),
+                response: definition.response.clean()
+            }
+        }
+        let contractYaml = yaml.safeDump(contractWrapper);
+        await helper.writeFile(`${this.contractsDirectory}/generated/${definition.name}.yaml`, contractYaml);
+    }
     // TODO: Write all generated contract definitions to file
-    throw new Error("");
 };
 
 module.exports = ContractPolice;

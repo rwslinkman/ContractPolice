@@ -9,14 +9,12 @@ let expect = chai.expect;
 const Logging = rewire("../../src/logging/logging.js");
 
 describe("Logging", () => {
-    function setMocks(writeFileError = null) {
-        const fsMock = {
-            writeFile: function (filename, data, callback) {
-                return callback(writeFileError);
-            }
+    function setMocks(writeError) {
+        const helperMock = {
+            writeFile: (writeError == null) ? sinon.stub().resolves() : sinon.stub().rejects(writeError)
         };
         Logging.__set__({
-            "fs": fsMock
+            "helper": helperMock
         });
     }
 
@@ -168,7 +166,9 @@ describe("Logging", () => {
             logger.error("TestTag", "Test message");
 
             const testTimestamp = 12345;
-            return expect(logger.writeLogs("/some/dir", testTimestamp)).to.eventually.be.fulfilled;
+            let writeLogs = logger.writeLogs("/some/dir", testTimestamp);
+            console.log(writeLogs);
+            return expect(writeLogs).to.eventually.be.fulfilled;
         });
 
         it("rejects a promise when error occurs during file writing", () => {
