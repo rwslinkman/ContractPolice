@@ -42,10 +42,6 @@ function filterNamedArgument(arguments, argName, defaultValue) {
     return (namedArgument.length === 0) ? defaultValue : namedArgument[0].value;
 }
 
-function generateRandomBoolean() {
-    return Math.random() >= 0.5;
-}
-
 function generateRandomUUID() {
     return uuidv4();
 }

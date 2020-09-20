@@ -3,10 +3,10 @@ const ContractPolice = require("./index.js");
 // Input
 const config = {
     contractDefinitionsDir: "contracts",
-    openApiFile: "openapi/swagger-example-artists.yaml",
+    // openApiFile: "openapi/swagger-example-artists.yaml",
     // openApiFile: "openapi/swagger-example-petstore.yaml",
     // openApiFile: "openapi/swagger-example-openstack-dbaas.yaml",
-    // openApiFile: "openapi/openapi-example-github.yaml",
+    openApiFile: "openapi/openapi-example-github.yaml",
     // openApiFile: "openapi/openapi-example-petstore.yaml",
     reportOutputDir: "report",
     // reporter: "junit",

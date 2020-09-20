@@ -45,10 +45,14 @@ module.exports = {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     },
 
-    writeFile: function(outputFileName, outputData) {
+    generateRandomBoolean: function () {
+        return Math.random() >= 0.5;
+    },
+
+    writeFile: function (outputFileName, outputData) {
         console.log(outputFileName);
-        return new Promise(function(resolve, reject) {
-            fs.writeFile(outputFileName, outputData, function(err) {
+        return new Promise(function (resolve, reject) {
+            fs.writeFile(outputFileName, outputData, function (err) {
                 if (err) reject(err);
                 else resolve();
             });

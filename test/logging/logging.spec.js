@@ -167,7 +167,6 @@ describe("Logging", () => {
 
             const testTimestamp = 12345;
             let writeLogs = logger.writeLogs("/some/dir", testTimestamp);
-            console.log(writeLogs);
             return expect(writeLogs).to.eventually.be.fulfilled;
         });
 

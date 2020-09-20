@@ -3,6 +3,7 @@ const helper = require("../../helper-functions.js");
 const ContractEntry = require("../../model/contractentry.js");
 const ContractResponse = require("../../model/contractresponse.js");
 const Contract = require("../../model/contract.js");
+const sharedGeneratorFunctions = require("../shared-generation.js");
 
 function parseQueryParams(parameters) {
     return parameters
@@ -30,38 +31,6 @@ function replacePathParams(path, parameters, replacement = helper.generateRandom
     return path;
 }
 
-function generateValueBySchema(schema, useWildcards = false) {
-    let createdObject;
-    if (schema.type === "object") {
-        createdObject = {};
-
-        let propertyList = Object.keys(schema.properties);
-        propertyList.forEach(prop => {
-            let createdValue;
-            let property = schema.properties[prop];
-            switch (property.type) {
-                case "string":
-                    createdValue = (useWildcards) ? "<anyString>" : helper.generateRandomString();
-                    break;
-                case "integer":
-                    createdValue = (useWildcards) ? "<anyNumber>" : helper.generateRandomNumber(1, 100);
-                    break;
-                default:
-                    createdValue = `unsupported[${property.type}]`;
-                    break;
-            }
-            createdObject[prop] = createdValue;
-        });
-    } else if (schema.type === "array") {
-        createdObject = [
-            generateValueBySchema(schema.items, useWildcards)
-        ];
-    } else {
-        createdObject = `unsupported[${schema.type}]`;
-    }
-    return createdObject;
-}
-
 const LOG_TAG = "SwaggerGenerator";
 
 function SwaggerGenerator(logger) {
@@ -85,7 +54,7 @@ SwaggerGenerator.prototype.generate = function (swaggerDefinition) {
         pathMethods.forEach(pathMethod => {
             let methodDef = pathDef[pathMethod];
             let methodDefParams = methodDef["parameters"] || pathLevelParameters;
-            let methodSummary = methodDef['summary'] || methodDef['description'] || "";
+            let methodSummary = methodDef['operationId'] || methodDef['summary'] || "";
             let url = replacePathParams(path, methodDefParams);
 
             // let params = parseQueryParams(methodDefParams);
@@ -109,7 +78,6 @@ SwaggerGenerator.prototype.generate = function (swaggerDefinition) {
                     // }
                 });
 
-            // console.log(requestBody);
             requestBody = (Object.keys(requestBody).length > 0) ? requestBody : null;
             let request = new ContractRequest(url, pathMethod.toUpperCase(), null, null, requestBody);
 
@@ -121,15 +89,14 @@ SwaggerGenerator.prototype.generate = function (swaggerDefinition) {
                 if(!isNaN(statusCode)) {
                     let responseBody = null;
                     if(expectedResponse.hasOwnProperty("schema")) {
-                        responseBody = generateValueBySchema(expectedResponse.schema, true);
+                        responseBody = sharedGeneratorFunctions.generateValueBySchema(expectedResponse.schema, true);
                     }
                     let response = new ContractResponse(statusCode, responseBody);
-
 
                     if(methodSummary.length === 0) {
                         methodSummary = request.path.substr(1, request.path.length);
                     }
-                    methodSummary = methodSummary.split(" ").join("-");
+                    methodSummary = methodSummary.split(" ").join("-").split("/").join("-");
                     contractDefinitions.push(new Contract(`test_${request.method}_${methodSummary}_${statusCode}`, request, response));
                 }
             });

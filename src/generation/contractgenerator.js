@@ -33,8 +33,7 @@ ContractGenerator.prototype.generateContractDefinitions = async function(openApi
     if(isSwagger(apiDefinition)) {
         apiGenerator = new SwaggerGenerator(this.logger);
     } else if(isOpenAPI(apiDefinition)) {
-        apiGenerator = new SwaggerGenerator(this.logger);
-        // apiGenerator = new OpenApiGenerator(this.logger);
+        apiGenerator = new OpenApiGenerator(this.logger);
     }
 
     return apiGenerator.generate(apiDefinition);
