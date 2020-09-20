@@ -50,7 +50,6 @@ module.exports = {
     },
 
     writeFile: function (outputFileName, outputData) {
-        console.log(outputFileName);
         return new Promise(function (resolve, reject) {
             fs.writeFile(outputFileName, outputData, function (err) {
                 if (err) reject(err);

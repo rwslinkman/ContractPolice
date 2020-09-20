@@ -161,7 +161,6 @@ ContractPolice.prototype.generateContractTests = async function () {
         let contractYaml = yaml.safeDump(contractWrapper);
         await helper.writeFile(`${this.contractsDirectory}/generated/${definition.name}.yaml`, contractYaml);
     }
-    // TODO: Write all generated contract definitions to file
 };
 
 module.exports = ContractPolice;
