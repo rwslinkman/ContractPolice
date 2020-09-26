@@ -1,11 +1,6 @@
-const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
 const rewire = require("rewire");
-const sinon = require("sinon");
-
-chai.use(chaiAsPromised);
-const expect = chai.expect;
-const stub = sinon.stub;
+const expect = require("chai").expect;
+const stub = require("sinon").stub;
 
 const TestOutcome = require("../src/testoutcome.js");
 const ContractPoliceReporter = require("../src/reporting/contractpolicereporter.js");
@@ -488,11 +483,11 @@ describe("ContractPolice", () => {
                     writeLogs: function () {
                         return Promise.resolve()
                     },
-                    log: sinon.stub(),
-                    error: sinon.stub(),
-                    warn: sinon.stub(),
-                    info: sinon.stub(),
-                    debug: sinon.stub(),
+                    log: stub(),
+                    error: stub(),
+                    warn: stub(),
+                    info: stub(),
+                    debug: stub(),
                     fileEnabled: true
                 };
             };
