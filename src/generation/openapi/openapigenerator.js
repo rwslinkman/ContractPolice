@@ -5,10 +5,11 @@ const ContractResponse = require("../../model/contractresponse.js");
 const Contract = require("../../model/contract.js");
 const sharedGeneratorFunctions = require("../shared-generation.js");
 
-function replacePathParams(path, parameters, replacement = helper.generateRandomString()) {
+function replacePathParams(path, parameters) {
     parameters
         .filter(param => param.in === "path")
         .forEach(param => {
+            let replacement = helper.generateRandomString();
             path = path.replace(`{${param.name}}`, replacement);
         });
     return path;

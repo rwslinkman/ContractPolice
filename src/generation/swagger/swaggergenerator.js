@@ -22,10 +22,11 @@ function parseQueryParams(parameters) {
         });
 }
 
-function replacePathParams(path, parameters, replacement = helper.generateRandomString()) {
+function replacePathParams(path, parameters) {
     parameters
         .filter(param => param.in === "path")
         .forEach(param => {
+            let replacement = helper.generateRandomString();
             path = path.replace(`{${param.name}}`, replacement);
         });
     return path;
@@ -67,7 +68,7 @@ SwaggerGenerator.prototype.generate = function (swaggerDefinition) {
             methodDefParams
                 .filter(param => param.in === "body")
                 .forEach(param => {
-                    requestBody[param.name] = generateValueBySchema(param.schema);
+                    requestBody[param.name] = sharedGeneratorFunctions.generateValueBySchema(param.schema);
                     // if (param.schema.hasOwnProperty("required")) {
                     //     let requiredProps = param.schema.required;
                     //     let bodyCopy = Object.assign({}, requestBody[param.name]);

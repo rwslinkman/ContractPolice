@@ -1,0 +1,1079 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "title" : "Speca Public API",
+    "version" : ""
+  },
+  "host" : "speca.io",
+  "basePath" : "/api",
+  "schemes" : [
+    "https"
+  ],
+  "consumes" : [
+    "application/zip"
+  ],
+  "produces" : [
+    "application/zip"
+  ],
+  "paths" : {
+    "/specs/{owner}/{urlName}/versions" : {
+      "get" : {
+        "summary" : "List versions",
+        "operationId" : "list-versions",
+        "parameters" : [
+          {
+            "name" : "owner",
+            "in" : "path",
+            "description" : "Owner account url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-org"
+          },
+          {
+            "name" : "urlName",
+            "in" : "path",
+            "description" : "API url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-rest-api"
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/VersionsResponse"
+            }
+          }
+        }
+      },
+      "put" : {
+        "summary" : "Create  version",
+        "operationId" : "create-version",
+        "parameters" : [
+          {
+            "name" : "owner",
+            "in" : "path",
+            "description" : "Owner account url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-org"
+          },
+          {
+            "name" : "urlName",
+            "in" : "path",
+            "description" : "API url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-rest-api"
+          },
+          {
+            "name" : "body",
+            "in" : "body",
+            "required" : true,
+            "schema" : {
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string",
+                  "description" : "Version name",
+                  "example" : "v1.2-draft"
+                },
+                "from" : {
+                  "type" : "string",
+                  "description" : "Name of parent version",
+                  "example" : "v1.0"
+                },
+                "desc" : {
+                  "type" : "string",
+                  "description" : "Version description",
+                  "example" : "some description"
+                },
+                "readOnly" : {
+                  "type" : "boolean",
+                  "description" : "whether this API version can be modified or not",
+                  "example" : "false"
+                },
+                "status" : {
+                  "$ref" : "#/definitions/VersionStatusEnum"
+                }
+              },
+              "required" : [
+                "name",
+                "from"
+              ]
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/VersionsResponse"
+            }
+          }
+        }
+      }
+    },
+    "/specs/{owner}/{urlName}/versions/{version}" : {
+      "post" : {
+        "summary" : "Update version",
+        "operationId" : "update-version",
+        "parameters" : [
+          {
+            "name" : "owner",
+            "in" : "path",
+            "description" : "Owner account url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-org"
+          },
+          {
+            "name" : "urlName",
+            "in" : "path",
+            "description" : "API url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-rest-api"
+          },
+          {
+            "name" : "version",
+            "in" : "path",
+            "description" : "updated version name",
+            "required" : true,
+            "type" : "string"
+          },
+          {
+            "name" : "body",
+            "in" : "body",
+            "required" : true,
+            "schema" : {
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string",
+                  "description" : "new version name"
+                },
+                "desc" : {
+                  "type" : "string",
+                  "description" : "version description"
+                },
+                "readOnly" : {
+                  "type" : "boolean",
+                  "description" : "whether this API version can be modified or not"
+                },
+                "status" : {
+                  "$ref" : "#/definitions/VersionStatusEnum"
+                }
+              },
+              "required" : [
+                "name"
+              ]
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/VersionsResponse"
+            }
+          }
+        }
+      },
+      "delete" : {
+        "summary" : "Delete version",
+        "operationId" : "delete-version",
+        "parameters" : [
+          {
+            "name" : "owner",
+            "in" : "path",
+            "description" : "Owner account url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-org"
+          },
+          {
+            "name" : "urlName",
+            "in" : "path",
+            "description" : "API url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-rest-api"
+          },
+          {
+            "name" : "version",
+            "in" : "path",
+            "description" : "version name",
+            "required" : true,
+            "type" : "string"
+          }
+        ],
+        "responses" : {
+          "202" : {
+            "description" : "Accepted"
+          }
+        }
+      }
+    },
+    "/specs/{owner}/{urlName}/bundle" : {
+      "get" : {
+        "summary" : "Export HTML bundle",
+        "description" : "Export API documentation in html format, so it can be hosted by any web server.",
+        "operationId" : "export-html-bundle",
+        "produces" : [
+          "application/zip"
+        ],
+        "parameters" : [
+          {
+            "name" : "owner",
+            "in" : "path",
+            "description" : "Owner account url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-org"
+          },
+          {
+            "name" : "urlName",
+            "in" : "path",
+            "description" : "API url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-rest-api"
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "Response is zip archive includes published versions of API in html format along with all required assets - js and css files."
+          }
+        }
+      }
+    },
+    "/specs/{owner}/{urlName}/oas3" : {
+      "get" : {
+        "summary" : "Export API description in OAS3 format",
+        "operationId" : "export-api-description-in-oas3-format",
+        "parameters" : [
+          {
+            "name" : "owner",
+            "in" : "path",
+            "description" : "Owner account url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-org"
+          },
+          {
+            "name" : "urlName",
+            "in" : "path",
+            "description" : "API url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-rest-api"
+          },
+          {
+            "name" : "specVersion",
+            "in" : "query",
+            "type" : "string",
+            "example" : "0.2"
+          },
+          {
+            "name" : "specaExt",
+            "in" : "query",
+            "type" : "boolean",
+            "example" : true
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/Swagger 3.0"
+            }
+          }
+        }
+      }
+    },
+    "/specs/{owner}/{urlName}/swagger" : {
+      "get" : {
+        "summary" : "Export API description in Swagger 2.0 format",
+        "operationId" : "export-api-description-in-swagger-2.0-format",
+        "parameters" : [
+          {
+            "name" : "owner",
+            "in" : "path",
+            "description" : "Owner account url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-org"
+          },
+          {
+            "name" : "urlName",
+            "in" : "path",
+            "description" : "API url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-rest-api"
+          },
+          {
+            "name" : "specVersion",
+            "in" : "query",
+            "type" : "string",
+            "example" : "0.2"
+          },
+          {
+            "name" : "specaExt",
+            "in" : "query",
+            "type" : "boolean"
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/Swagger 2.0 Object"
+            }
+          }
+        }
+      }
+    },
+    "/specs/{owner}/{urlName}/postman" : {
+      "get" : {
+        "summary" : "Export as Postman collection",
+        "operationId" : "export-as-postman-collection",
+        "parameters" : [
+          {
+            "name" : "owner",
+            "in" : "path",
+            "description" : "Owner account url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-org"
+          },
+          {
+            "name" : "urlName",
+            "in" : "path",
+            "description" : "API url name",
+            "required" : true,
+            "type" : "string",
+            "example" : "my-rest-api"
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "type" : "object",
+              "properties" : {
+                "id" : {
+                  "type" : "string",
+                  "example" : "a6a47569-0e7a-492d-9269-2641daaa9579"
+                },
+                "name" : {
+                  "type" : "string",
+                  "example" : "Speca Public API"
+                },
+                "timestamp" : {
+                  "type" : "integer",
+                  "example" : 1550633310503
+                },
+                "order" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "string",
+                    "example" : "eaf11938-52e2-4f7c-88b2-827d166823a9"
+                  },
+                  "example" : "[\"eaf11938-52e2-4f7c-88b2-827d166823a9\",\"72d82249-67c9-4aef-9a1e-f3b2f0b469a2\",\"746469b7-4002-4e75-95a1-bfd144052897\"]"
+                },
+                "folders" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "object",
+                    "properties" : {
+                      "id" : {
+                        "type" : "string",
+                        "example" : "eaf11938-52e2-4f7c-88b2-827d166823a9"
+                      },
+                      "name" : {
+                        "type" : "string",
+                        "example" : "Export"
+                      },
+                      "order" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "string",
+                          "example" : "635624b9-d5d3-4b71-bec9-ef9f37b79e69"
+                        },
+                        "example" : "[\"635624b9-d5d3-4b71-bec9-ef9f37b79e69\",\"61e93b8d-41d4-40e9-96ce-3633d72b5fe2\",\"ef8404f6-b550-4562-9b0c-9e8d040d341a\"]"
+                      },
+                      "collection_name" : {
+                        "type" : "string",
+                        "example" : "Speca Public API"
+                      },
+                      "collection_id" : {
+                        "type" : "string",
+                        "example" : "a6a47569-0e7a-492d-9269-2641daaa9579"
+                      }
+                    }
+                  }
+                },
+                "requests" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "object",
+                    "properties" : {
+                      "id" : {
+                        "type" : "string",
+                        "example" : "635624b9-d5d3-4b71-bec9-ef9f37b79e69"
+                      },
+                      "headers" : {
+                        "type" : "string",
+                        "example" : "Accept: application/json\nContent-Type: application/json\n"
+                      },
+                      "url" : {
+                        "type" : "string",
+                        "example" : "https://speca.io/api/specs/:owner/:urlName/postman"
+                      },
+                      "method" : {
+                        "type" : "string",
+                        "example" : "GET"
+                      },
+                      "pathVariables" : {
+                        "type" : "object",
+                        "properties" : {
+                          "owner" : {
+                            "type" : "string",
+                            "example" : "my-org"
+                          },
+                          "urlName" : {
+                            "type" : "string",
+                            "example" : "my-rest-api"
+                          }
+                        }
+                      },
+                      "data" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "unknown"
+                        }
+                      },
+                      "dataMode" : {
+                        "type" : "string",
+                        "example" : "params"
+                      },
+                      "name" : {
+                        "type" : "string",
+                        "example" : "Export as Postman collection"
+                      },
+                      "time" : {
+                        "type" : "integer",
+                        "example" : 1550633310504
+                      },
+                      "version" : {
+                        "type" : "integer",
+                        "example" : 2
+                      },
+                      "responses" : {
+                        "type" : "array",
+                        "items" : {
+                          "type" : "object",
+                          "properties" : {
+                            "id" : {
+                              "type" : "string",
+                              "example" : "1d18189b-87e2-4415-b483-b13f20b956f4"
+                            },
+                            "name" : {
+                              "type" : "string",
+                              "example" : "Example Response"
+                            },
+                            "responseCode" : {
+                              "type" : "object",
+                              "properties" : {
+                                "code" : {
+                                  "type" : "integer",
+                                  "example" : 200
+                                },
+                                "name" : {
+                                  "type" : "string",
+                                  "example" : "OK"
+                                }
+                              }
+                            },
+                            "time" : {
+                              "type" : "integer",
+                              "example" : 109
+                            },
+                            "headers" : {
+                              "type" : "array",
+                              "items" : {
+                                "type" : "unknown"
+                              }
+                            },
+                            "language" : {
+                              "type" : "string",
+                              "example" : "javascript"
+                            },
+                            "previewType" : {
+                              "type" : "string",
+                              "example" : "html"
+                            },
+                            "rawDataType" : {
+                              "type" : "string",
+                              "example" : "text"
+                            },
+                            "collectionRequestId" : {
+                              "type" : "string",
+                              "example" : "635624b9-d5d3-4b71-bec9-ef9f37b79e69"
+                            }
+                          }
+                        }
+                      },
+                      "collectionId" : {
+                        "type" : "string",
+                        "example" : "a6a47569-0e7a-492d-9269-2641daaa9579"
+                      },
+                      "synced" : {
+                        "type" : "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/specs/{owner}/{name}/uploadUpdatePreview" : {
+      "post" : {
+        "summary" : "Show diff between spec and uploaded API definition",
+        "description" : "This operation let you preview updates that will be result of update API with provided spec in either Swagger 2.0 or Open API format.\nIn other words operation produces a diff between API definition in Speca and provided document.",
+        "operationId" : "preview-update",
+        "consumes" : [
+          "multipart/form-data"
+        ],
+        "parameters" : [
+          {
+            "name" : "owner",
+            "in" : "path",
+            "required" : true,
+            "type" : "string"
+          },
+          {
+            "name" : "name",
+            "in" : "path",
+            "required" : true,
+            "type" : "string"
+          },
+          {
+            "name" : "mode",
+            "in" : "query",
+            "description" : "Merge definitions mode.",
+            "required" : true,
+            "type" : "string",
+            "example" : "merge",
+            "enum" : [
+              "merge",
+              "replace",
+              "add"
+            ]
+          },
+          {
+            "name" : "updateDesc",
+            "in" : "query",
+            "description" : "If `true`, descriptions will be updated with the ones coming in uploaded document.",
+            "type" : "boolean",
+            "default" : "false"
+          },
+          {
+            "name" : "updateExamples",
+            "in" : "query",
+            "description" : "If `true`, examples will be updated with the ones coming in uploaded document.",
+            "type" : "boolean",
+            "default" : "false"
+          },
+          {
+            "name" : "removeOrphans",
+            "in" : "query",
+            "description" : "Remove items that are no longer referred by any other objects",
+            "type" : "boolean"
+          },
+          {
+            "$ref" : "#/parameters/Speca-Version"
+          },
+          {
+            "in" : "formData",
+            "description" : "OpenAPI document, both Swagger 2.0 and OpenAPI 3 are accepted",
+            "type" : "file"
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/PreviewResponse"
+            }
+          }
+        }
+      }
+    },
+    "/specs/{owner}/{name}/mergeSwaggerPreview" : {
+      "post" : {
+        "summary" : "Show diff between spec and Swagger 2.0 definition",
+        "description" : "This operation let you preview updates that will be result of update API with provided spec in Swagger 2.0 format.\nIn other words operation produces a diff between API definition in Speca and provided document.",
+        "operationId" : "merge-swagger-preview",
+        "consumes" : [
+          "application/json"
+        ],
+        "parameters" : [
+          {
+            "name" : "owner",
+            "in" : "path",
+            "required" : true,
+            "type" : "string"
+          },
+          {
+            "name" : "name",
+            "in" : "path",
+            "required" : true,
+            "type" : "string"
+          },
+          {
+            "name" : "mode",
+            "in" : "query",
+            "description" : "Merge definitions mode.",
+            "required" : true,
+            "type" : "string",
+            "example" : "merge",
+            "enum" : [
+              "merge",
+              "replace",
+              "add"
+            ]
+          },
+          {
+            "name" : "updateDesc",
+            "in" : "query",
+            "description" : "If `true`, descriptions will be updated with the ones coming in uploaded document.",
+            "type" : "boolean",
+            "default" : "false"
+          },
+          {
+            "name" : "updateExamples",
+            "in" : "query",
+            "description" : "If `true`, examples will be updated with the ones coming in uploaded document.",
+            "type" : "boolean",
+            "default" : "false"
+          },
+          {
+            "name" : "removeOrphans",
+            "in" : "query",
+            "description" : "Remove items that are no longer referred by any other objects",
+            "type" : "boolean"
+          },
+          {
+            "$ref" : "#/parameters/Speca-Version"
+          },
+          {
+            "name" : "body",
+            "in" : "body",
+            "required" : true,
+            "schema" : {
+              "$ref" : "#/definitions/Swagger 2.0 Object"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "schema" : {
+              "$ref" : "#/definitions/PreviewResponse"
+            }
+          }
+        }
+      }
+    },
+    "/specs/{owner}/{urlName}/mergeSpec" : {
+      "post" : {
+        "summary" : "Update API with a Spec Definition in internal format",
+        "operationId" : "update-api",
+        "parameters" : [
+          {
+            "name" : "owner",
+            "in" : "path",
+            "required" : true,
+            "type" : "string"
+          },
+          {
+            "name" : "urlName",
+            "in" : "path",
+            "required" : true,
+            "type" : "string"
+          },
+          {
+            "name" : "group",
+            "in" : "query",
+            "description" : "Id of the group new items will be placed in.",
+            "type" : "string",
+            "example" : "last-import"
+          },
+          {
+            "name" : "mode",
+            "in" : "query",
+            "description" : "Merge definitions mode.",
+            "required" : true,
+            "type" : "string",
+            "example" : "merge",
+            "enum" : [
+              "merge",
+              "replace",
+              "add"
+            ]
+          },
+          {
+            "name" : "updateDesc",
+            "in" : "query",
+            "description" : "If `true`, descriptions will be updated with the ones coming in uploaded document.",
+            "type" : "boolean",
+            "default" : "false"
+          },
+          {
+            "name" : "updateExamples",
+            "in" : "query",
+            "description" : "If `true`, examples will be updated with the ones coming in uploaded document.",
+            "type" : "boolean",
+            "default" : "false"
+          },
+          {
+            "name" : "removeOrphans",
+            "in" : "query",
+            "description" : "Remove items that are no longer referred by any other objects",
+            "type" : "boolean"
+          },
+          {
+            "$ref" : "#/parameters/Speca-Version"
+          },
+          {
+            "name" : "body",
+            "in" : "body",
+            "description" : "API definition in Speca internal format (result of [Preview update](speca://preview-update) operation)",
+            "required" : true,
+            "schema" : {
+              "$ref" : "#/definitions/SpecaObject"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      }
+    },
+    "/specs/{owner}/{urlName}/mergeSwagger" : {
+      "post" : {
+        "summary" : "Update API with Swagger 2.0 Document",
+        "operationId" : "update-api-with-swagger-2.0-document",
+        "parameters" : [
+          {
+            "name" : "owner",
+            "in" : "path",
+            "required" : true,
+            "type" : "string"
+          },
+          {
+            "name" : "urlName",
+            "in" : "path",
+            "required" : true,
+            "type" : "string"
+          },
+          {
+            "name" : "group",
+            "in" : "query",
+            "description" : "Id of the group new items will be placed in. If empty, all the new items will become children of the root group.",
+            "type" : "string",
+            "example" : "last-import",
+            "default" : "\"\""
+          },
+          {
+            "name" : "mode",
+            "in" : "query",
+            "description" : "Merge definitions mode.",
+            "required" : true,
+            "type" : "string",
+            "example" : "merge",
+            "enum" : [
+              "merge",
+              "replace",
+              "add"
+            ]
+          },
+          {
+            "name" : "updateDesc",
+            "in" : "query",
+            "description" : "If `true`, descriptions will be updated with the ones coming in uploaded document.",
+            "type" : "boolean",
+            "default" : "false"
+          },
+          {
+            "name" : "updateExamples",
+            "in" : "query",
+            "description" : "If `true`, examples will be updated with the ones coming in uploaded document.",
+            "type" : "boolean",
+            "default" : "false"
+          },
+          {
+            "name" : "removeOrphans",
+            "in" : "query",
+            "description" : "Remove items that are no longer referred by any other objects",
+            "type" : "boolean"
+          },
+          {
+            "$ref" : "#/parameters/Speca-Version"
+          },
+          {
+            "name" : "body",
+            "in" : "body",
+            "required" : true,
+            "schema" : {
+              "$ref" : "#/definitions/Swagger 2.0 Object"
+            }
+          }
+        ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "VersionsResponse" : {
+      "type" : "object",
+      "properties" : {
+        "counter" : {
+          "type" : "integer",
+          "description" : "_@deperecated_ to be removed",
+          "example" : 1
+        },
+        "default_" : {
+          "type" : "integer",
+          "description" : "default version id"
+        },
+        "versions" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "properties" : {
+              "id" : {
+                "type" : "integer",
+                "example" : 1
+              },
+              "from" : {
+                "type" : "integer",
+                "description" : "parent version id",
+                "example" : 0
+              },
+              "createdAt" : {
+                "type" : "integer",
+                "example" : 1543980746920
+              },
+              "name" : {
+                "type" : "string",
+                "example" : "master"
+              },
+              "status" : {
+                "$ref" : "#/definitions/VersionStatusEnum"
+              }
+            }
+          }
+        }
+      }
+    },
+    "VersionStatusEnum" : {
+      "type" : "string",
+      "enum" : [
+        "published",
+        "archived",
+        "draft"
+      ]
+    },
+    "SpecaObject" : {
+      "type" : "object",
+      "properties" : {
+        "info" : {
+          "type" : "string"
+        },
+        "base_url" : {
+          "type" : "string"
+        },
+        "base_url_vars" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Param"
+          }
+        },
+        "content_types" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "tags" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "groups" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Group"
+          }
+        },
+        "docs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Doc"
+          }
+        },
+        "methods" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Method"
+          }
+        },
+        "schemas" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Schema"
+          }
+        },
+        "params" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Param"
+          }
+        },
+        "reqHeaders" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Param"
+          }
+        },
+        "resHeaders" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Param"
+          }
+        },
+        "responses" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Param"
+          }
+        },
+        "auth_definitions" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/AuthDefinition"
+          }
+        }
+      }
+    },
+    "Group" : {
+      "type" : "object"
+    },
+    "Doc" : {
+      "type" : "object"
+    },
+    "Schema" : {
+      "type" : "object"
+    },
+    "Method" : {
+      "type" : "object"
+    },
+    "Param" : {
+      "type" : "object"
+    },
+    "AuthDefinition" : {
+      "type" : "object"
+    },
+    "PreviewResponse" : {
+      "type" : "object",
+      "properties" : {
+        "data" : {
+          "$ref" : "#/definitions/SpecaObject"
+        },
+        "created" : {
+          "type" : "array",
+          "description" : "List of items that doesn't exist and will be created",
+          "items" : {
+            "$ref" : "#/definitions/MergeResultItem"
+          }
+        },
+        "updated" : {
+          "type" : "array",
+          "description" : "List of existing items that will be updated",
+          "items" : {
+            "$ref" : "#/definitions/MergeResultItem"
+          }
+        },
+        "deleted" : {
+          "type" : "array",
+          "description" : "List of items that will be deleted",
+          "items" : {
+            "$ref" : "#/definitions/MergeResultItem"
+          }
+        }
+      },
+      "example" : "{\n    \"data\": {},\n    \"created\": [\n        {\n            \"id\": \"pet\",\n            \"name\": \"Pet\",\n            \"type\": \"method\"\n        }\n    ],\n    \"updated\": [\n        {\n            \"id\": \"user\",\n            \"name\": \"User\",\n            \"type\": \"schema\"\n        }\n    ],\n    \"deleted\": [\n        {\n            \"id\": \"deprecated-param\",\n            \"name\": \"Deprecated Param\",\n            \"type\": \"param\"\n        }\n    ]\n}"
+    },
+    "MergeResultItem" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "item unique id"
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "item name"
+        },
+        "type" : {
+          "type" : "string",
+          "description" : "item type",
+          "enum" : [
+            "method",
+            "schema",
+            "response",
+            "param",
+            "header"
+          ]
+        }
+      }
+    },
+    "Swagger 2.0 Object" : {
+      "type" : "object",
+      "description" : "~~~info Swagger 2.0 Spec\nPlease checkout original specification [here](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md)\n~~~",
+      "additionalProperties" : {
+        "type" : "string"
+      }
+    },
+    "Swagger 3.0" : {
+      "type" : "object",
+      "description" : "~~~info OAS Spec\nSee [https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md)\n~~~",
+      "additionalProperties" : {
+        "type" : "string"
+      }
+    }
+  },
+  "parameters" : {
+    "Speca-Version" : {
+      "name" : "Speca-Version",
+      "in" : "header",
+      "description" : "This header can be passed in every API endpoint that reads or updates API spec, if you omit the header that means you deal with the *default* version.",
+      "type" : "string"
+    }
+  }
+}
