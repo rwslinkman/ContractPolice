@@ -9,29 +9,21 @@ const Logging = require("./src/logging/logging.js");
 const ContractGenerator = require("./src/generation/contractgenerator.js");
 const yaml = require('js-yaml');
 const helper = require("./src/helper-functions.js");
+const Config = require("./src/cp-config");
 
 const LOG_TAG = "ContractPolice"
-const defaultConfig = {
-    contractDefinitionsDir: null, // required
-    openApiFile: "",
-    customValidationRules: [],
-    failOnError: true,
-    reportOutputDir: "/contractpolice/build",
-    reporter: "default",
-    enableAppLogsConsole: true,
-    enableAppLogsFile: false,
-    loglevel: "warn"
-};
+const defaultConfig = new Config();
 
 initializeConfig = function (logger, targetConfig, inputConfig) {
-    targetConfig['customValidationRules'] = inputConfig.customValidationRules || defaultConfig.customValidationRules;
-    targetConfig['failOnError'] = inputConfig.failOnError || defaultConfig.failOnError;
-    targetConfig['reporter'] = inputConfig.reporter || defaultConfig.reporter;
-    targetConfig['reportOutputDir'] = inputConfig.reportOutputDir || defaultConfig.reportOutputDir;
-    targetConfig['enableAppLogsConsole'] = inputConfig.enableAppLogsConsole || defaultConfig.enableAppLogsConsole;
-    targetConfig['enableAppLogsFile'] = inputConfig.enableAppLogsFile || defaultConfig.enableAppLogsFile;
-    targetConfig['loglevel'] = inputConfig.loglevel || defaultConfig.loglevel;
-    targetConfig['openApiFile'] = inputConfig.openApiFile || defaultConfig.openApiFile;
+    targetConfig.contractDefinitionsDir = inputConfig.contractDefinitionsDir || defaultConfig.contractDefinitionsDir;
+    targetConfig.customValidationRules = inputConfig.customValidationRules || defaultConfig.customValidationRules;
+    targetConfig.failOnError = inputConfig.failOnError || defaultConfig.failOnError;
+    targetConfig.reporter = inputConfig.reporter || defaultConfig.reporter;
+    targetConfig.reportOutputDir = inputConfig.reportOutputDir || defaultConfig.reportOutputDir;
+    targetConfig.enableAppLogsConsole = inputConfig.enableAppLogsConsole || defaultConfig.enableAppLogsConsole;
+    targetConfig.enableAppLogsFile = inputConfig.enableAppLogsFile || defaultConfig.enableAppLogsFile;
+    targetConfig.loglevel = inputConfig.loglevel || defaultConfig.loglevel;
+    targetConfig.generatorSourceDir = inputConfig.generatorSourceDir || defaultConfig.generatorSourceDir;
 
     if (!['error', 'warn', 'info', 'debug'].includes(inputConfig.loglevel)) {
         targetConfig.loglevel = defaultConfig.loglevel;
@@ -44,7 +36,7 @@ initializeConfig = function (logger, targetConfig, inputConfig) {
     }
 }
 
-function ContractPolice(endpoint, userConfig = {}) {
+function ContractPolice(endpoint, userConfig) {
     let loglevel = userConfig.loglevel || defaultConfig.loglevel;
     if (!['error', 'warn', 'info', 'debug'].includes(loglevel)) {
         loglevel = defaultConfig.loglevel;
@@ -55,20 +47,21 @@ function ContractPolice(endpoint, userConfig = {}) {
         userConfig.enableAppLogsFile || defaultConfig.enableAppLogsFile
     );
 
+    // Required parameter
+    if (endpoint === null || endpoint === undefined) {
+        this.logger.log(LOG_TAG, "error", "Required parameter 'endpoint' not found. Please provide the endpoint that will be placed under test.");
+        throw Error(`Required parameter 'endpoint' not found.`);
+    }
+    // Required config
     let contractsDirectory = userConfig.contractDefinitionsDir || defaultConfig.contractDefinitionsDir;
     if (contractsDirectory === null || contractsDirectory === undefined) {
         this.logger.log(LOG_TAG, "error", "Required parameter 'config.contractDefinitionsDir' not found. Please provide the directory where contracts are stored.");
         throw Error("Required parameter 'config.contractDefinitionsDir' not found.");
     }
-    if (endpoint === null || endpoint === undefined) {
-        this.logger.log(LOG_TAG, "error", "Required parameter 'endpoint' not found. Please provide the endpoint that will be placed under test.");
-        throw Error(`Required parameter 'endpoint' not found.`);
-    }
 
     // Store parameters for later use
     this.endpoint = endpoint;
-    this.contractsDirectory = contractsDirectory;
-    this.config = {};
+    this.config = new Config();
     initializeConfig(this.logger, this.config, userConfig);
 }
 
@@ -77,9 +70,9 @@ ContractPolice.prototype.testContracts = async function () {
 
     // Parse contracts
     let contractParser = new ContractParser(this.logger);
-    let contractFiles = await contractParser.findYamlFiles(this.contractsDirectory);
+    let contractFiles = await contractParser.findYamlFiles(this.config.contractDefinitionsDir);
     let contracts = contractFiles.map((yamlFile) => {
-        return contractParser.parseContract(this.contractsDirectory, yamlFile);
+        return contractParser.parseContract(this.config.contractDefinitionsDir, yamlFile);
     });
 
     // Prepare test runners
@@ -136,14 +129,12 @@ ContractPolice.prototype.testContracts = async function () {
 };
 
 ContractPolice.prototype.generateContractTests = async function () {
-    // Convert data from OpenAPI file to (ContractPolice) Contract Definitions
+    // Convert data from OpenAPI files to (ContractPolice) Contract Definitions
     let generator = new ContractGenerator(this.logger);
-    let generatedContractDefinitions = await generator.generateContractDefinitions(this.config.openApiFile);
-
-    console.log(`Generated ${generatedContractDefinitions.length} contract definitions`);
+    let generatedContractDefinitions = await generator.generateContractDefinitions(this.config.generatorSourceDir);
 
     // Write newly created Contract Definitions to YAML files.
-    const generatedSourcesDir = `${this.contractsDirectory}/generated`;
+    const generatedSourcesDir = `${this.config.contractDefinitionsDir}/generated`;
     if (!fs.existsSync(generatedSourcesDir)) {
         // Ensure output dir exists
         this.logger.debug(LOG_TAG, `Contracts directory ${generatedSourcesDir} does not existing, creating...`);
@@ -159,7 +150,7 @@ ContractPolice.prototype.generateContractTests = async function () {
             }
         }
         let contractYaml = yaml.safeDump(contractWrapper);
-        await helper.writeFile(`${this.contractsDirectory}/generated/${definition.name}.yaml`, contractYaml);
+        await helper.writeFile(`${generatedSourcesDir}/${definition.name}.yaml`, contractYaml);
     }
 };
 

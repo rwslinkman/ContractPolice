@@ -2,6 +2,20 @@ const SwaggerParser = require("@apidevtools/swagger-parser");
 const SwaggerGenerator = require("./swagger/swaggergenerator.js");
 const OpenApiGenerator = require("./openapi/openapigenerator.js");
 const NullGenerator = require("./nullgenerator.js");
+const helper = require("../helper-functions.js");
+
+async function parseFile(file) {
+    try {
+        return await SwaggerParser.dereference(file);
+    } catch(e) {
+        // TODO: logging?
+        return null;
+    }
+}
+
+function clean(obj) {
+    return Object.values(obj).filter(item => item !== null);
+}
 
 function isSwagger(api) {
     return api.swagger !== undefined && api.swagger.length > 0 && api.openapi === undefined;
@@ -16,27 +30,21 @@ function ContractGenerator(logger) {
     this.logger = logger;
 }
 
-ContractGenerator.prototype.generateContractDefinitions = async function(openApiFile) {
-    let apiDefinition = null;
-    try {
-        apiDefinition = await SwaggerParser.dereference(openApiFile);
-    } catch (e) {
-        let errorMessage = e.message.substr(0, e.message.indexOf('\n'));
-        this.logger.error(LOG_TAG, "Unable to parse OpenAPI file: " + errorMessage);
-    }
+ContractGenerator.prototype.generateContractDefinitions = async function(sourceDir) {
+    let allFiles = await helper.getFiles(sourceDir);
+    let supportedFiles = allFiles.map(async (file) => await parseFile(file));
+    let parsedApiDefinitions = clean(await Promise.all(supportedFiles));
 
-    if (apiDefinition == null) {
-        this.logger.warn(LOG_TAG, "No OpenAPI definition found. Skipping generate step.")
-        return;
-    }
-    let apiGenerator = new NullGenerator();
-    if(isSwagger(apiDefinition)) {
-        apiGenerator = new SwaggerGenerator(this.logger);
-    } else if(isOpenAPI(apiDefinition)) {
-        apiGenerator = new OpenApiGenerator(this.logger);
-    }
+    return parsedApiDefinitions.flatMap(apiDefinition => {
+        let apiGenerator = new NullGenerator();
+        if (isSwagger(apiDefinition)) {
+            apiGenerator = new SwaggerGenerator(this.logger);
+        } else if (isOpenAPI(apiDefinition)) {
+            apiGenerator = new OpenApiGenerator(this.logger);
+        }
 
-    return apiGenerator.generate(apiDefinition);
+        return apiGenerator.generate(apiDefinition);
+    });
 }
 
 module.exports = ContractGenerator;
