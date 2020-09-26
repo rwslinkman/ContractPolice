@@ -85,7 +85,7 @@ WildcardGenerator.prototype.generateWildcardValue = function(value) {
         return helper.generateRandomNumber(minValue, maxValue);
     }
     else if(generationValueType === "bool") {
-        return generateRandomBoolean();
+        return helper.generateRandomBoolean();
     }
     else if(generationValueType === "uuid") {
         return generateRandomUUID();

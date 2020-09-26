@@ -12,6 +12,8 @@ const ContractPoliceReporter = require("../src/reporting/contractpolicereporter.
 const JUnitReporter = require("../src/reporting/junitreporter.js");
 const Logging = require("../src/logging/logging.js");
 const Contract = require("../src/model/contract.js");
+const ContractResponse = require("../src/model/contractresponse");
+const ContractRequest = require("../src/model/contractrequest");
 // Subject
 const ContractPolice = rewire("../index.js");
 
@@ -27,7 +29,7 @@ describe("ContractPolice", () => {
             },
             writeFile: function (filename, data, callback) {
                 return callback(writeFileError);
-            }
+            },
         };
     }
 
@@ -71,6 +73,13 @@ describe("ContractPolice", () => {
         }
     }
 
+    function testLogger() {
+        return new Logging(null, false, false);
+    }
+
+    ContractPolice.__set__({
+        "Logging": testLogger
+    });
     //endregion
 
     //region Tests to setup and config of ContractPolice
@@ -244,15 +253,15 @@ describe("ContractPolice", () => {
 
     //region Tests to verify behaviour of ContractPolice.testContracts
     describe("testContracts ", () => {
-        it('should resolve a successful promise when given valid input, outputDir exists and tests are passing', async () => {
+        it('should resolve when given valid input, outputDir exists and tests are passing', async () => {
             //region mocks
-            const cprStub = stub().returns(Promise.resolve());
+            const cprStub = stub().resolves();
             const cpReporter = function () {
                 return {
                     writeTestReport: cprStub
                 }
             };
-            const junitStub = stub().returns(Promise.resolve());
+            const junitStub = stub().resolves();
             const junitReporter = function () {
                 return {
                     writeTestReport: junitStub
@@ -277,15 +286,15 @@ describe("ContractPolice", () => {
             expect(junitStub.called).to.equal(false);
         });
 
-        it('should resolve a successful promise when given valid input, outputDir does not exist and tests are passing', async () => {
+        it('should resolve when given valid input, outputDir does not exist and tests are passing', async () => {
             //region mocks
-            const cprStub = stub().returns(Promise.resolve());
+            const cprStub = stub().resolves();
             const cpReporter = function () {
                 return {
                     writeTestReport: cprStub
                 }
             };
-            const junitStub = stub().returns(Promise.resolve());
+            const junitStub = stub().resolves();
             const junitReporter = function () {
                 return {
                     writeTestReport: junitStub
@@ -309,14 +318,14 @@ describe("ContractPolice", () => {
             expect(junitStub.called).to.equal(false);
         });
 
-        it('should resolve a successful promise when given valid input, tests are passing, outputDir exists and junit reporter is configured', async () => {
-            const cprStub = stub().returns(Promise.resolve());
+        it('should resolve when given valid input, tests are passing, outputDir exists and junit reporter is configured', async () => {
+            const cprStub = stub().resolves();
             const cpReporter = function () {
                 return {
                     writeTestReport: cprStub
                 }
             };
-            const junitStub = stub().returns(Promise.resolve());
+            const junitStub = stub().resolves();
             const junitReporter = function () {
                 return {
                     writeTestReport: junitStub
@@ -343,15 +352,15 @@ describe("ContractPolice", () => {
             expect(junitStub.called).to.equal(true);
         });
 
-        it('should resolve a successful promise when given valid input, tests are passing, outputDir does not exist and junit reporter is configured', async () => {
+        it('should resolve when given valid input, tests are passing, outputDir does not exist and junit reporter is configured', async () => {
             //region mocks
-            const cprStub = stub().returns(Promise.resolve());
+            const cprStub = stub().resolves();
             const cpReporter = function () {
                 return {
                     writeTestReport: cprStub
                 }
             };
-            const junitStub = stub().returns(Promise.resolve());
+            const junitStub = stub().resolves();
             const junitReporter = function () {
                 return {
                     writeTestReport: junitStub
@@ -379,15 +388,15 @@ describe("ContractPolice", () => {
             expect(junitStub.called).to.equal(true);
         });
 
-        it('should resolve a successful promise when given valid input, outputDir exists and tests are failing', async () => {
+        it('should resolve when given valid input, outputDir exists and tests are failing', async () => {
             //region mocks
-            const cprStub = stub().returns(Promise.resolve());
+            const cprStub = stub().resolves();
             const cpReporter = function () {
                 return {
                     writeTestReport: cprStub
                 }
             };
-            const junitStub = stub().returns(Promise.resolve());
+            const junitStub = stub().resolves();
             const junitReporter = function () {
                 return {
                     writeTestReport: junitStub
@@ -419,15 +428,15 @@ describe("ContractPolice", () => {
             expect(junitStub.called).to.equal(false);
         });
 
-        it('should resolve a successful promise when given valid input, outputDir does not exist and tests are failing', async () => {
+        it('should resolve when given valid input, outputDir does not exist and tests are failing', async () => {
             //region mocks
-            const cprStub = stub().returns(Promise.resolve());
+            const cprStub = stub().resolves();
             const cpReporter = function () {
                 return {
                     writeTestReport: cprStub
                 }
             };
-            const junitStub = stub().returns(Promise.resolve());
+            const junitStub = stub().resolves();
             const junitReporter = function () {
                 return {
                     writeTestReport: junitStub
@@ -462,13 +471,13 @@ describe("ContractPolice", () => {
 
         it('should write additional logs when given valid input, outputDir exists and tests are passing', async () => {
             //region mocks
-            const cprStub = stub().returns(Promise.resolve());
+            const cprStub = stub().resolves();
             const cpReporter = function () {
                 return {
                     writeTestReport: cprStub
                 }
             };
-            const junitStub = stub().returns(Promise.resolve());
+            const junitStub = stub().resolves();
             const junitReporter = function () {
                 return {
                     writeTestReport: junitStub
@@ -512,7 +521,18 @@ describe("ContractPolice", () => {
 
     //region Tests to verify behaviour of ContractPolice.generateContractTests
     describe("generateContractTests", () => {
-        it("should", async () => {
+        it("should successfully complete when no contract tests are generated", async () => {
+            const genReturnedValue = [];
+            const genStub = stub().resolves(genReturnedValue)
+            const genMock = function() {
+                return {
+                    generateContractDefinitions: genStub
+                };
+            }
+            ContractPolice.__set__({
+                "ContractGenerator": genMock,
+                "fs": mockFileSystem(true)
+            })
 
             const contractPolice = new ContractPolice("http://someserver.com", {
                 contractDefinitionsDir: "some/directory",
@@ -520,7 +540,56 @@ describe("ContractPolice", () => {
             });
             await contractPolice.generateContractTests();
 
-            expect(true).to.equal(true);
+            expect(genStub.called).to.equal(true);
+        });
+
+        it("should successfully complete when no contracts are generated and 'generated' directory does not exist", async () => {
+            const genReturnedValue = [];
+            const genStub = stub().resolves(genReturnedValue);
+            const genMock = function() {
+                return {
+                    generateContractDefinitions: genStub
+                };
+            }
+            ContractPolice.__set__({
+                "ContractGenerator": genMock,
+                "fs": mockFileSystem(false)
+            })
+
+            const contractPolice = new ContractPolice("http://someserver.com", {
+                contractDefinitionsDir: "some/directory",
+                generatorSourceDir: "some/generator/directory"
+            });
+            await contractPolice.generateContractTests();
+
+            expect(genStub.called).to.equal(true);
+        });
+
+        it("should successfully complete when a contract was generated", async () => {
+            const genReturnedValue = [
+                new Contract("testContract", new ContractRequest(), new ContractResponse())
+            ];
+            const genStub = stub().resolves(genReturnedValue);
+            const genMock = function() {
+                return {
+                    generateContractDefinitions: genStub
+                };
+            }
+            ContractPolice.__set__({
+                "ContractGenerator": genMock,
+                "fs": mockFileSystem(false),
+                "helper": {
+                    writeFile: stub().resolves()
+                }
+            })
+
+            const contractPolice = new ContractPolice("http://someserver.com", {
+                contractDefinitionsDir: "some/directory",
+                generatorSourceDir: "some/generator/directory"
+            });
+            await contractPolice.generateContractTests();
+
+            expect(genStub.called).to.equal(true);
         })
     });
     //endregion

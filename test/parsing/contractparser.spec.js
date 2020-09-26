@@ -3,6 +3,7 @@ const chaiAsPromised = require("chai-as-promised");
 const rewire = require("rewire");
 const Logging = require("../../src/logging/logging.js");
 const sinon = require("sinon");
+const helper = require("../../src/helper-functions.js");
 
 chai.use(chaiAsPromised);
 let expect = chai.expect;
@@ -12,54 +13,48 @@ const TESTLOGGER = new Logging("error", false, false);
 
 describe("ContractParser", () => {
     describe("findYamlFiles", () => {
-        it("should return list of file names with YAML extension", () => {
-            const readdirMock = function() {
-                return [
-                    "contract.yaml",
-                    "hello/contract.yaml",
-                    "hello/world/contract.yaml",
-                ]
-            };
-            const statMock = function() {
-                return {
-                    isDirectory: function() { return false }
-                };
+        it("should return list of file names with YAML extension", async () => {
+            let files = [
+                "contract.yaml",
+                "hello/contract.yaml",
+                "hello/world/contract.yaml",
+            ];
+            const helperMock = {
+                getFiles: function() {
+                    return files;
+                }
             };
             ContractParser.__set__({
-                "readdir": readdirMock,
-                "stat": statMock,
+                "helper": helperMock
             });
 
             const parser = new ContractParser(TESTLOGGER);
 
-            let result = parser.findYamlFiles("some/directory");
+            let result = await parser.findYamlFiles("some/directory");
 
-            return expect(result).to.eventually.have.length(3);
+            expect(result).to.have.length(3);
         });
 
-        it("should ignore files with non-YAML extension and return list of file names", () => {
-            const readdirMock = function() {
-                return [
-                    "contract.yaml",
-                    "hello/contract.yml",
-                    "hello/world/contract.json",
-                ]
-            };
-            const statMock = function() {
-                return {
-                    isDirectory: function() { return false }
-                };
+        it("should ignore files with non-YAML extension and return list of file names", async () => {
+            let files = [
+                "contract.yaml",
+                "hello/contract.yml",
+                "hello/world/contract.json",
+            ];
+            const helperMock = {
+                getFiles: function() {
+                    return files;
+                }
             };
             ContractParser.__set__({
-                "readdir": readdirMock,
-                "stat": statMock,
+                "helper": helperMock
             });
 
             const parser = new ContractParser(TESTLOGGER);
 
-            let result = parser.findYamlFiles("some/directory");
+            let result = await parser.findYamlFiles("some/directory");
 
-            return expect(result).to.eventually.have.length(2);
+            return expect(result).to.have.length(2);
         });
     });
 
@@ -82,7 +77,8 @@ describe("ContractParser", () => {
             ContractParser.__set__({
                 "fs": fsMock,
                 "yaml": yamlMock,
-                "resolve": resolveStub
+                "resolve": resolveStub,
+                "helper": helper
             });
         }
 

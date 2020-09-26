@@ -15,7 +15,7 @@ const LOG_TAG = "ContractPolice"
 const defaultConfig = new Config();
 
 initializeConfig = function (logger, targetConfig, inputConfig) {
-    targetConfig.contractDefinitionsDir = inputConfig.contractDefinitionsDir || defaultConfig.contractDefinitionsDir;
+    targetConfig.contractDefinitionsDir = inputConfig.contractDefinitionsDir;
     targetConfig.customValidationRules = inputConfig.customValidationRules || defaultConfig.customValidationRules;
     targetConfig.failOnError = inputConfig.failOnError || defaultConfig.failOnError;
     targetConfig.reporter = inputConfig.reporter || defaultConfig.reporter;
