@@ -1,0 +1,8 @@
+{
+  "request": {
+    "path": "/orders"
+  },
+  "response": {
+    "statusCode": 200
+  }
+}

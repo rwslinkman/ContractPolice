@@ -1,0 +1,41 @@
+contract:
+  request:
+    path: /v2/orders
+#    method: POST
+#    body:
+#      customer: Rick
+#      transactionId: <uuid>
+#      items:
+#        - product: Hamburger
+#          quantity: 2
+#          price: 20
+#        - product: Fries
+#          quantity: 1
+#          price: 5
+#        - product: Chicken nuggets
+#          quantity: 1
+#          price: 5
+#        - product: Milkshake
+#          quantity: 2
+#          procie: 10
+#    headers:
+#      - Content-Type: application/json
+  response:
+    body: "hoi"
+#      orderId: <anyString>
+#      transactionId: <anyUUID>
+#      customer: Rick
+#      items:
+#        - product: Hamburger
+#          quantity: 2
+#          price: 20
+#        - product: Fries
+#          quantity: 1
+#          price: 5
+#        - product: Chicken nuggets
+#          quantity: 1
+#          price: 5
+#        - product: Milkshake
+#          quantity: 2
+#          price: 10
+    statusCode: 200

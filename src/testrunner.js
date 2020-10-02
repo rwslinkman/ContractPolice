@@ -44,6 +44,7 @@ TestRunner.prototype.runTest = async function () {
     }
     // Query params
     let contractQueryParams = contractRequest.params || [];
+    contractQueryParams = helper.normalizeObject(contractQueryParams);
     // Endpoint
     const endpoint = formatUrl(this.target, contractRequest.path, contractQueryParams);
     loggerLocal.debug(LOG_TAG, `Creating request to endpoint: ${method.toUpperCase()} ${endpoint}`);

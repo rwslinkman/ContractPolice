@@ -1,21 +1,11 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
-const {promisify} = require('util');
 const resolve = require('path').resolve;
-const readdir = promisify(fs.readdir);
-const stat = promisify(fs.stat);
 const helper = require("../helper-functions.js");
 const WildcardGenerator = require("./wildcard-generator.js");
+const Contract = require("../model/contract.js");
+const ContractRequest = require("../model/contractrequest.js");
 const LOG_TAG = "ContractParser";
-
-async function getFiles(dir) {
-    const subdirs = await readdir(dir);
-    const files = await Promise.all(subdirs.map(async (subdir) => {
-        const res = resolve(dir, subdir);
-        return (await stat(res)).isDirectory() ? getFiles(res) : res;
-    }));
-    return files.reduce((a, f) => a.concat(f), []);
-}
 
 function hasDeepChild(obj, arg) {
     return arg
@@ -80,6 +70,16 @@ function injectGenerateWildcardValues(logger, target, contractName) {
     });
 }
 
+function convertToRequestModel(dataObj) {
+    return new ContractRequest(
+        dataObj.path,
+        dataObj.method,
+        dataObj.headers,
+        dataObj.params,
+        dataObj.body
+    );
+}
+
 function ContractParser(logger) {
     this.logger = logger;
 }
@@ -87,7 +87,7 @@ function ContractParser(logger) {
 ContractParser.prototype.findYamlFiles = async function (directory) {
     const log = this.logger;
     log.info(LOG_TAG, `Searching "${directory}" for YAML files...`);
-    let files = await getFiles(directory)
+    let files = await helper.getFiles(directory)
     log.info(LOG_TAG, `Found ${files.length} files in directory`)
     let contractFiles = [];
     files.forEach(function (file) {
@@ -134,10 +134,8 @@ ContractParser.prototype.parseContract = function (contractsDirectory, contractF
     // Check request for <generate> wildcards and inject values there
     injectGenerateWildcardValues(this.logger, contractYaml.contract.request, contractName);
 
-    return {
-        name: contractName,
-        data: contractYaml.contract
-    };
+    let requestModel = convertToRequestModel(contractYaml.contract.request)
+    return new Contract(contractName, requestModel, contractYaml.contract.response);
 };
 
 module.exports = ContractParser;

@@ -2,23 +2,21 @@ const ContractPolice = require("./index.js");
 
 // Input
 const config = {
+    contractDefinitionsDir: "contracts",
+    generatorSourceDir: "openapi",
     reportOutputDir: "report",
-    reporter: "junit",
+    // reporter: "junit",
     enableAppLogsConsole: true,
     enableAppLogsFile: false,
     loglevel: "info"
 };
-const contractsDirectory = "contracts";
 const testTarget = "http://localhost:3000";
 
 (async () => {
     try {
-        // Execution
-        const contractPolice = new ContractPolice(contractsDirectory, testTarget, config);
-        console.log("Start contract test(s) with ContractPolice");
-        await contractPolice.testContracts()
-        // Successful test, no errors found
-        console.log("ContractPolice successfully finished executing contract tests");
+        const contractPolice = new ContractPolice(testTarget, config);
+        await contractPolice.generateContractTests();
+        await contractPolice.testContracts();
         process.exitCode = 0; // success
     } catch (err) {
         // Show output of contract test

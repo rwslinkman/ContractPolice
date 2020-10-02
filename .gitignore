@@ -108,3 +108,5 @@ build
 buildimage.sh
 envfile.list
 runcontainer.sh
+runnode.sh
+contracts/generated

@@ -1,4 +1,4 @@
-const fs = require('fs');
+const helper = require("../helper-functions.js");
 
 const supportedLogLevels = {
     "error": 3,
@@ -44,23 +44,14 @@ Logging.prototype.debug = function(logTag, logMessage) {
 }
 
 Logging.prototype.writeLogs = function(outputDirectory, timestamp) {
-    const isFileEnabled = this.fileEnabled;
-    const allLogs = this.logLines;
-
+    if(!this.fileEnabled) {
+        return;
+    }
     const lineEnd = "\r\n";
-    return new Promise(function(resolve, reject) {
-        if(!isFileEnabled) {
-            resolve();
-            return;
-        }
+    let output = "";
+    this.logLines.forEach(logLine => output += logLine + lineEnd);
+    let outputFileName = outputDirectory + "/contractpolice-logs-" + timestamp + ".txt";
 
-        let output = "";
-        allLogs.forEach(logLine => output += logLine + lineEnd);
-        let outputFileName = outputDirectory + "/contractpolice-logs-" + timestamp + ".txt";
-        fs.writeFile(outputFileName, output, function(err) {
-            if (err) reject(err);
-            else resolve();
-        });
-    });
+    return helper.writeFile(outputFileName, output);
 }
 module.exports = Logging;

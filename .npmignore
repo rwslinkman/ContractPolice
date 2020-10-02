@@ -7,3 +7,6 @@ coverage
 .nyc_output
 .github
 test
+openapi
+docker
+.dockerignore

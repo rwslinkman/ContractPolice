@@ -56,7 +56,7 @@ describe("WildcardGenerator", () => {
 
             expect(result).to.not.contain("generate");
             expect(result).to.not.contain("string");
-            expect(typeof result).to.equal("string");
+            expect(result).to.be.a("string");
             expect(result.length).to.equal(10);
         });
 
@@ -68,7 +68,7 @@ describe("WildcardGenerator", () => {
             expect(result).to.not.contain("generate");
             expect(result).to.not.contain("string");
             expect(result).to.not.contain("length");
-            expect(typeof result).to.equal("string");
+            expect(result).to.be.a("string");
             expect(result.length).to.equal(64);
         });
 
@@ -77,7 +77,7 @@ describe("WildcardGenerator", () => {
 
             let result = generator.generateWildcardValue("<generate[number]>")
 
-            expect(typeof result).to.equal("number");
+            expect(result).to.be.a("number");
             expect(result).to.be.at.least(1);
             expect(result).to.be.at.most(9999999);
         });
@@ -87,7 +87,7 @@ describe("WildcardGenerator", () => {
 
             let result = generator.generateWildcardValue("<generate[number(max=31)]>")
 
-            expect(typeof result).to.equal("number");
+            expect(result).to.be.a("number");
             expect(result).to.be.at.least(1);
             expect(result).to.be.at.most(31);
         });
@@ -97,7 +97,7 @@ describe("WildcardGenerator", () => {
 
             let result = generator.generateWildcardValue("<generate[number(min=10)]>")
 
-            expect(typeof result).to.equal("number");
+            expect(result).to.be.a("number");
             expect(result).to.be.at.least(10);
             expect(result).to.be.at.most(9999999);
         });
@@ -107,7 +107,7 @@ describe("WildcardGenerator", () => {
 
             let result = generator.generateWildcardValue("<generate[number(min=10;max=31)]>")
 
-            expect(typeof result).to.equal("number");
+            expect(result).to.be.a("number");
             expect(result).to.be.at.least(10);
             expect(result).to.be.at.most(31);
         });
@@ -117,7 +117,7 @@ describe("WildcardGenerator", () => {
 
             let result = generator.generateWildcardValue("<generate[number(min=31;max=10)]>")
 
-            expect(typeof result).to.equal("number");
+            expect(result).to.be.a("number");
             expect(result).to.be.at.least(10);
             expect(result).to.be.at.most(31);
         });
@@ -127,7 +127,7 @@ describe("WildcardGenerator", () => {
 
             let result = generator.generateWildcardValue("<generate[bool]>")
 
-            expect(typeof result).to.equal("boolean");
+            expect(result).to.be.a("boolean");
         });
 
         it("should replace a value with a random UUID when request contains generator keyword for uuid", () => {
@@ -137,7 +137,7 @@ describe("WildcardGenerator", () => {
 
             expect(result).to.not.contain("generate");
             expect(result).to.not.contain("uuid");
-            expect(typeof result).to.equal("string");
+            expect(result).to.be.a("string");
         });
 
         it("should not replace a value with a random value when request contains unsupported generator keyword", () => {
@@ -150,10 +150,10 @@ describe("WildcardGenerator", () => {
         });
 
         it("should not replace a value with a random value when request contains unsupported generator keyword", () => {
-            const keyword = "<generate[problem(this=test)]>"
+            const keyword = "<generate[problem(this=test)]>";
             const generator = new WildcardGenerator(TESTLOGGER);
 
-            let result = generator.generateWildcardValue(keyword)
+            let result = generator.generateWildcardValue(keyword);
 
             expect(result).to.equal(keyword);
         });

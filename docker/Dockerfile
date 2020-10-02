@@ -12,5 +12,6 @@ COPY . .
 
 # Define output directory (mount destination for input files)
 RUN mkdir /contractpolice/ci-contracts
+RUN mkdir /contractpolice/generator
 
 ENTRYPOINT node run-ci.js
