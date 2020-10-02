@@ -1,15 +1,17 @@
 # ContractPolice
 ContractPolice helps you find contract violations in REST APIs fast and easily!
 
-Lightweight Node HTTP client that validates a API contract on a given endpoint.
+Lightweight Node HTTP client that validates an API contract on a given endpoint.
 
 #### Table of Content
  * [About ContractPolice](#About-ContractPolice)
  * [Usage](#Usage)
      * [Docker](#Docker) 
      * [Installation in your project](#Installation-in-your-project)
+     * [Generating contract tests from Swagger/OpenAPI files](#Generating-contract-tests-from-Swagger/OpenAPI-files)
  * [Options](#Options)
     * [Reporter configuration](#Reporter-configuration)
+    * [Logging configuration](#Logging-configuration)
  * [Contract Definitions](#Contract-Definitions)
     * [Basics](#Basics)
     * [Response body validation](#Response-body-validation)
@@ -21,17 +23,18 @@ Lightweight Node HTTP client that validates a API contract on a given endpoint.
  * [Full example](#Full-example) 
 
 ## About ContractPolice
-Many applications depend on a web service to deliver data and fetch configuration using HTTP.   
+Many applications depend on a web service to deliver data and fetch their configuration using HTTP.   
 In most cases, this is done using a REST API.   
 Clients that make HTTP requests in the REST fashion are dependent on a (sometimes) strict contract.   
 Especially after deployment, breaking an API contract can be fatal to business operations.   
 
-A basic tool can be useful in verifying the correctness of the web service that your application uses.   
+A basic tool can be useful in verifying the correctness of the web service your application uses.   
 When running ContractPolice on a regular basis, you can make sure to work with valid APIs. 
 
 ## Usage
 ContractPolice takes a `Contract` defined in YAML and tests a given endpoint.   
-For more details on the defining a contract, see [Contract Definitions](#Contract-Definitions)
+It is possible to generate Contract Definitions from Swagger and OpenAPI files.   
+For more details on the defining a contract, see [Contract Definitions](#Contract-Definitions).
 
 ### Docker 
 An easy to use Docker image is available on [Docker Hub](https://hub.docker.com/r/rwslinkman/contractpolice).   
@@ -40,7 +43,7 @@ It will automatically stop after the contract tests have been executed.
 
 ```shell script
 docker run \
-  -e CP_TARGET=http://testing-target.com/api \
+  -e CP_TARGET=https://testing-target.com/api \
   -e CP_REPORTER=junit \
   -v $(pwd)/contracts:/contractpolice/ci-contracts \
   -v $(pwd)/build:/contractpolice/outputs \
@@ -68,10 +71,15 @@ npm install contractpolice --save
 ```
 
 Create a script that `require`s ContractPolice and point it to the directory where you keep the contract definitions.   
+Optionally, you can let ContractPolice generate contracts based on Swagger and OpenAPI files.   
 ```javascript
 (async () => {
-    const contractPolice = new ContractPolice(contractsDirectory, testTarget, config);    
+    const contractPoliceConfig = {
+        contractDefinitionsDir: "/some/directory/contracts"
+    };
+    const contractPolice = new ContractPolice(testTarget, contractPoliceConfig);    
     try {
+        await contractPolice.generateContractTests() // optional
         await contractPolice.testContracts()
         // Success
     } catch (err) {
@@ -81,18 +89,41 @@ Create a script that `require`s ContractPolice and point it to the directory whe
 ```
 **Note:** ContractPolice requires Node version >= 12
 
+### Generating contract tests from Swagger/OpenAPI files
+If you are using Swagger or OpenAPI files to define your API, you can use these with ContractPolice.  
+ContractPolice will generate `Contract Definitions` from these files and use them for contract testing.   
+
+To point ContractPolice to the directory containing your API definition files, use the following option:   
+```javascript
+const contractPoliceConfig = {
+    contractDefinitionsDir: "/some/directory/contracts",
+    generatorSourceDir: "/some/directory/openapifiles"
+};
+``` 
+
+When using Docker, please map the directory holding your OpenAPI files to `/contractpolice/generator`
+```shell script
+-v $(pwd)/openapi:/contractpolice/generator
+```
+ 
+
 ## Options
 ContractPolice allows for a (minimal) set of properties to be configured to your desire.   
 
-| Config                  | Environment variable (Docker) | Explanation                                                                             | Default value |
-|-------------------------|-------------------------------|-----------------------------------------------------------------------------------------|---------------|
-| `failOnError`           | `CP_FAIL_ON_ERROR`            | Determines the signal given to the CLI after ContractPolice detects contract violations | `true`        |
-| `reporter`              | `CP_REPORTER`                 | Defines which reporter should be used by ContractPolice.                                | `default`     |
-| `reportOutputDir`       | n/a (volume)                  | Allows to set a location for the reports to be placed                                   | `build`       |
-| `enableAppLogsConsole`  | `CP_LOGS_CONSOLE_ENABLED`     | Enables console logging of ContractPolice application logs                              | `true`        |
-| `enableAppLogsFile`     | `CP_LOGS_FILE_ENABLED`        | Enables file logging of ContractPolice application logs                                 | `false`       |
-| `loglevel`              | `CP_LOGS_LEVEL`               | Loglevel for ContractPolice application logs (one of `error`, `warn`, `info`, `debug`   | `warn`        |
-| `customValidationRules` | not implemented               | List of custom rules for ContractPolice to use when validating contracts                | `[]`          |
+| Config                    | Environment variable (Docker) | Explanation                                                                             | Default value |
+|---------------------------|-------------------------------|-----------------------------------------------------------------------------------------|---------------|
+| `target`* (passed in)     | `CP_TARGET`                   | Base URL of the API that will be put under test by ContractPolice                       | n/a           |
+| `contractDefinitionsDir`* | n/a (volume)                  | Directory that holds the Contract Definitions used for testing                          | n/a           |
+| `generatorSourceDir`      | n/a (volume)                  | Directory that contains the OpenAPI and Swagger files to generate contracts with        | n/a           |
+| `failOnError`             | `CP_FAIL_ON_ERROR`            | Determines the signal given to the CLI after ContractPolice detects contract violations | `true`        |
+| `reporter`                | `CP_REPORTER`                 | Defines which reporter should be used by ContractPolice.                                | `default`     |
+| `reportOutputDir`         | n/a (volume)                  | Allows to set a location for the reports to be placed                                   | `build`       |
+| `enableAppLogsConsole`    | `CP_LOGS_CONSOLE_ENABLED`     | Enables console logging of ContractPolice application logs                              | `true`        |
+| `enableAppLogsFile`       | `CP_LOGS_FILE_ENABLED`        | Enables file logging of ContractPolice application logs                                 | `false`       |
+| `loglevel`                | `CP_LOGS_LEVEL`               | Loglevel for ContractPolice application logs (one of `error`, `warn`, `info`, `debug`)  | `warn`        |
+| `customValidationRules`   | not implemented               | List of custom rules for ContractPolice to use when validating contracts                | `[]`          |
+
+**Note:** Options marked with a * are required
 
 ### Reporter configuration
 ContractPolice is a tool that keeps CI pipelines close to the heart.   
@@ -107,7 +138,30 @@ This will help in relocating the file for result analysis by your CI system.
 const contractPoliceConfig = {
     reporter: "junit",
     reportOutputDir: "relative/path/to/outputdir"
-}
+};
+```
+
+### Logging configuration
+To give an insight in how the application performs, ContractPolice generates application logs.   
+Logs can be written to the console or to a `.txt` file.   
+By default, console logging is enabled and file logging is disabled.  
+Log lines are written at multiple severity levels.   
+The supported log levels are `error`, `warn`, `info` and `debug`.    
+
+To configure logging to your preference, use the following options:   
+```javascript
+const contractPoliceConfig = {
+    enableAppLogsConsole: true,
+    enableAppLogsFile: true,
+    loglevel: "debug"
+};
+```
+
+When using Docker, pass the configuration as environment variables:   
+```shell script
+-e CP_LOGS_CONSOLE_ENABLED=true
+-e CP_LOGS_FILE_ENABLED=true
+-e CP_LOGS_LEVEL=info
 ```
 
 ## Contract Definitions
@@ -286,9 +340,10 @@ contract:
 Run the Docker image with the parameters
 ```shell script
 docker run \
-  -e CP_TARGET=http://localhost/api \
+  -e CP_TARGET=http://localhost:8080/api \
   -e CP_REPORTER=junit \
   -v $(pwd)/contracts:/contractpolice/ci-contracts \
+  -v $(pwd)/openapi:/contractpolice/generator \
   -v $(pwd)/build:/contractpolice/outputs \
   rwslinkman/contractpolice:v1.0.0
 ```
@@ -298,9 +353,14 @@ Custom implementation example for using ContractPolice can be found below:
 ```javascript
 (async () => {
     try {
+        const contractPoliceConfig = {
+            contractDefinitionsDir: "/some/directory/contracts"
+        };
+    
         // Execution
         console.log("Start contract test(s) with ContractPolice");
-        const contractPolice = new ContractPolice(contractsDirectory, testTarget, config);
+        const contractPolice = new ContractPolice(testTarget, contractPoliceConfig);
+        await contractPolice.generateContractTests() // optional
         await contractPolice.testContracts()
         // Successful test, no errors found
         console.log("ContractPolice successfully finished executing contract tests");
@@ -320,7 +380,7 @@ let config = {
     reportOutputDir: "reports",
     reporter: "junit"
 };
-let contractPolice = new ContractPolice("contracts", "http://localhost:3000", config);
+let contractPolice = new ContractPolice("http://localhost:3000", config);
 
 console.log("Start contract test(s) with ContractPolice");
 contractPolice

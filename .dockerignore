@@ -1,5 +1,6 @@
 build/
 contracts/
+openapi/
 docker/
 node_modules/
 report/
@@ -9,3 +10,4 @@ buildimage.sh
 envfile.list
 run-cli.js
 runcontainer.sh
+runnode.sh

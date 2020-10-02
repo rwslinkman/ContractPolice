@@ -19,7 +19,7 @@ describe("Shared generator functions", () => {
             expect(result).to.not.be.null;
             expect(result).to.be.a("object");
             expect(result.hasOwnProperty("username")).to.equal(true);
-            expect(typeof result.username).to.equal("string");
+            expect(result.username).to.be.a("string");
             expect(result.username.length).to.be.greaterThan(0);
         });
 
@@ -37,9 +37,7 @@ describe("Shared generator functions", () => {
             expect(result).to.not.be.null;
             expect(result).to.be.a("object");
             expect(result.hasOwnProperty("userId")).to.equal(true);
-            console.log(typeof result.userId);
-            let generatedType = typeof result.userId;
-            expect(generatedType).to.equal("number");
+            expect(result.userId).to.be.a("number");
             expect(result.userId).to.be.greaterThan(0);
         });
 
@@ -57,7 +55,7 @@ describe("Shared generator functions", () => {
             expect(result).to.not.be.null;
             expect(result).to.be.a("object");
             expect(result.hasOwnProperty("isAdmin")).to.equal(true);
-            expect(typeof result.isAdmin).to.equal("boolean");
+            expect(result.isAdmin).to.be.a("boolean");
         });
 
         it("should generate a value by given schema of object with object property", () => {
@@ -199,7 +197,7 @@ describe("Shared generator functions", () => {
             expect(result).to.not.be.null;
             expect(result).to.be.a("object");
             expect(result.hasOwnProperty("username")).to.equal(true);
-            expect(typeof result.username).to.equal("string");
+            expect(result.username).to.be.a("string");
             expect(result.username.length).to.be.greaterThan(0);
         });
 
@@ -236,7 +234,7 @@ describe("Shared generator functions", () => {
             expect(result).to.not.be.null;
             expect(result).to.be.a("object");
             expect(result.hasOwnProperty("username")).to.equal(true);
-            expect(typeof result.username).to.equal("string");
+            expect(result.username).to.be.a("string");
             expect(result.username.length).to.be.greaterThan(0);
         });
 
@@ -254,7 +252,7 @@ describe("Shared generator functions", () => {
             expect(result).to.not.be.null;
             expect(result).to.be.a("object");
             expect(result.hasOwnProperty("userId")).to.equal(true);
-            expect(typeof result.userId).to.equal("string");
+            expect(result.userId).to.be.a("string");
             expect(result.userId).to.equal("<anyNumber>");
         });
 
@@ -395,7 +393,7 @@ describe("Shared generator functions", () => {
             expect(result).to.not.be.null;
             expect(result).to.be.a("object");
             expect(result.hasOwnProperty("username")).to.equal(true);
-            expect(typeof result.username).to.equal("string");
+            expect(result.username).to.be.a("string");
             expect(result.username).to.be.equal("<anyString>");
         });
 

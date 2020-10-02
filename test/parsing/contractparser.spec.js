@@ -493,7 +493,7 @@ describe("ContractParser", () => {
             expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
             const generatedValue = result.request.body.username;
             expect(generatedValue).to.not.contain("generate");
-            expect(typeof generatedValue).to.equal("string");
+            expect(generatedValue).to.be.a("string");
         });
 
         it("should replace a value with a random string when request contains generator keyword for string with length param", () => {
@@ -520,7 +520,7 @@ describe("ContractParser", () => {
             expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
             const generatedValue = result.request.body.username;
             expect(generatedValue).to.not.contain("generate");
-            expect(typeof generatedValue).to.equal("string");
+            expect(generatedValue).to.be.a("string");
             expect(generatedValue.length).to.equal(64);
         });
 
@@ -547,7 +547,7 @@ describe("ContractParser", () => {
             expect(result.request.path).to.equal(yamlContent.contract.request.path);
             expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
             const generatedValue = result.request.body.username;
-            expect(typeof generatedValue).to.equal("number");
+            expect(generatedValue).to.be.a("number");
             expect(generatedValue).to.be.at.least(1);
             expect(generatedValue).to.be.at.most(9999999);
         });
@@ -575,7 +575,7 @@ describe("ContractParser", () => {
             expect(result.request.path).to.equal(yamlContent.contract.request.path);
             expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
             const generatedValue = result.request.body.username;
-            expect(typeof generatedValue).to.equal("number");
+            expect(generatedValue).to.be.a("number");
             expect(generatedValue).to.be.at.least(1);
             expect(generatedValue).to.be.at.most(31);
         });
@@ -603,7 +603,7 @@ describe("ContractParser", () => {
             expect(result.request.path).to.equal(yamlContent.contract.request.path);
             expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
             const generatedValue = result.request.body.username;
-            expect(typeof generatedValue).to.equal("number");
+            expect(generatedValue).to.be.a("number");
             expect(generatedValue).to.be.at.least(10);
             expect(generatedValue).to.be.at.most(9999999);
         });
@@ -631,7 +631,7 @@ describe("ContractParser", () => {
             expect(result.request.path).to.equal(yamlContent.contract.request.path);
             expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
             const generatedValue = result.request.body.username;
-            expect(typeof generatedValue).to.equal("number");
+            expect(generatedValue).to.be.a("number");
             expect(generatedValue).to.be.at.least(10);
             expect(generatedValue).to.be.at.most(31);
         });
@@ -659,7 +659,7 @@ describe("ContractParser", () => {
             expect(result.request.path).to.equal(yamlContent.contract.request.path);
             expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
             const generatedValue = result.request.body.username;
-            expect(typeof generatedValue).to.equal("boolean");
+            expect(generatedValue).to.be.a("boolean");
         });
 
         it("should replace a value with a random UUID when request contains generator keyword for uuid", () => {
@@ -719,10 +719,10 @@ describe("ContractParser", () => {
             expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
             const generatedStringValue = result.request.body.user.name;
             expect(generatedStringValue).to.not.contain("generate");
-            expect(typeof generatedStringValue).to.equal("string");
+            expect(generatedStringValue).to.be.a("string");
             const generatedUuidValue = result.request.body.user.id.value;
             expect(generatedUuidValue).to.not.contain("generate");
-            expect(typeof generatedUuidValue).to.equal("string");
+            expect(generatedUuidValue).to.be.a("string");
         });
 
         it("should replace a value with a random string when deep array property contains generator keyword for string", () => {
@@ -756,11 +756,11 @@ describe("ContractParser", () => {
             expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
             const generatedStringValue = result.request.body.user.name;
             expect(generatedStringValue).to.not.contain("generate");
-            expect(typeof generatedStringValue).to.equal("string");
+            expect(generatedStringValue).to.be.a("string");
             const generatedArray = result.request.body.user.tokens;
             generatedArray.forEach(function(item) {
                 expect(item).to.not.contain("generate");
-                expect(typeof item).to.equal("string");
+                expect(item).to.be.a("string");
             });
         });
 
@@ -789,7 +789,7 @@ describe("ContractParser", () => {
             expect(result.response.statusCode).to.equal(yamlContent.contract.response.statusCode);
             const generatedValue = result.request.body.username;
             expect(generatedValue).to.equal(keyword);
-            expect(typeof generatedValue).to.equal("string");
+            expect(generatedValue).to.be.a("string");
         });
         //endregion
     })
