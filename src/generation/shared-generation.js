@@ -53,18 +53,18 @@ function generateSchemaValue(schema, useWildcards = false) {
             generateSchemaValue(schema.items, useWildcards)
         ];
     } else if (schema.type === "string") {
-        createdObject = helper.generateRandomString();
+        createdObject = (useWildcards) ? "<anyString>" : helper.generateRandomString();
     } else if (schema.type === "integer") {
-        createdObject = helper.generateRandomNumber();
+        createdObject = (useWildcards) ? "<anyNumber>" : helper.generateRandomNumber();
     } else if (schema.type === "boolean") {
-        createdObject = helper.generateRandomBoolean();
+        createdObject =  (useWildcards) ? "<anyBool>" : helper.generateRandomBoolean();
     } else {
-        let type = schema.type;
-        if(schema.type === "object") {
-            // TODO: Log warning
-            type = "emptyObject";
+        let unsupportedSchemaType = "";
+        if(schema.hasOwnProperty("type")) {
+            unsupportedSchemaType = `[${schema.type}]`;
         }
-        createdObject = `unsupportedSchema[${type}]`;
+        // TODO: Log warning
+        createdObject = `unsupportedSchema${unsupportedSchemaType}`;
     }
     return createdObject;
 }
