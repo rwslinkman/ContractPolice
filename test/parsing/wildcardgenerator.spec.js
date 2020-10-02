@@ -150,10 +150,10 @@ describe("WildcardGenerator", () => {
         });
 
         it("should not replace a value with a random value when request contains unsupported generator keyword", () => {
-            const keyword = "<generate[problem(this=test)]>"
+            const keyword = "<generate[problem(this=test)]>";
             const generator = new WildcardGenerator(TESTLOGGER);
 
-            let result = generator.generateWildcardValue(keyword)
+            let result = generator.generateWildcardValue(keyword);
 
             expect(result).to.equal(keyword);
         });

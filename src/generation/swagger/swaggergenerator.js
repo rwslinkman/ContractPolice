@@ -5,22 +5,22 @@ const ContractResponse = require("../../model/contractresponse.js");
 const Contract = require("../../model/contract.js");
 const sharedGeneratorFunctions = require("../shared-generation.js");
 
-function parseQueryParams(parameters) {
-    return parameters
-        .filter(param => param.in === "query")
-        .map(pathParam => {
-            let generatedValue;
-            switch (pathParam.type) {
-                case "integer":
-                    generatedValue = helper.generateRandomNumber(1, 100);
-                    break;
-                default:
-                    generatedValue = `unsupported[${pathParam.type}]`
-                    break;
-            }
-            return new ContractEntry(pathParam.name, generatedValue);
-        });
-}
+// function parseQueryParams(parameters) {
+//     return parameters
+//         .filter(param => param.in === "query")
+//         .map(pathParam => {
+//             let generatedValue;
+//             switch (pathParam.type) {
+//                 case "integer":
+//                     generatedValue = helper.generateRandomNumber(1, 100);
+//                     break;
+//                 default:
+//                     generatedValue = `unsupported[${pathParam.type}]`
+//                     break;
+//             }
+//             return new ContractEntry(pathParam.name, generatedValue);
+//         });
+// }
 
 function replacePathParams(path, parameters) {
     parameters
